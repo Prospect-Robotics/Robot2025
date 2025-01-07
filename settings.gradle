@@ -28,3 +28,10 @@ pluginManagement {
 
 Properties props = System.getProperties();
 props.setProperty("org.gradle.internal.native.headers.unresolved.dependencies.ignore", "true");
+
+includeBuild('lib2813') {
+    dependencySubstitution {
+        substitute module('com.team2813:lib2813') using project(':lib')
+        substitute module('com.team2813:limelight') using project(':limelight')
+    }
+}
