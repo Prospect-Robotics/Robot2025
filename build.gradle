@@ -70,7 +70,7 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'org.junit:junit:4.13.2'
+    testImplementation 'junit:junit:4.13'
     implementation "com.team2813:lib2813"
 }
 
