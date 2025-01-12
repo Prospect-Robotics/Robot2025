@@ -3,13 +3,11 @@ package com.team2813.subsystems;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CorePigeon2;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
-
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be inproper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be inproper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
@@ -48,7 +46,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0;
     // See above comment, do not delete past this line.
 
-    Drive() {
+    public Drive() {
         
         double FLSteerOffset = 0.0;
         double FRSteerOffset = 0.0;
@@ -126,5 +124,8 @@ public class Drive extends SubsystemBase {
                     true, // May need to change later.
                     true, // May need to change later.
                     false); // May need to change later.
+
+            drivetrain = new SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2>(
+                TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
     }
 }
