@@ -1,0 +1,28 @@
+Metadata-Version: 2.2
+Name: robotpy-hal
+Version: 2025.2.1
+Summary: Binary wrapper for FRC HAL
+Home-page: https://github.com/robotpy/robotpy-hal
+Author: RobotPy Development Team
+Author-email: robotpy@googlegroups.com
+License: BSD-3-Clause
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: robotpy-wpiutil==2025.2.1
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+robotpy-hal
+===========
+
+Python wrappers around the WPILib HAL.
+
+API Documentation can be found at
+https://robotpy.readthedocs.io/projects/hal/en/latest

@@ -1,0 +1,26 @@
+Metadata-Version: 2.2
+Name: pyntcore
+Version: 2025.2.1
+Summary: Binary wrappers for the FRC ntcore library
+Home-page: https://github.com/robotpy/pyntcore
+Author: RobotPy Development Team
+Author-email: robotpy@googlegroups.com
+License: BSD-3-Clause
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: robotpy-wpiutil==2025.2.1
+Requires-Dist: robotpy-wpinet==2025.2.1
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+pyntcore
+========
+
+Python pybind11 wrappers around the C++ ntcore library.

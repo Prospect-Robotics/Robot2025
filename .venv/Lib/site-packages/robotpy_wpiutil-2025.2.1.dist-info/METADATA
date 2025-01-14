@@ -1,0 +1,17 @@
+Metadata-Version: 2.2
+Name: robotpy-wpiutil
+Version: 2025.2.1
+Summary: Binary wrapper for FRC WPIUtil library
+Home-page: https://github.com/robotpy/robotpy-wpiutil
+Author: RobotPy Development Team
+Author-email: robotpy@googlegroups.com
+License: BSD-3-Clause
+Requires-Python: >=3.8
+Requires-Dist: msvc-runtime>=14.42.34433; platform_system == "Windows"
+Dynamic: author
+Dynamic: author-email
+Dynamic: home-page
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

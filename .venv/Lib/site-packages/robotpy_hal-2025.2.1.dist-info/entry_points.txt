@@ -1,0 +1,3 @@
+[robotpybuild]
+hal_simulation = hal.simulation.pkgcfg
+wpiHal = hal.pkgcfg
