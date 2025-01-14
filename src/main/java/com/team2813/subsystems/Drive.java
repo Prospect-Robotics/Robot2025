@@ -10,8 +10,12 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be inproper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be inproper import.
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
+import static com.team2813.Constants.*;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Also add all the nescesary imports for constants and other things
@@ -24,23 +28,7 @@ public class Drive extends SubsystemBase {
     private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain; // TODO: Create a drive train...
 
 
-    // These variables below should be removed and replaced, they are here solely untill a drivetrain is created. 
-    public static final int FRONT_RIGHT_STEER_ID = 1;
-    public static final int FRONT_RIGHT_ENCODER_ID = 2;
-    public static final int FRONT_RIGHT_DRIVE_ID = 3;
-    // Back Right swerve module
-    public static final int BACK_RIGHT_STEER_ID = 4;
-    public static final int BACK_RIGHT_ENCODER_ID = 5;
-    public static final int BACK_RIGHT_DRIVE_ID = 6;
-    // Back Left swerve module
-    public static final int BACK_LEFT_STEER_ID = 7;
-    public static final int BACK_LEFT_ENCODER_ID = 8;
-    public static final int BACK_LEFT_DRIVE_ID = 9;
-    // Front Left swerve module
-    public static final int FRONT_LEFT_STEER_ID = 10;
-    public static final int FRONT_LEFT_ENCODER_ID = 11;
-    public static final int FRONT_LEFT_DRIVE_ID = 12;
-    public static final int PIGEON_ID = 13; // Usually in robot constants.
+    
 
     static double frontDist = 0;
     static double leftDist = 0;
@@ -128,4 +116,18 @@ public class Drive extends SubsystemBase {
             drivetrain = new SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2>(
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
     }
+
+    private final ApplyFieldSpeeds fieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
+
+    public void drive(double xSpeed, double ySpeed, double rotation) {} // TODO: implement later
+
+    public void drive(ChassisSpeeds demand) {
+
+        drivetrain.setControl(fieldSpeedsApplier.withSpeeds(demand));
+
+    }
+
+    public void turnToFace(Rotation2d rotation) {} // TODO: implement later
+
+    
 }
