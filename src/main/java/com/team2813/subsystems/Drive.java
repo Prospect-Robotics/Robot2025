@@ -142,13 +142,12 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(fieldCentricFacingAngleApplier.withTargetDirection(rotation));
     }
 
-    public void setRotationVelocity(double rotationRate) { // Radians per second
+    @Deprecated // Use the other "setRotationVelocity" method.
+    public void setRotationVelocityDouble(double rotationRate) { // Radians per second
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
 
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
-
-    
 }
