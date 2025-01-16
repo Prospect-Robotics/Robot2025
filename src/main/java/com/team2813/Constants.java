@@ -2,7 +2,6 @@ package com.team2813;
 
 public class Constants {
 
-    // These variables below should be removed and replaced, they are here solely untill a drivetrain is created. 
     public static final int FRONT_RIGHT_STEER_ID = 1;
     public static final int FRONT_RIGHT_ENCODER_ID = 2;
     public static final int FRONT_RIGHT_DRIVE_ID = 3;
