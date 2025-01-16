@@ -5,6 +5,8 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CorePigeon2;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
@@ -117,17 +119,19 @@ public class Drive extends SubsystemBase {
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
     }
 
-    private final ApplyFieldSpeeds fieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
+
+    private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
+    private final FieldCentricFacingAngle FieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
 
     public void drive(double xSpeed, double ySpeed, double rotation) {} // TODO: implement later
-
+    
     public void drive(ChassisSpeeds demand) {
-
-        drivetrain.setControl(fieldSpeedsApplier.withSpeeds(demand));
-
+        drivetrain.setControl(applyFieldSpeedsApplier.withSpeeds(demand));
     }
 
-    public void turnToFace(Rotation2d rotation) {} // TODO: implement later
+    public void turnToFace(Rotation2d rotation) {
+        drivetrain.setControl(FieldCentricFacingAngleApplier.withTargetDirection(rotation));
+    }
 
     
 }
