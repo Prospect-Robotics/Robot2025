@@ -1,22 +1,8 @@
 import wpilib
 import wpilib.drive
 import phoenix6
-
-# CONSTANTS
-
-FRONT_RIGHT_STEER_ID = 1
-FRONT_RIGHT_ENCODER_ID = 2
-FRONT_RIGHT_DRIVE_ID = 3
-BACK_RIGHT_STEER_ID = 4
-BACK_RIGHT_ENCODER_ID = 5
-BACK_RIGHT_DRIVE_ID = 6
-BACK_LEFT_STEER_ID = 7
-BACK_LEFT_ENCODER_ID = 8
-BACK_LEFT_DRIVE_ID = 9
-FRONT_LEFT_STEER_ID = 10
-FRONT_LEFT_ENCODER_ID = 11
-FRONT_LEFT_DRIVE_ID = 12
-PIGEON_ID = 13
+import phoenix6.swerve.swerve_module
+from constants import *
 
 class MyRobot(wpilib.TimedRobot):
     def robotInit(self):
