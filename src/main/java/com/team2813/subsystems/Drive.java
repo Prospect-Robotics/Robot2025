@@ -14,10 +14,12 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // M
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be inproper import.
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
+
 import static com.team2813.Constants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Also add all the nescesary imports for constants and other things
@@ -27,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Drive extends SubsystemBase {
 
-    private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain; // TODO: Create a drive train...
+    private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain;
 
 
     
@@ -121,16 +123,31 @@ public class Drive extends SubsystemBase {
 
 
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
-    private final FieldCentricFacingAngle FieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
+    private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
+    private final FieldCentric fieldCentricApplier = new FieldCentric();
 
-    public void drive(double xSpeed, double ySpeed, double rotation) {} // TODO: implement later
+    public void drive(double xSpeed, double ySpeed, double rotation) {
+        drivetrain.setControl(fieldCentricApplier
+            .withVelocityX(xSpeed)
+            .withVelocityY(ySpeed)
+            .withRotationalRate(rotation)
+            ); // Note: might not work, will need testing.
+    }
     
     public void drive(ChassisSpeeds demand) {
         drivetrain.setControl(applyFieldSpeedsApplier.withSpeeds(demand));
     }
 
     public void turnToFace(Rotation2d rotation) {
-        drivetrain.setControl(FieldCentricFacingAngleApplier.withTargetDirection(rotation));
+        drivetrain.setControl(fieldCentricFacingAngleApplier.withTargetDirection(rotation));
+    }
+
+    public void setRotationVelocity(double rotationRate) { // Radians per second
+        drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
+    }
+
+    public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
+        drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
 
     
