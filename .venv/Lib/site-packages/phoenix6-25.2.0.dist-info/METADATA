@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: phoenix6
+Version: 25.2.0
+Summary: Phoenix 6 Libraries
+Home-page: https://ctr-electronics.com
+Author: CTR Electronics
+Author-email: support@ctr-electronics.com
+Project-URL: Bug Reports, https://github.com/CrossTheRoadElec/Phoenix-Releases
+Keywords: CTRE,CTR Electronics,Phoenix,Phoenix 6,FRC,FIRST,robotpy,robotpy-ctre,FIRST Robotics Competition,WPILib,WPI
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Programming Language :: Python :: 3.13
+Requires-Python: >=3.10, <4
+Description-Content-Type: text/markdown
+Requires-Dist: setuptools
+
+# Phoenix 6 Python
+
+This is the official Phoenix 6 python distribution, provided by CTR Electronics.
+
+This contains the necessary python libraries used to control, read, and configure CTRE devices running Phoenix 6 firmware.
