@@ -117,7 +117,7 @@ public class Drive extends SubsystemBase {
                     true, // May need to change later.
                     false); // May need to change later.
 
-            drivetrain = new SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2>(
+            drivetrain = new SwerveDrivetrain<>(
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
     }
 
