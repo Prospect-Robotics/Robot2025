@@ -70,18 +70,18 @@ dependencies {
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'junit:junit:4.13'
+    implementation "com.team2813:lib2813"
 }
 
 test {
-    useJUnitPlatform()
-    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    useJUnit()
 }
 
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
+downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":lib:jar")
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
