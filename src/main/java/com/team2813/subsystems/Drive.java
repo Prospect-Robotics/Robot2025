@@ -142,7 +142,12 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(fieldCentricFacingAngleApplier.withTargetDirection(rotation));
     }
 
-    @Deprecated // Use the other "setRotationVelocity" method.
+/**
+     * Sets the rotation velocity of the robot
+     * @param rotationRate rotation rate in radians per second
+     * @deprecated unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you are using
+     */
+    @Deprecated
     public void setRotationVelocityDouble(double rotationRate) { // Radians per second
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
