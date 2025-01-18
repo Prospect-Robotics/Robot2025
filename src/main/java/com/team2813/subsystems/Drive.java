@@ -18,6 +18,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import static com.team2813.Constants.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -154,5 +155,16 @@ public class Drive extends SubsystemBase {
 
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
+    }
+    public Pose2d getPose() {
+        return null;
+        // insert robot getPose here
+    }
+    public void resetPose() {
+        // insert robot odometry reset here
+    }
+    public ChassisSpeeds getCurrentSpeeds() {
+        return null;
+        // insert robot getSpeeds here
     }
 }
