@@ -3,8 +3,10 @@ from phoenix6.hardware import talon_fx
 import phoenix6.hardware.core.core_pigeon2 as core_pigeon2
 from phoenix6.swerve import swerve_drivetrain, swerve_drivetrain_constants, swerve_module_constants, SwerveModuleConstantsFactory
 from phoenix6.swerve.swerve_module_constants import ClosedLoopOutputType, SteerFeedbackType
-from phoenix6.swerve.requests import ApplyFieldSpeeds, FieldCentricFacingAngle
+from phoenix6.swerve.requests import ApplyFieldSpeeds, FieldCentricFacingAngle, FieldCentric
 from wpimath.kinematics import ChassisSpeeds
+from wpimath.geometry import Rotation2d
+from typing import overload
 import sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -65,8 +67,24 @@ class Drive():
         True, 
         True, 
         False)
-    drivetrain = swerve_drivetrain.SwerveDrivetrain(talon_fx.TalonFX, talon_fx.TalonFX, core_pigeon2.CorePigeon2, drivetrainconstants, [frontLeft, frontRight, backLeft, backRight])
+    swerve_modules =  [frontLeft, frontRight, backLeft, backRight]
+    drivetrain = swerve_drivetrain.SwerveDrivetrain(talon_fx.TalonFX, talon_fx.TalonFX, core_pigeon2.CorePigeon2, drivetrainconstants, swerve_modules)
     applyFieldSpeedsApplier = ApplyFieldSpeeds()
     fieldCentricFacingAngleApplier = FieldCentricFacingAngle()
-    def drive(demand: ChassisSpeeds):
+    fieldCentricApplier = FieldCentric()
+    @overload
+    def drive(self, demand: ChassisSpeeds):
         self.drivetrain.set_control(self.applyFieldSpeedsApplier.with_speeds(demand))
+    swerve_module_constants.SwerveModuleConstants.drive_motor_initial_configs
+    @overload
+    def drive(self, xSpeed, ySpeed, rotation):
+        self.drivetrain.set_control(self.fieldCentricApplier.with_velocity_x(xSpeed).with_velocity_y(ySpeed).with_rotational_rate(rotation))
+
+    def turn_to_face(self, rotation: Rotation2d):
+        self.drivetrain.set_control(self.fieldCentricFacingAngleApplier.with_target_direction(rotation))
+    
+    def set_rotation_velocity(self, rotation_rate): # radians_per_second = angularVelocity
+        """
+        parameter rotation_rate should be in radians_per_second
+        """
+        self.drivetrain.set_control(self.fieldCentricApplier.with_rotational_rate(rotation_rate))
