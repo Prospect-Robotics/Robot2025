@@ -12,20 +12,20 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase{
     private boolean isIntaking = false;
-    private final PIDMotor intakeMotor = new TalonFXWrapper(20, InvertType.COUNTER_CLOCKWISE);// canID = 20, arbitrary canID;
-    private static final double intakeSpeed = 0.1;
-    private static final double outakeSpeed = 0.6;
+    private final PIDMotor intakeMotor = new TalonFXWrapper(20, InvertType.COUNTER_CLOCKWISE);// canID = 20:arbitrary canID;
+    private static final double intakeSpeed = 0.6;
+    private static final double outakeSpeed = -0.6;
 
     public void intakeCoral(){
-        intakeMotor.set(null, intakeSpeed);
+        intakeMotor.set(ControlMode.DUTY_CYCLE, intakeSpeed); //null for now
         isIntaking = true;
     }
     public void outakeCoral(){
-        intakeMotor.set(null, outakeSpeed);
+        intakeMotor.set(ControlMode.DUTY_CYCLE, outakeSpeed); // null for now
         isIntaking = false;
     }
     public void stopIntakeMotor(){
-        intakeMotor.set(null,0);
+        intakeMotor.set(ControlMode.DUTY_CYCLE,0);
         isIntaking = false;
     }
 }
