@@ -23,17 +23,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-// Also add all the nescesary imports for constants and other things
-
-
-
 
 public class Drive extends SubsystemBase {
 
     private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain;
-
-
-    
 
     static double frontDist = 0;
     static double leftDist = 0;
@@ -70,8 +63,6 @@ public class Drive extends SubsystemBase {
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.FusedCANcoder) // Tune this.
             .withCouplingGearRatio(3.5);
-
-
 
             SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, Pigeon2Configuration> frontLeft =
                 constantCreator.createModuleConstants(
@@ -122,7 +113,6 @@ public class Drive extends SubsystemBase {
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
     }
 
-
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
     private final FieldCentric fieldCentricApplier = new FieldCentric();
@@ -164,7 +154,7 @@ public class Drive extends SubsystemBase {
         // insert robot odometry reset here
     }
     public ChassisSpeeds getCurrentSpeeds() {
-        return null;
+        return drivetrain.getState().Speeds;
         // insert robot getSpeeds here
     }
 }
