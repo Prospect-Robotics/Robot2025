@@ -141,7 +141,13 @@ public class Drive extends SubsystemBase {
             drivetrain = new SwerveDrivetrain<>(
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
 
-            this.config = com.team2813.Constants.getConfig();
+           RobotConfig config;
+            try {
+                config = com.team2813.Constants.getConfig();
+            } catch (IOException | ParseException e) {
+                // Or handle the error more gracefully
+                throw new RuntimeException("Could not get config!", e);
+            }
             AutoBuilder.configure(
             this::getPose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
