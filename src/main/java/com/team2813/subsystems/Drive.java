@@ -141,9 +141,8 @@ public class Drive extends SubsystemBase {
             drivetrain = new SwerveDrivetrain<>(
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
 
-           RobotConfig config;
             try {
-                config = com.team2813.Constants.getConfig();
+                config = RobotConfig.fromGUISettings();
             } catch (IOException | ParseException e) {
                 // Or handle the error more gracefully
                 throw new RuntimeException("Could not get config!", e);

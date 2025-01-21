@@ -35,10 +35,6 @@ public class Constants {
 
     public static final int CLAW_PIVOT = 18;
     public static final int CLAW_WHEEL = 19;
-
-    public static RobotConfig getConfig() throws IOException, org.json.simple.parser.ParseException {
-        return RobotConfig.fromGUISettings();
-    }
     
     // Algae Mechanisms (might not be used)
     public static final int ALGAE_PIVOT = 20;
