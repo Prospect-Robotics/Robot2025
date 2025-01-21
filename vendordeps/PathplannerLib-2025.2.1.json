@@ -5,7 +5,7 @@
     "uuid": "1b42324f-17c6-4875-8e77-1c312bc8c786",
     "frcYear": "2025",
     "mavenUrls": [
-        "https://3015rangerrobotics.github.io/pathplannerlib/repo/com/pathplanner/lib/PathplannerLib-java/2025.2.1/PathplannerLib-java-2025.2.1-javadoc.jar"
+        "https://3015rangerrobotics.github.io/pathplannerlib/repo/"
     ],
     "jsonUrl": "https://3015rangerrobotics.github.io/pathplannerlib/PathplannerLib.json",
     "javaDependencies": [
