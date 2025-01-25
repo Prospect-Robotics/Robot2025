@@ -29,8 +29,8 @@ public class Constants {
     public static final int ELEVATOR_1 = 16;
     public static final int ELEVATOR_2 = 17;
 
-    public static final int CLAW_PIVOT = 18;
-    public static final int CLAW_WHEEL = 19;
+    public static final int INTAKE_PIVOT = 18;
+    public static final int INTAKE_ENCODER = 19;
 
 
     // Algae Mechanisms (might not be used)
