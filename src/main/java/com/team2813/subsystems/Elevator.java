@@ -10,15 +10,19 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Units;
 
 import java.util.function.Supplier;
 
 public class Elevator extends MotorSubsystem<Elevator.Position> {
+
+    // You see a message written in blood on the wall...
+    // It reads: "THIS CODE WILL LIKELY HAVE TO BE *MAJORLY* REFACTORED 
+    // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
+    // HERE BE DRAGONS.
+    // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
 
     public Elevator() {
         super(
