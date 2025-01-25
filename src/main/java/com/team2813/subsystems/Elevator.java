@@ -32,11 +32,11 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                         .acceptableError(2.5)
                         .controller(getPIDController())
                         .rotationUnit(Units.Radians));
-        ((TalonFXWrapper) motor).addFollower(ELEVATOR_2, "swerve", InvertType.OPPOSE_MASTER);
+        ((TalonFXWrapper) motor).addFollower(ELEVATOR_2, "swerve", InvertType.OPPOSE_MASTER); // TODO: See if the motors need to be reversed.
     }
     
     private static TalonFXWrapper getMotor() {
-        TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, "swerve", InvertType.COUNTER_CLOCKWISE);
+        TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, "swerve", InvertType.COUNTER_CLOCKWISE); // TODO: See if the motors need to be reversed.
         wrapper.setNeutralMode(NeutralModeValue.Brake);
         return wrapper;
     }
@@ -49,6 +49,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     
     @Override
     protected void useOutput(double output, double setpoint) {
+        // TODO: Once we have a working elevator, tune this.
         if (output > 0) {
             output += 0.40798;
         }
