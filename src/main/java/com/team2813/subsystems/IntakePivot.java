@@ -3,31 +3,26 @@ package com.team2813.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.team2813.lib2813.control.Encoder;
 import com.team2813.lib2813.control.InvertType;
-import com.team2813.lib2813.control.Motor;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.encoders.CancoderWrapper;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 
+import edu.wpi.first.units.BaseUnits;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
 
-    Motor intakePivotMotor;
-    Encoder intakePivotEncoder;
-    
     public IntakePivot() {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
-            new CancoderWrapper(19))
+            new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
             .acceptableError(0.5)
-            .startingPosition(Rotations.INTAKE_UP)
+            .startingPosition(Rotations.INTAKE)
         );
-        intakePivotEncoder = new TalonFXWrapper(18, InvertType.COUNTER_CLOCKWISE);
         
     }
 
@@ -42,7 +37,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
         super.useOutput(output, setPoint);
     }
     private static PIDMotor pivotMotor() {
-        TalonFXWrapper pivotMotor = new TalonFXWrapper(18, InvertType.CLOCKWISE);
+        TalonFXWrapper pivotMotor = new TalonFXWrapper(com.team2813.Constants.INTAKE_PIVOT, InvertType.CLOCKWISE);
         pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
         return pivotMotor;
@@ -55,8 +50,9 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     }
 
     public static enum Rotations implements Supplier<Angle>{
-        INTAKE_DOWN(Angle.ofBaseUnits(0.825439, null)),
-        INTAKE_UP(Angle.ofBaseUnits(0, null));
+        OUTTAKE(BaseUnits.AngleUnit.of(0.825439)), // TODO: NEEDS TUNING
+        INTAKE(BaseUnits.AngleUnit.of(0)), // TODO: NEEDS TUNING
+        ALGAE_BUMP(BaseUnits.AngleUnit.of(0)); // TODO: NEEDS TUNING
 
         Rotations(Angle pos) {
             this.pos = pos;
