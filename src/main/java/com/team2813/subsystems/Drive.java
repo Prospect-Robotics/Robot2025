@@ -5,15 +5,12 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
-import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
-import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -45,10 +42,10 @@ public class Drive extends SubsystemBase {
 
     public Drive() {
         
-        double FLSteerOffset = 0.0;
-        double FRSteerOffset = 0.0;
-        double BLSteerOffset = 0.0;
-        double BRSteerOffset = 0.0;
+        double FLSteerOffset = 0.16796875;
+        double FRSteerOffset = -0.355712890625;
+        double BLSteerOffset = -0.367919921875;
+        double BRSteerOffset = 0.371337890625;
 
         Slot0Configs steerGains = new Slot0Configs()
 			      .withKP(50).withKI(0).withKD(0.2)// Tune this.

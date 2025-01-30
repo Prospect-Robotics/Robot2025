@@ -48,12 +48,12 @@ public class Constants {
         private DriverConstants() {
             throw new AssertionError("Not instantionable");
         }
-        public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(1);
+        public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
     }
     public static class OperatorConstants {
         private OperatorConstants() {
             throw new AssertionError("Not instantionable");
         }
-        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(2);
+        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
     }
 }
