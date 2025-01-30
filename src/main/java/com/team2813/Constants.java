@@ -1,6 +1,13 @@
 package com.team2813;
 
+import com.team2813.subsystems.Drive;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+
 public class Constants {
+    
+    private Constants() {
+        throw new AssertionError("Not instantionable");
+    }
 
     // Drive train CAN IDs
     // Front Right swerve module
@@ -36,4 +43,17 @@ public class Constants {
     // Algae Mechanisms (might not be used)
     public static final int ALGAE_PIVOT = 20;
     public static final int ALGAE_WHEEL = 21;
+    
+    public static class DriverConstants {
+        private DriverConstants() {
+            throw new AssertionError("Not instantionable");
+        }
+        public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(1);
+    }
+    public static class OperatorConstants {
+        private OperatorConstants() {
+            throw new AssertionError("Not instantionable");
+        }
+        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(2);
+    }
 }

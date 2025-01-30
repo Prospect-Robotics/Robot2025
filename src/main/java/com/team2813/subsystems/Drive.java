@@ -31,7 +31,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class Drive extends SubsystemBase {
-
+    
+    public static final double MAX_VELOCITY = 6;
+    public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
 
 
