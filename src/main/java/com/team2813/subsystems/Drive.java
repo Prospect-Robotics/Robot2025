@@ -133,7 +133,7 @@ public class Drive extends SubsystemBase {
 
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
-    private final FieldCentric fieldCentricApplier = new FieldCentric();
+    private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
     public void drive(double xSpeed, double ySpeed, double rotation) {
         drivetrain.setControl(fieldCentricApplier
