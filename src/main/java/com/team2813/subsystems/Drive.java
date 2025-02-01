@@ -48,11 +48,13 @@ public class Drive extends SubsystemBase {
         double BRSteerOffset = 0.371337890625;
 
         Slot0Configs steerGains = new Slot0Configs()
-			      .withKP(50).withKI(0).withKD(0.2)// Tune this.
+                // l: 12.5 h: 25
+			      .withKP(12.5).withKI(0).withKD(0.2)// Tune this.
 			      .withKS(0).withKV(1.5).withKA(0);// Tune this.
 
+        // l: 0 h: 2.5
         Slot0Configs driveGains = new Slot0Configs()
-			      .withKP(2.5).withKI(0).withKD(0)// Tune this.
+			      .withKP(0).withKI(0).withKD(0)// Tune this.
 			      .withKS(0).withKV(0).withKA(0);// Tune this.
 
 
@@ -66,7 +68,7 @@ public class Drive extends SubsystemBase {
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.TorqueCurrentFOC) // Tune this. (Important to tune ↓)
+            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune ↓)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.FusedCANcoder) // Tune this.
@@ -129,7 +131,6 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-
 
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
