@@ -18,6 +18,10 @@ import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -175,5 +179,19 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getCurrentSpeeds() {
         return null;
         // insert robot getSpeeds here
+    }
+    
+    StructArrayPublisher<SwerveModuleState> expextedState =
+            NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
+    StructArrayPublisher<SwerveModuleState> actualState =
+            NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
+    StructPublisher<Pose2d> currentPose =
+            NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
+    
+    @Override
+    public void periodic() {
+        expextedState.set(drivetrain.getState().ModuleTargets);
+        actualState.set(drivetrain.getState().ModuleStates);
+        currentPose.set(getPose());
     }
 }
