@@ -170,7 +170,7 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
     public Pose2d getPose() {
-        return null;
+        return drivetrain.getState().Pose;
         // insert robot getPose here
     }
     public void resetPose() {
