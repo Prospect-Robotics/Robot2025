@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Go to scoring"
+            "pathName": "Go to scoring Algae"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "BumpAlgaeLow"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Align with reef"
           }
         },
         {
