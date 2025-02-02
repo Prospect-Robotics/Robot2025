@@ -37,9 +37,6 @@ public class Drive extends SubsystemBase {
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
 
-
-    
-
     static double frontDist = 0.330200;
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
@@ -52,8 +49,8 @@ public class Drive extends SubsystemBase {
         double BRSteerOffset = 0.371337890625;
 
         Slot0Configs steerGains = new Slot0Configs()
-                // l: 12.5 h: 25
-			      .withKP(12.5).withKI(0).withKD(0.2)// Tune this.
+                // l: 150, h: ?
+			      .withKP(200).withKI(0).withKD(0.2)// Tune this.
 			      .withKS(0).withKV(1.5).withKA(0);// Tune this.
 
         // l: 0 h: 2.5
