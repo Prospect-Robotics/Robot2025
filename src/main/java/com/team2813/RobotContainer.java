@@ -6,10 +6,15 @@ package com.team2813;
 
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.Drive;
+import com.team2813.sysid.SysIdRoutineSelector;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+
+import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
+import static com.team2813.Constants.DriverConstants.SYSID_RUN;
 
 public class RobotContainer {
   private final Drive drive = new Drive();
@@ -22,6 +27,8 @@ public class RobotContainer {
                     () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
     configureBindings();
   }
+  
+  SysIdRoutineSelector sysIdRoutineSelector = new SysIdRoutineSelector();
   
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
@@ -41,7 +48,10 @@ public class RobotContainer {
     return value;
   }
 
-  private void configureBindings() {}
+  private void configureBindings() {
+    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
+    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, Set.of(drive)));
+  }
 
   public Command getAutonomousCommand() {
     return Commands.print("No autonomous command configured");
