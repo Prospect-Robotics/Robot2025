@@ -15,6 +15,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -143,6 +144,10 @@ public class Drive extends SubsystemBase {
             .withVelocityY(ySpeed)
             .withRotationalRate(rotation)
             ); // Note: might not work, will need testing.
+    }
+    
+    public void runSysIdRequest(SwerveSysidRequest request) {
+        drivetrain.setControl(request);
     }
     
     public void drive(ChassisSpeeds demand) {

@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import static com.team2813.sysid.Requests.*;
 
-enum RequestType {
+public enum RequestType {
   VoltageOut(VOLTAGE_OUT::withOutput),
   TorqueCurrentFOC(CONVERT_VOLTAGE.andThen(TORQUE_CURRENT_FOC::withOutput));
   private final Function<Voltage, ControlRequest> convertVoltage;

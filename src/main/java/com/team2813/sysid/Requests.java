@@ -13,8 +13,6 @@ class Requests {
   public static VoltageOut VOLTAGE_OUT = new VoltageOut(0);
   public static TorqueCurrentFOC TORQUE_CURRENT_FOC = new TorqueCurrentFOC(0);
   public static Function<Voltage, Double> CONVERT_VOLTAGE = (v) -> v.in(Units.Volts);
-  public static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
-  public static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   private Requests() {
     throw new AssertionError("Not instantiable!");
   }

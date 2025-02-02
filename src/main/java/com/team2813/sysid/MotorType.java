@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 
 import static com.team2813.sysid.Requests.NEUTRAL_OUT;
 
-enum MotorType {
+public enum MotorType {
   Swerve((m, r) -> {
     m.getDriveMotor().setControl(NEUTRAL_OUT);
     m.getSteerMotor().setControl(r);

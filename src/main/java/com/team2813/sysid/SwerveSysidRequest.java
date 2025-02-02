@@ -6,7 +6,7 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.units.measure.Voltage;
 
-class SwerveSysidRequest implements SwerveRequest {
+public class SwerveSysidRequest implements SwerveRequest {
   private final RequestType requestType;
   private final MotorType motorType;
   private Voltage curVoltage;

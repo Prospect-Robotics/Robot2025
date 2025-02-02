@@ -4,15 +4,17 @@
 
 package com.team2813;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.Drive;
-import com.team2813.sysid.DropdownEntry;
-import com.team2813.sysid.SubsystemRegistry;
-import com.team2813.sysid.SysIdRoutineSelector;
+import com.team2813.sysid.*;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,8 +59,36 @@ public class RobotContainer {
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
   }
   
+  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
+  private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
+  
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
-    return List.of();
+    List<DropdownEntry> routines = new ArrayList<>();
+    routines.add(new DropdownEntry("Drive-Drive Motor", new SysIdRoutine(
+            new SysIdRoutine.Config(null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
+            new SysIdRoutine.Mechanism(
+                    (v) -> registry.getSubsystem(Drive.class).runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
+                    null,
+                    registry.getSubsystem(Drive.class)
+            )
+    )));
+    routines.add(new DropdownEntry("Drive-Steer Motor", new SysIdRoutine(
+            new SysIdRoutine.Config(null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
+            new SysIdRoutine.Mechanism(
+                    (v) -> registry.getSubsystem(Drive.class).runSysIdRequest(STEER_SYSID.withVoltage(v)),
+                    null,
+                    registry.getSubsystem(Drive.class)
+            )
+    )));
+    routines.add(new DropdownEntry("Drive-Slip Test (Forward Quasistatic only)", new SysIdRoutine(
+            new SysIdRoutine.Config(Units.Volts.of(0.25).per(Units.Second), null, null, (s) -> SignalLogger.writeString("state", s.toString())),
+            new SysIdRoutine.Mechanism(
+                    (v) -> registry.getSubsystem(Drive.class).runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
+                    null,
+                    registry.getSubsystem(Drive.class)
+            )
+    )));
+    return routines;
   }
 
   public Command getAutonomousCommand() {
