@@ -1,8 +1,5 @@
 package com.team2813;
 
-import java.io.IOException;
-
-import com.pathplanner.lib.config.RobotConfig;
 
 public class Constants {
 
