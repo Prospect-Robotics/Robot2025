@@ -28,7 +28,6 @@ public class Constants {
 
     public static final int ELEVATOR_1 = 16;
     public static final int ELEVATOR_2 = 17;
-    
 
     public static final int INTAKE_PIVOT = 18;
     public static final int INTAKE_WHEEL = 19;
