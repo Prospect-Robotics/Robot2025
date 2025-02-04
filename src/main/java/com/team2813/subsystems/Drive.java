@@ -50,9 +50,8 @@ public class Drive extends SubsystemBase {
         double BRSteerOffset = 0.371337890625;
 
         Slot0Configs steerGains = new Slot0Configs()
-                // l: 150, h: ?
-			      .withKP(53.546).withKI(0).withKD(4.5462)// Tune this.
-			      .withKS(0.12386).withKV(2.4693).withKA(0.21909);// Tune this.
+			      .withKP(46.619).withKI(0).withKD(3.0889)// Tune this.
+			      .withKS(0.20951).withKV(2.4288).withKA(0.11804);// Tune this.
 
         // l: 0 h: 2.5
         Slot0Configs driveGains = new Slot0Configs()
@@ -73,7 +72,7 @@ public class Drive extends SubsystemBase {
             .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune ↓)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
-            .withFeedbackSource(SteerFeedbackType.FusedCANcoder) // Tune this.
+            .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
             .withCouplingGearRatio(3.5);
 
 
