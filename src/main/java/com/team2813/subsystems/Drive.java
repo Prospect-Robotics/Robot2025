@@ -51,8 +51,8 @@ public class Drive extends SubsystemBase {
 
         Slot0Configs steerGains = new Slot0Configs()
                 // l: 150, h: ?
-			      .withKP(200).withKI(0).withKD(0.2)// Tune this.
-			      .withKS(0).withKV(1.5).withKA(0);// Tune this.
+			      .withKP(53.546).withKI(0).withKD(4.5462)// Tune this.
+			      .withKS(0.12386).withKV(2.4693).withKA(0.21909);// Tune this.
 
         // l: 0 h: 2.5
         Slot0Configs driveGains = new Slot0Configs()
