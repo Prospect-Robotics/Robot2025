@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotContainer {
+
+   private final SendableChooser<Command> autoChooser;
+  
   public RobotContainer() {
     configureBindings();
   }
