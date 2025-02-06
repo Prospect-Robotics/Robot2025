@@ -15,6 +15,15 @@ public class RobotContainer {
    private final SendableChooser<Command> autoChooser;
   
   public RobotContainer() {
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+    try {
+      com.team2813.subsystems.Drive drive = new com.team2813.subsystems.Drive();
+    } catch (IOException | ParseException e) {
+      e.printStackTrace();
+    } // Initialize swerve drive
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
 
