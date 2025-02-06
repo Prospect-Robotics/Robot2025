@@ -4,10 +4,6 @@
 
 package com.team2813;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -20,11 +16,13 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
 
-  public RobotContainer() throws IOException, ParseException {
+  @SuppressWarnings("CallToPrintStackTrace")
+  public RobotContainer() {
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    com.team2813.subsystems.Drive drive = new com.team2813.subsystems.Drive(); // Initialize swerve drive
+      com.team2813.subsystems.Drive drive = new com.team2813.subsystems.Drive();
+
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();

@@ -59,7 +59,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0;
     // See above comment, do not delete past this line.
 
-    public Drive() throws IOException, ParseException {
+     public Drive() { // throws IOException, ParseException 
         
         double FLSteerOffset = 0.0;
         double FRSteerOffset = 0.0;
