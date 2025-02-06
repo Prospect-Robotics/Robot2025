@@ -7,6 +7,9 @@ package com.team2813;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class RobotContainer {
   public RobotContainer() {
     configureBindings();
