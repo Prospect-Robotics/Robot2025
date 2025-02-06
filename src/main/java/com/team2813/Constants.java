@@ -1,9 +1,5 @@
 package com.team2813;
 
-import java.io.IOException;
-
-import com.pathplanner.lib.config.RobotConfig;
-
 public class Constants {
 
     // Drive train CAN IDs
@@ -33,10 +29,13 @@ public class Constants {
     public static final int ELEVATOR_1 = 16;
     public static final int ELEVATOR_2 = 17;
 
-    public static final int CLAW_PIVOT = 18;
-    public static final int CLAW_WHEEL = 19;
-    
+    public static final int INTAKE_PIVOT = 18;
+    public static final int INTAKE_WHEEL = 19;
+    public static final int INTAKE_ENCODER = 20;
+
+
     // Algae Mechanisms (might not be used)
-    public static final int ALGAE_PIVOT = 20;
-    public static final int ALGAE_WHEEL = 21;
+    public static final int ALGAE_PIVOT = 21;
+    public static final int ALGAE_WHEEL = 22;
+    public static final int ALGAE_ENCODER = 23;
 }
