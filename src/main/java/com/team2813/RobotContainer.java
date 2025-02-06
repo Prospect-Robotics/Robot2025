@@ -4,33 +4,17 @@
 
 package com.team2813;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.team2813.subsystems.Drive;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class RobotContainer {
-
-  
-  private final SendableChooser<Command> autoChooser;
-
-
   public RobotContainer() {
-    // Build an auto chooser. This will use Commands.none() as the default option.
-    autoChooser = AutoBuilder.buildAutoChooser();
-
-      Drive drive = new Drive();
-
-
-    SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
   }
 
   private void configureBindings() {}
 
-    public Command getAutonomousCommand() {
-      return autoChooser.getSelected();
-    }
+  public Command getAutonomousCommand() {
+    return Commands.print("No autonomous command configured");
   }
+}
