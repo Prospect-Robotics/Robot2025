@@ -22,7 +22,7 @@ public class RobotContainer {
 
   public RobotContainer() throws IOException, ParseException {
     // Build an auto chooser. This will use Commands.none() as the default option.
-    autoChooser = AutoBuilder.buildAutoChooser("leave");
+    autoChooser = AutoBuilder.buildAutoChooser();
 
     com.team2813.subsystems.Drive drive = new com.team2813.subsystems.Drive(); // Initialize swerve drive
 
