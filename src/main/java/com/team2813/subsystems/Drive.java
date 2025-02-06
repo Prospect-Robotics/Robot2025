@@ -1,47 +1,26 @@
 package com.team2813.subsystems;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.core.CorePigeon2;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be inproper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be inproper import.
-import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import static com.team2813.Constants.BACK_LEFT_DRIVE_ID;
-import static com.team2813.Constants.BACK_LEFT_ENCODER_ID;
-import static com.team2813.Constants.BACK_LEFT_STEER_ID;
-import static com.team2813.Constants.BACK_RIGHT_DRIVE_ID;
-import static com.team2813.Constants.BACK_RIGHT_ENCODER_ID;
-import static com.team2813.Constants.BACK_RIGHT_STEER_ID;
-import static com.team2813.Constants.FRONT_LEFT_DRIVE_ID;
-import static com.team2813.Constants.FRONT_LEFT_ENCODER_ID;
-import static com.team2813.Constants.FRONT_LEFT_STEER_ID;
-import static com.team2813.Constants.FRONT_RIGHT_DRIVE_ID;
-import static com.team2813.Constants.FRONT_RIGHT_ENCODER_ID;
-import static com.team2813.Constants.FRONT_RIGHT_STEER_ID;
-import static com.team2813.Constants.PIGEON_ID;
+import com.ctre.phoenix6.swerve.SwerveModuleConstantsFactory;
 
-import edu.wpi.first.math.geometry.Pose2d;
+import static com.team2813.Constants.*;
+
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Also add all the nescesary imports for constants and other things
@@ -52,14 +31,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Drive extends SubsystemBase {
 
     private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain;
-    RobotConfig config;
-    private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
+
+
+    
 
     static double frontDist = 0;
     static double leftDist = 0;
     // See above comment, do not delete past this line.
 
-     public Drive() { // throws IOException, ParseException 
+    public Drive() {
         
         double FLSteerOffset = 0.0;
         double FRSteerOffset = 0.0;
@@ -140,36 +120,6 @@ public class Drive extends SubsystemBase {
 
             drivetrain = new SwerveDrivetrain<>(
                 TalonFX::new, TalonFX::new, CorePigeon2::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
-
-            try {
-                config = RobotConfig.fromGUISettings();
-            } catch (IOException | ParseException e) {
-                // Or handle the error more gracefully
-                throw new RuntimeException("Could not get config!", e);
-            }
-            AutoBuilder.configure(
-            this::getPose, // Robot pose supplier
-            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedforwards) -> drive(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-            new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
-            ),
-            config, // The robot configuration
-            () -> {
-              // Boolean supplier that controls when the path will be mirrored for the red alliance
-              // This will flip the path being followed to the red side of the field.
-              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-              var alliance = DriverStation.getAlliance();
-              if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-              }
-              return false;
-            },
-            this // Reference to this subsystem to set requirements
-    );
     }
 
 
@@ -206,16 +156,15 @@ public class Drive extends SubsystemBase {
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
-    
     public Pose2d getPose() {
-        double x = this.drivetrain.getState().Pose.getX() + this.poseOffset.getX();
-        double y = this.drivetrain.getState().Pose.getY() + this.poseOffset.getY();
-        return new Pose2d(x,y,this.drivetrain.getState().Pose.getRotation());
+        return null;
+        // insert robot getPose here
     }
-    public void resetPose(Pose2d currentPose) {
-        this.drivetrain.seedFieldCentric();
+    public void resetPose() {
+        // insert robot odometry reset here
     }
-    public ChassisSpeeds getRobotRelativeSpeeds() {
-        return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
+    public ChassisSpeeds getCurrentSpeeds() {
+        return null;
+        // insert robot getSpeeds here
     }
 }
