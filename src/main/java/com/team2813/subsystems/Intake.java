@@ -12,7 +12,7 @@ import static com.team2813.Constants.INTAKE_WHEEL;
 
 public class Intake extends SubsystemBase{
     private boolean isIntaking = false;
-    private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE);// canID = 20:arbitrary canID;
+    private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE);
     private static final double intakeSpeed = 0.6;
     private static final double outakeSpeed = -0.6;
 
