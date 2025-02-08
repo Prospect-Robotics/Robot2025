@@ -13,7 +13,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
+public class IntakePivot extends MotorSubsystem<IntakePivot.Position> {
     private static final Angle RESET_ANGLE = Units.Rotations.of(0);
 
     public IntakePivot() {
@@ -21,7 +21,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
             .acceptableError(0.5)
-            .startingPosition(Rotations.INTAKE)
+            .startingPosition(Position.INTAKE)
         );
         
     }
@@ -51,12 +51,12 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
         SmartDashboard.putNumber("Intake Pivot CANCoder Position", encoder.getPositionMeasure().in(Units.Rotations));
     }
 
-    public static enum Rotations implements Supplier<Angle>{
+    public static enum Position implements Supplier<Angle>{
         OUTTAKE(Units.Rotations.of(0.825439)), // TODO: NEEDS TUNING
         INTAKE(Units.Rotations.of(0)), // TODO: NEEDS TUNING
         ALGAE_BUMP(Units.Rotations.of(0)); // TODO: NEEDS TUNING
 
-        Rotations(Angle pos) {
+        Position(Angle pos) {
             this.pos = pos;
         }
 
