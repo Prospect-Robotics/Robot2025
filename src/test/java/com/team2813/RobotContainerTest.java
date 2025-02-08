@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
-public class RobotContainerTest {
+public final class RobotContainerTest {
     @Test
     public void constructorDoesNotRaise() {
         new RobotContainer();
