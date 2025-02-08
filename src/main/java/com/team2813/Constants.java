@@ -1,6 +1,5 @@
 package com.team2813;
 
-import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 
 public class Constants {
@@ -36,13 +35,15 @@ public class Constants {
     public static final int ELEVATOR_1 = 16;
     public static final int ELEVATOR_2 = 17;
 
-    public static final int CLAW_PIVOT = 18;
-    public static final int CLAW_WHEEL = 19;
+    public static final int INTAKE_PIVOT = 18;
+    public static final int INTAKE_WHEEL = 19;
+    public static final int INTAKE_ENCODER = 20;
 
 
     // Algae Mechanisms (might not be used)
-    public static final int ALGAE_PIVOT = 20;
-    public static final int ALGAE_WHEEL = 21;
+    public static final int ALGAE_PIVOT = 21;
+    public static final int ALGAE_WHEEL = 22;
+    public static final int ALGAE_ENCODER = 23;
     
     public static class DriverConstants {
         private DriverConstants() {

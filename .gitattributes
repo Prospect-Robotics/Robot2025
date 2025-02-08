@@ -1,6 +1,8 @@
 #
 # https://help.github.com/articles/dealing-with-line-endings/
 #
+# No binary files are being tracked, so tell git to use whatever line ending it sees best
+*               text=auto
 # These are explicitly windows files and should use crlf
 *.bat           text eol=crlf
 gradlew         text eol=lf
