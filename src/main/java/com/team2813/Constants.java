@@ -1,6 +1,7 @@
 package com.team2813;
 
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Constants {
     
@@ -50,6 +51,7 @@ public class Constants {
             throw new AssertionError("Not instantionable");
         }
         public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
+        public static Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
     }
     public static class OperatorConstants {
         private OperatorConstants() {
