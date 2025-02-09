@@ -1,6 +1,12 @@
 plugins {
-    id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id 'java'
+    id 'edu.wpi.first.GradleRIO' version '2025.1.1'
+    // Applies plugin that adds a task to generate a constants class
+    // We use the constants class to store build information like the build time,
+    // git commit hash etc. All this information is printed to the console when
+    // the robot starts.
+    // https://github.com/cthing/gradle-build-constants
+    id 'org.cthing.build-constants' version '2.0.0'
 }
 
 java {
@@ -8,7 +14,32 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "com.team2813.Main"
+// https://docs.gradle.org/current/userguide/service_injection.html#execoperations
+interface InjectedExecOps {
+    @Inject
+    ExecOperations getExecOps()
+}
+
+// A helper method to get the git hash of the current commit.
+def getGitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    def injected = project.objects.newInstance(InjectedExecOps)
+    injected.execOps.exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+tasks {
+    generateBuildConstants {
+        classname = 'com.team2813.BuildConstants'
+        additionalConstants.put('GIT_HASH', getGitHash())
+        println('=== Generated BuildConstants with git commit hash: ' + getGitHash() + ' ===')
+    }
+}
+
+def ROBOT_MAIN_CLASS = 'com.team2813.Main'
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -71,17 +102,18 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     testImplementation 'junit:junit:4.13'
-    implementation "com.team2813:lib2813"
+    implementation 'com.team2813:lib2813'
 }
 
 test {
     useJUnit()
+    println("Running tests, git commit hash short: " + getGitHash())
 }
 
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
-downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":lib:jar")
+downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
