@@ -1,5 +1,6 @@
 package com.team2813;
 
+import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -30,11 +31,11 @@ public class Constants {
     public static final int PIGEON_ID = 13;
      
     // Mechanism CAN IDs 
-    public static final int CLIMB_1 = 14;
-    public static final int CLIMB_2 = 15;
+    public static final int CLIMB_1 = 14;  // Climb Top
+    public static final int CLIMB_2 = 15;  // Climb Bottom
 
-    public static final int ELEVATOR_1 = 16;
-    public static final int ELEVATOR_2 = 17;
+    public static final int ELEVATOR_1 = 16;  // Elevator Top
+    public static final int ELEVATOR_2 = 17;  // Elevator Bottom
 
     public static final int INTAKE_PIVOT = 18;
     public static final int INTAKE_WHEEL = 19;
@@ -52,11 +53,13 @@ public class Constants {
         }
         public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
         public static Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
+        public static Trigger TMP_INTAKE = DRIVER_CONTROLLER.square();
+        public static Trigger TMP_OUTTAKE = DRIVER_CONTROLLER.circle();
     }
     public static class OperatorConstants {
         private OperatorConstants() {
             throw new AssertionError("Not instantiable");
         }
-        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+        //public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
     }
 }

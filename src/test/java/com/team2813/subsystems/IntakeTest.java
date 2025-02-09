@@ -20,7 +20,7 @@ public final class IntakeTest {
 
     @Override
     public void set(ControlMode mode, double demand) {
-      assertThat(mode).isEqualTo(ControlMode.DUTY_CYCLE);
+      assertThat(mode).isEqualTo(ControlMode.VOLTAGE);
       this.dutyCycle = demand;
     }
   }

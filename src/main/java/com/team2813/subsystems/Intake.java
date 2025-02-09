@@ -18,11 +18,11 @@ public class Intake extends SubsystemBase{
     
     private boolean isIntaking = false;
     private final PIDMotor intakeMotor;
-    static final double INTAKE_SPEED = 0.6;
-    static final double OUTTAKE_SPEED = -0.6;
+    static final double INTAKE_SPEED = 4;
+    static final double OUTTAKE_SPEED = -4;
 
     public Intake() {
-        this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE));
+        this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
     }
 
     Intake(PIDMotor motor) {
@@ -30,15 +30,15 @@ public class Intake extends SubsystemBase{
     }
 
     public void intakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, INTAKE_SPEED);
+        intakeMotor.set(ControlMode.VOLTAGE, INTAKE_SPEED);
         isIntaking = true;
     }
     public void outakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, OUTTAKE_SPEED);
+        intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
         isIntaking = false;
     }
     public void stopIntakeMotor(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE,0);
+        intakeMotor.set(ControlMode.VOLTAGE,0);
         isIntaking = false;
     }
 
