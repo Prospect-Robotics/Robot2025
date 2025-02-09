@@ -11,6 +11,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.Elevator;
 import com.team2813.subsystems.Intake;
 import com.team2813.subsystems.IntakePivot;
 import com.team2813.sysid.*;
@@ -36,6 +37,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser = configureAuto(drive);
   private final Intake intake = new Intake();
   private final IntakePivot intakePivot = new IntakePivot();
+  private final Elevator elevator = new Elevator();
   
   public RobotContainer() {
     drive.setDefaultCommand(
@@ -102,11 +104,11 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-    TMP_OUTTAKE.onTrue(new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot));
-    TMP_OUTTAKE.onFalse(new InstantCommand(intakePivot::disable, intakePivot));
+    TMP_OUTTAKE.onTrue(new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator));
+    TMP_OUTTAKE.onFalse(new InstantCommand(elevator::disable, elevator));
     
-    TMP_INTAKE.onTrue(new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intake));
-    TMP_INTAKE.onFalse(new InstantCommand(intakePivot::disable, intake));
+    TMP_INTAKE.onTrue(new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator));
+    TMP_INTAKE.onFalse(new InstantCommand(elevator::disable, elevator));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);

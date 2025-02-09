@@ -30,12 +30,16 @@ public class Constants {
 
     public static final int PIGEON_ID = 13;
      
-    // Mechanism CAN IDs 
-    public static final int CLIMB_1 = 14;  // Climb Top
-    public static final int CLIMB_2 = 15;  // Climb Bottom
+    // Mechanism CAN IDs
+    /** Climb Top */
+    public static final int CLIMB_1 = 14;
+    /** Climb Bottom */
+    public static final int CLIMB_2 = 15;
 
-    public static final int ELEVATOR_1 = 16;  // Elevator Top
-    public static final int ELEVATOR_2 = 17;  // Elevator Bottom
+    /** Elevator Top */
+    public static final int ELEVATOR_1 = 16;
+    /** Elevator Bottom */
+    public static final int ELEVATOR_2 = 17;
 
     public static final int INTAKE_PIVOT = 18;
     public static final int INTAKE_WHEEL = 19;
