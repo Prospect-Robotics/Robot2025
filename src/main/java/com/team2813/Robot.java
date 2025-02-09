@@ -19,6 +19,18 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void robotInit() {
+    System.out.println("Build Information:");
+    System.out.println("  MAVEN_NAME     : " + BuildConstants.MAVEN_NAME);
+    System.out.println("  VERSION        : " + BuildConstants.VERSION);
+    System.out.println("  GIT_REVISION   : " + BuildConstants.GIT_REVISION);
+    System.out.println("  GIT_SHA        : " + BuildConstants.GIT_SHA);
+    System.out.println("  GIT_DATE       : " + BuildConstants.GIT_DATE);
+    System.out.println("  GIT_BRANCH     : " + BuildConstants.GIT_BRANCH);
+    System.out.println("  BUILD_DATE     : " + BuildConstants.BUILD_DATE);
+  }
+
+  @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
   }

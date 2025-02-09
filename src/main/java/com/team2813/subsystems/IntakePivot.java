@@ -46,7 +46,9 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     @Override
     public void periodic() {
         super.periodic();
-        SmartDashboard.putData("Intake Pivot CANCoder Position", (Sendable) encoder.getPositionMeasure());
+        SmartDashboard.putData(
+                "Intake Pivot CANCoder Position", 
+                (Sendable) encoder.getPositionMeasure());
     }
 
     public static enum Rotations implements Supplier<Angle>{
