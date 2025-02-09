@@ -7,22 +7,26 @@ package com.team2813;
 import com.ctre.phoenix6.SignalLogger;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.Intake;
+import com.team2813.subsystems.IntakePivot;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
-import static com.team2813.Constants.DriverConstants.SYSID_RUN;
+import static com.team2813.Constants.DriverConstants.*;
 
 public class RobotContainer {
   private final Drive drive = new Drive();
+  private final Intake intake = new Intake();
+  private final IntakePivot intakePivot = new IntakePivot();
   public RobotContainer() {
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -57,6 +61,11 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+    TMP_OUTTAKE.onTrue(new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot));
+    TMP_OUTTAKE.onFalse(new InstantCommand(intakePivot::disable, intakePivot));
+    
+    TMP_INTAKE.onTrue(new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intake));
+    TMP_INTAKE.onFalse(new InstantCommand(intakePivot::disable, intake));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);

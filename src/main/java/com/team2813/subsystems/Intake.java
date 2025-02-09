@@ -12,20 +12,20 @@ import static com.team2813.Constants.INTAKE_WHEEL;
 
 public class Intake extends SubsystemBase{
     private boolean isIntaking = false;
-    private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE);
-    private static final double intakeSpeed = 0.6;
-    private static final double outakeSpeed = -0.6;
+    private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE);
+    private static final double intakeSpeed = 4;
+    private static final double outakeSpeed = -4;
 
     public void intakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, intakeSpeed);
+        intakeMotor.set(ControlMode.VOLTAGE, intakeSpeed);
         isIntaking = true;
     }
     public void outakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, outakeSpeed); 
+        intakeMotor.set(ControlMode.VOLTAGE, outakeSpeed);
         isIntaking = false;
     }
     public void stopIntakeMotor(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE,0);
+        intakeMotor.set(ControlMode.VOLTAGE,0);
         isIntaking = false;
     }
 }
