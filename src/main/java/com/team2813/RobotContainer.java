@@ -6,10 +6,7 @@ package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.team2813.commands.DefaultDriveCommand;
-import com.team2813.subsystems.Drive;
-import com.team2813.subsystems.Elevator;
-import com.team2813.subsystems.Intake;
-import com.team2813.subsystems.IntakePivot;
+import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +26,7 @@ public class RobotContainer {
   private final Intake intake = new Intake();
   private final IntakePivot intakePivot = new IntakePivot();
   private final Elevator elevator = new Elevator();
+  private final Climb climb = new Climb();
   public RobotContainer() {
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -63,11 +61,11 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-    TMP_OUTTAKE.onTrue(new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator));
-    TMP_OUTTAKE.onFalse(new InstantCommand(elevator::disable, elevator));
+    TMP_OUTTAKE.onTrue(new InstantCommand(climb::extend, climb));
+    TMP_OUTTAKE.onFalse(new InstantCommand(climb::stop, climb));
     
-    TMP_INTAKE.onTrue(new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator));
-    TMP_INTAKE.onFalse(new InstantCommand(elevator::disable, elevator));
+    TMP_INTAKE.onTrue(new InstantCommand(climb::retract, climb));
+    TMP_INTAKE.onFalse(new InstantCommand(climb::stop, climb));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
