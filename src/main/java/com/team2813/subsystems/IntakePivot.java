@@ -12,10 +12,12 @@ import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+/**
+* This is the Intake Pivot. Her name is Sophie.
+* Please be kind to her and say hi.
+* Have a nice day!
+*/
 public class IntakePivot extends MotorSubsystem<IntakePivot.Position> {
-
-    // This is Julius. He is the Intake Pivot Subsystem. Treat him with respect.
     
     private static final Angle RESET_ANGLE = Units.Rotations.of(0);
 
