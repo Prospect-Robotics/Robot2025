@@ -27,11 +27,14 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 
-
+/**
+* This is the Drive. His name is Gary.
+* Please be kind to him and say hi.
+* Have a nice day!
+*/
 public class Drive extends SubsystemBase {
 
     private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain;
-
 
     
 
