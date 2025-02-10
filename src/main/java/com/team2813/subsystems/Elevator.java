@@ -23,7 +23,8 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
     // HERE BE DRAGONS.
     // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
-
+    // Another message appears...
+    // It reads: "This is the Elevator. His name is Pablo. Treat him with respect."
     public Elevator() {
         super(
                 new MotorSubsystemConfiguration(
