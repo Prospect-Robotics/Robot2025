@@ -32,7 +32,8 @@ public class Drive extends SubsystemBase {
 
     private final SwerveDrivetrain<TalonFX, TalonFX, CorePigeon2> drivetrain;
 
-
+	// This is Bartholomew Jaquavious DeMarcus Jr Jr the 3rd. He is the Climb subsystem of the robot.
+	// Treat him with respect.
     
 
     static double frontDist = 0;
