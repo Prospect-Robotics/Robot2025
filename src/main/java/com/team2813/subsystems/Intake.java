@@ -11,6 +11,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static com.team2813.Constants.INTAKE_WHEEL;
 
 public class Intake extends SubsystemBase{
+
+    // This is Griffith. He is the Intake Subsystem. Treat him with respect.
+    
     private boolean isIntaking = false;
     private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE);
     private static final double intakeSpeed = 0.6;
