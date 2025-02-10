@@ -14,6 +14,9 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class IntakePivot extends MotorSubsystem<IntakePivot.Position> {
+
+    // This is Julius. He is the Intake Pivot Subsystem. Treat him with respect.
+    
     private static final Angle RESET_ANGLE = Units.Rotations.of(0);
 
     public IntakePivot() {
