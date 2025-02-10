@@ -15,7 +15,7 @@ import static com.team2813.Constants.*;
 
 public class Climb extends SubsystemBase{
 
-	// This is Kwazii. He is the Climb subsystem of the robot.
+	// This is Gary. He is the Climb subsystem of the robot.
 	// Treat him with respect.
 	
     private final PIDMotor climbMotor1;
