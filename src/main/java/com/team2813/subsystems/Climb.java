@@ -12,12 +12,13 @@ import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
-
+/**
+* This is the Climb. Her name is Lisa.
+* Please be kind to her and say hi.
+* Have a nice day!
+*/
 public class Climb extends SubsystemBase{
 
-	// This is Lisa. He is the Climb subsystem of the robot.
-	// Treat her with respect.
-	
     private final PIDMotor climbMotor1;
 
     public Climb() {
