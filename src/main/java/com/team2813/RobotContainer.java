@@ -109,7 +109,7 @@ public class RobotContainer {
     TMP_INTAKE.onFalse(new InstantCommand(climb::stop, climb));
   }
   
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
+  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
   private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
