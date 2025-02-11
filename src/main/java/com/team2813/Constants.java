@@ -1,7 +1,14 @@
 package com.team2813;
 
+import com.team2813.subsystems.Drive;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Constants {
+    
+    private Constants() {
+        throw new AssertionError("Not instantionable");
+    }
 
     // Drive train CAN IDs
     // Front Right swerve module
@@ -23,11 +30,15 @@ public class Constants {
 
     public static final int PIGEON_ID = 13;
      
-    // Mechanism CAN IDs 
+    // Mechanism CAN IDs
+    /** Climb Top */
     public static final int CLIMB_1 = 14;
+    /** Climb Bottom */
     public static final int CLIMB_2 = 15;
 
+    /** Elevator Top */
     public static final int ELEVATOR_1 = 16;
+    /** Elevator Bottom */
     public static final int ELEVATOR_2 = 17;
 
     public static final int INTAKE_PIVOT = 18;
@@ -39,4 +50,20 @@ public class Constants {
     public static final int ALGAE_PIVOT = 21;
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
+    
+    public static class DriverConstants {
+        private DriverConstants() {
+            throw new AssertionError("Not instantionable");
+        }
+        public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
+        public static Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
+        public static Trigger TMP_INTAKE = DRIVER_CONTROLLER.square();
+        public static Trigger TMP_OUTTAKE = DRIVER_CONTROLLER.circle();
+    }
+    public static class OperatorConstants {
+        private OperatorConstants() {
+            throw new AssertionError("Not instantionable");
+        }
+        //public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+    }
 }
