@@ -22,7 +22,7 @@ public class Robot extends TimedRobot {
   }
 
   private final static StringPublisher m_buildConstantsGitShaPublisher = NetworkTableInstance.getDefault()
-      .getStringTopic("/buildConstants/gitSha").publish();
+      .getStringTopic("/BuildConstants/GitSha").publish();
 
   @Override
   public void robotInit() {
