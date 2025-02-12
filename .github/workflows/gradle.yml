@@ -5,6 +5,9 @@ on:
     types: [opened, synchronize]
     branches:
       - main
+  push:
+    branches:
+      - main
 
 permissions:
       contents: read
