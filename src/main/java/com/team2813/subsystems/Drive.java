@@ -42,6 +42,12 @@ public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    
+    /**
+     * This measurement is <em>IN INCHES</em>
+     */
+    private static final double WHEEL_RADIUS_IN = 1.875;
+    private static final double INCHES_PER_METER = 39.37;
     private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
 
     static double frontDist = 0.330200;
@@ -56,10 +62,10 @@ public class Drive extends SubsystemBase {
         double BRSteerOffset = -0.2556591796875;
 
         Slot0Configs steerGains = new Slot0Configs()
-			      .withKP(0.97819).withKI(0).withKD(3.0889)// Tune this.
+			      .withKP(40).withKI(0).withKD(3.0889)// Tune this.
 			      .withKS(0.21041).withKV(2.68).withKA(0.084645);// Tune this.
 
-        // l: 0 h: 2
+        // l: 0 h: 10
         Slot0Configs driveGains = new Slot0Configs()
 			      .withKP(2.030731).withKI(0).withKD(0)// Tune this.
 			      .withKS(6.4111).withKV(0.087032).withKA(0);// Tune this.
@@ -71,13 +77,13 @@ public class Drive extends SubsystemBase {
             // WARNING: TUNE ALL OF THESE THINGS!!!!!!
             .withDriveMotorGearRatio(6.75)
             .withSteerMotorGearRatio(150.0 / 7)
-            .withWheelRadius(1.75)
+            .withWheelRadius(WHEEL_RADIUS_IN / INCHES_PER_METER)
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
             .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.TorqueCurrentFOC) // Tune this. (Important to tune values below)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
-            .withSpeedAt12Volts(5) // Tune this.
+            .withSpeedAt12Volts(6) // Tune this.
             .withFeedbackSource(SteerFeedbackType.FusedCANcoder) // Tune this.
             .withCouplingGearRatio(3.5);
 
