@@ -4,10 +4,10 @@
 
 package com.team2813;
 
-import java.io.IOException;
+import com.team2813.BuildConstants;
 
-import org.json.simple.parser.ParseException;
-
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -20,19 +20,31 @@ public class Robot extends TimedRobot {
   public Robot() {
     m_robotContainer = new RobotContainer();
   }
+
+  private final static StringPublisher m_buildConstantsGitShaPublisher = NetworkTableInstance.getDefault()
+      .getStringTopic("/BuildConstants/GitSha").publish();
+
+  @Override
+  public void robotInit() {
+    m_buildConstantsGitShaPublisher.set(BuildConstants.GIT_SHA);
+  }
+
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+  }
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+  }
 
   @Override
   public void autonomousInit() {
@@ -44,10 +56,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+  }
 
   @Override
   public void teleopInit() {
@@ -57,19 +71,25 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+  }
 
   @Override
   public void testInit() {
+    System.out.println("Hhhhhhhhh: " + BuildConstants.GIT_SHA);
+    // DriverStation.reportWarning("Hhhhhhhhh: " + BuildConstants.GIT_SHA, false);
     CommandScheduler.getInstance().cancelAll();
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   @Override
-  public void testExit() {}
+  public void testExit() {
+  }
 }
