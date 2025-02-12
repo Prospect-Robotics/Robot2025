@@ -9,7 +9,6 @@ public final class Main {
   private Main() {}
 
   public static void main(String[] args) throws Exception {
-    Robot robot = new Robot();
-    RobotBase.startRobot(() -> robot);
+    RobotBase.startRobot(Robot::new);
   }
 }
