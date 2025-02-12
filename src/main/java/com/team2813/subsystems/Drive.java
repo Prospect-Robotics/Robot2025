@@ -26,6 +26,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -56,10 +57,10 @@ public class Drive extends SubsystemBase {
 
     public Drive() {
         
-        double FLSteerOffset = -0.471435546875;
-        double FRSteerOffset = 0.299072265625;
-        double BLSteerOffset = -0.365478515625;
-        double BRSteerOffset = -0.2556591796875;
+        double FLSteerOffset = 0.256103515625;
+        double FRSteerOffset = 0.216796875;
+        double BLSteerOffset = -0.371826171875;
+        double BRSteerOffset = -0.306640625;
 
         Slot0Configs steerGains = new Slot0Configs()
 			      .withKP(40).withKI(0).withKD(3.0889)// Tune this.
@@ -67,7 +68,7 @@ public class Drive extends SubsystemBase {
 
         // l: 0 h: 10
         Slot0Configs driveGains = new Slot0Configs()
-			      .withKP(2.030731).withKI(0).withKD(0)// Tune this.
+			      .withKP(2.5).withKI(0).withKD(0)// Tune this.
 			      .withKS(6.4111).withKV(0.087032).withKA(0);// Tune this.
 
 
@@ -77,7 +78,7 @@ public class Drive extends SubsystemBase {
             // WARNING: TUNE ALL OF THESE THINGS!!!!!!
             .withDriveMotorGearRatio(6.75)
             .withSteerMotorGearRatio(150.0 / 7)
-            .withWheelRadius(WHEEL_RADIUS_IN / INCHES_PER_METER)
+            .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
