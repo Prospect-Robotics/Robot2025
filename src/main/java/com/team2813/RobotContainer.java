@@ -20,7 +20,7 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
 
-  public RobotContainer() throws IOException, ParseException {
+  public RobotContainer() {
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
 
