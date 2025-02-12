@@ -17,7 +17,7 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  public Robot() throws IOException, ParseException {
+  public Robot() {
     m_robotContainer = new RobotContainer();
   }
   @Override
