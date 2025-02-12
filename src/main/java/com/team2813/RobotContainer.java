@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import com.team2813.subsystems.Drive;
 
 public class RobotContainer {
 
@@ -24,7 +25,7 @@ public class RobotContainer {
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
 
-    com.team2813.subsystems.Drive drive = new com.team2813.subsystems.Drive(); // Initialize swerve drive
+    Drive drive = new Drive(); // Initialize swerve drive
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
