@@ -59,7 +59,7 @@ public class Drive extends SubsystemBase {
 			      .withKP(0.97819).withKI(0).withKD(3.0889)// Tune this.
 			      .withKS(0.21041).withKV(2.68).withKA(0.084645);// Tune this.
 
-        // l: 0 h: 2.5
+        // l: 0 h: 2
         Slot0Configs driveGains = new Slot0Configs()
 			      .withKP(2.030731).withKI(0).withKD(0)// Tune this.
 			      .withKS(6.4111).withKV(0.087032).withKA(0);// Tune this.
