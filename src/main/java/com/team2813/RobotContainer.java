@@ -102,11 +102,11 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-    TMP_OUTTAKE.onTrue(new InstantCommand(climb::extend, climb));
-    TMP_OUTTAKE.onFalse(new InstantCommand(climb::stop, climb));
+    TMP_OUTTAKE.onTrue(new InstantCommand(intake::outakeCoral, intake));
+    TMP_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
-    TMP_INTAKE.onTrue(new InstantCommand(climb::retract, climb));
-    TMP_INTAKE.onFalse(new InstantCommand(climb::stop, climb));
+    TMP_INTAKE.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    TMP_INTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
