@@ -167,4 +167,9 @@ public class Drive extends SubsystemBase {
         return null;
         // insert robot getSpeeds here
     }
+
+    public Object enableSlowMode(boolean b) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'enableSlowMode'");
+    }
 }
