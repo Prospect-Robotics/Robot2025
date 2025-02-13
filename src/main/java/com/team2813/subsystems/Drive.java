@@ -18,12 +18,15 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
+
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -31,7 +34,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 
-
+/**
+* This is the Drive. His name is Gary.
+* Please be kind to him and say hi.
+* Have a nice day!
+*/
 public class Drive extends SubsystemBase {
     
     public static final double MAX_VELOCITY = 6;
@@ -74,7 +81,6 @@ public class Drive extends SubsystemBase {
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
             .withCouplingGearRatio(3.5);
-
 
 
         SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration> frontLeft =
@@ -170,16 +176,16 @@ public class Drive extends SubsystemBase {
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
+    
     public Pose2d getPose() {
         return drivetrain.getState().Pose;
         // insert robot getPose here
     }
-    public void resetPose() {
-        // insert robot odometry reset here
+    public void resetPose(Pose2d currentPose) {
+        this.drivetrain.seedFieldCentric();
     }
-    public ChassisSpeeds getCurrentSpeeds() {
-        return null;
-        // insert robot getSpeeds here
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
     StructArrayPublisher<SwerveModuleState> expextedState =

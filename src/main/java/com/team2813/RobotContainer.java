@@ -91,7 +91,7 @@ public class RobotContainer {
     return routines;
   }
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    public Command getAutonomousCommand() {
+      return autoChooser.getSelected();
+    }
   }
-}
