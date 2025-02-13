@@ -4,26 +4,36 @@
 
 package com.team2813;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.Drive;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import org.json.simple.parser.ParseException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
 import static com.team2813.Constants.DriverConstants.SYSID_RUN;
 
 public class RobotContainer {
   private final Drive drive = new Drive();
+  private final SendableChooser<Command> autoChooser;
+
   public RobotContainer() {
+    // Build an auto chooser. This will use Commands.none() as the default option.
+    autoChooser = AutoBuilder.buildAutoChooser();
+
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
@@ -91,7 +101,7 @@ public class RobotContainer {
     return routines;
   }
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    public Command getAutonomousCommand() {
+      return autoChooser.getSelected();
+    }
   }
-}

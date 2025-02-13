@@ -1,17 +1,17 @@
 package com.team2813.subsystems;
 
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.hardware.core.CorePigeon2;
 import com.ctre.phoenix6.swerve.*;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -19,13 +19,13 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // Also add all the nescesary imports for constants and other things
@@ -41,6 +41,7 @@ public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
 
     static double frontDist = 0.330200;
     static double leftDist = 0.330200;
@@ -174,16 +175,17 @@ public class Drive extends SubsystemBase {
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
+    
     public Pose2d getPose() {
-        return drivetrain.getState().Pose;
-        // insert robot getPose here
+        double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
+        double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
+        return new Pose2d(x,y,this.drivetrain.getState().Pose.getRotation());
     }
     public void resetPose() {
-        // insert robot odometry reset here
+        this.drivetrain.seedFieldCentric();
     }
-    public ChassisSpeeds getCurrentSpeeds() {
-        return null;
-        // insert robot getSpeeds here
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
     StructArrayPublisher<SwerveModuleState> expextedState =
