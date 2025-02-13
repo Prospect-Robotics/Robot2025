@@ -1,5 +1,6 @@
 package com.team2813.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -38,6 +39,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
+    private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
+    
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
@@ -137,7 +140,6 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);

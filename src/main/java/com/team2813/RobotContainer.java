@@ -18,6 +18,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
@@ -28,12 +29,11 @@ import static com.team2813.Constants.DriverConstants.SYSID_RUN;
 
 public class RobotContainer {
   private final Drive drive = new Drive();
-  private final SendableChooser<Command> autoChooser;
+  // private final SendableChooser<Command> autoChooser;
 
   public RobotContainer() {
     // Build an auto chooser. This will use Commands.none() as the default option.
-    autoChooser = AutoBuilder.buildAutoChooser();
-
+    // autoChooser = AutoBuilder.buildAutoChooser();
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
@@ -102,6 +102,7 @@ public class RobotContainer {
   }
 
     public Command getAutonomousCommand() {
-      return autoChooser.getSelected();
+      // return autoChooser.getSelected();
+      return Commands.print("No autonomous command configured");
     }
   }
