@@ -1,6 +1,9 @@
 plugins {
-    id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id 'java'
+    id 'edu.wpi.first.GradleRIO' version '2025.1.1'
+    // Plugin needed for Git Build Info
+    // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
+    id 'com.peterabeles.gversion' version '1.10'
 }
 
 java {
@@ -8,7 +11,23 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
-def ROBOT_MAIN_CLASS = "com.team2813.Main"
+
+// Generates a BuildConstats file.
+// https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html
+project.compileJava.dependsOn(createVersionFile)
+def BUILD_CONSTANTS_AUTOGEN_PATH = 'build/build_constants_autogen/'
+gversion {
+  // Build outside src/main/ so that it can be ignored by git
+  srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
+  classPackage = 'com.team2813'
+  className    = 'BuildConstants'
+  dateFormat   = 'yyyy-MM-dd HH:mm:ss z'
+  timeZone     = 'America/Los_Angeles' // Use preferred time zone
+  indent       = '  '
+}
+sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
+
+def ROBOT_MAIN_CLASS = 'com.team2813.Main'
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -71,7 +90,7 @@ dependencies {
     simulationRelease wpi.sim.enableRelease()
 
     testImplementation 'junit:junit:4.13'
-    implementation "com.team2813:lib2813"
+    implementation 'com.team2813:lib2813'
 }
 
 test {
@@ -81,7 +100,7 @@ test {
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
-downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":lib:jar")
+downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib

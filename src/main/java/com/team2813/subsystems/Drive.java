@@ -74,7 +74,7 @@ public class Drive extends SubsystemBase {
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune ↓)
+            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune values below)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
