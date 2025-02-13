@@ -19,13 +19,11 @@ public class RobotContainer {
 
   
   private final SendableChooser<Command> autoChooser;
-
+  private final Drive drive = new Drive();
 
   public RobotContainer() {
     // Build an auto chooser. This will use Commands.none() as the default option.
     autoChooser = AutoBuilder.buildAutoChooser();
-
-    Drive drive = new Drive(); // Initialize swerve drive
 
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
