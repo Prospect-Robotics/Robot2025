@@ -57,13 +57,13 @@ public class Drive extends SubsystemBase {
 
     public Drive() {
         
-        double FLSteerOffset = 0.256103515625;
-        double FRSteerOffset = 0.216796875;
-        double BLSteerOffset = -0.371826171875;
-        double BRSteerOffset = -0.306640625;
+        double FLSteerOffset = 0.22021484375;
+        double FRSteerOffset = -0.085693359375;
+        double BLSteerOffset = -0.367919921875;
+        double BRSteerOffset = -0.258544921875;
 
         Slot0Configs steerGains = new Slot0Configs()
-			      .withKP(40).withKI(0).withKD(3.0889)// Tune this.
+			      .withKP(50).withKI(0).withKD(3.0889)// Tune this.
 			      .withKS(0.21041).withKV(2.68).withKA(0.084645);// Tune this.
 
         // l: 0 h: 10
