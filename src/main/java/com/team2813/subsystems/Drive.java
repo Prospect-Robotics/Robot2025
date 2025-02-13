@@ -39,8 +39,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
-    private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
-    
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
@@ -185,6 +183,9 @@ public class Drive extends SubsystemBase {
     }
     public void resetPose() {
         this.drivetrain.seedFieldCentric();
+    }
+    public void setPose(Pose2d pose) {
+        drivetrain.resetPose(pose);
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
