@@ -9,8 +9,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 import static com.team2813.Constants.INTAKE_WHEEL;
-
+/**
+* This is the Intake. His name is Joe.
+* Please be kind to him and say hi.
+* Have a nice day!
+*/
 public class Intake extends SubsystemBase{
+    
     private boolean isIntaking = false;
     private final PIDMotor intakeMotor = new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE);
     private static final double intakeSpeed = 0.6;
