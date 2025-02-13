@@ -33,13 +33,13 @@ public class RobotContainer {
 				() -> -modifyAxis(driverController.getLeftX()) * Drive.MAX_VELOCITY,
 				() -> -modifyAxis(driverController.getRightX()) * Drive.MAX_ANGULAR_VELOCITY,
 				drive));
-    ));
+        ));
     
 
   }
 
   private void configureBindings() {
-    Trigger l1 = driverController.l1();
+    Trigger l1 = driverController.L1();
   }
   public void addDriveCommand()
   public Command getAutonomousCommand() {
