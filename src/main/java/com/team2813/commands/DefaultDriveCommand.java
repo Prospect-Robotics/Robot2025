@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.function.Supplier;
 
-public class DefaultDriveCommand extends Command {
+public final class DefaultDriveCommand extends Command {
   private final Drive drive;
   private final Supplier<Double> xSupplier;
   private final Supplier<Double> ySupplier;
