@@ -1,10 +1,14 @@
 package com.team2813.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 
+import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -27,6 +31,11 @@ public class Intake extends SubsystemBase{
 
     Intake(PIDMotor motor) {
         this.intakeMotor = motor;
+        if (motor instanceof TalonFXWrapper wrapper) {
+          TalonFXConfigurator config = wrapper.motor().getConfigurator();
+          ConfigUtils.phoenix6Config(() -> config.apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false)));
+          ConfigUtils.phoenix6Config(() -> config.apply(new VoltageConfigs().withPeakForwardVoltage(12).withPeakReverseVoltage(12)));
+        }
     }
 
     public void intakeCoral(){
