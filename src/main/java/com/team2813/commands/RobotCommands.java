@@ -1,4 +1,4 @@
-package com.team2813.Commands;
+package com.team2813.commands;
 
 import com.team2813.subsystems.Elevator;
 import com.team2813.subsystems.Intake;
