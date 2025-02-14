@@ -23,6 +23,7 @@ public class Intake extends SubsystemBase{
     private final PIDMotor intakeMotor;
     static final double INTAKE_SPEED = 4;
     static final double OUTTAKE_SPEED = -4;
+    static final double BUMP_SPEED = -4;
 
     public Intake() {
         this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
@@ -43,6 +44,10 @@ public class Intake extends SubsystemBase{
     }
     public void outakeCoral(){
         intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
+        isIntaking = false;
+    }
+    public void bumpAlgae() {
+        intakeMotor.set(ControlMode.VOLTAGE, BUMP_SPEED);
         isIntaking = false;
     }
     public void stopIntakeMotor(){
