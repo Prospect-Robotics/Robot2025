@@ -4,21 +4,14 @@
 
 package com.team2813;
 
-import com.team2813.Commands.DefaultDriveCommand;
-import com.team2813.Commands.robotCommands;
-import com.team2813.subsystems.Drive;
-import com.team2813.subsystems.Elevator;
-import com.team2813.subsystems.Intake;
-import com.team2813.subsystems.AlgeaIntake;
-import com.team2813.subsystems.IntakePivot;
-import com.team2813.subsystems.Climb;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-
+import com.team2813.Commands.robotCommands;
+import com.team2813.subsystems.*;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -27,7 +20,6 @@ public class RobotContainer {
   private final Drive drive = new Drive();
   private final Intake intake = new Intake();
   private final Elevator elevate = new Elevator();
-  private final AlgeaIntake algeaIntake = new AlgeaIntake();
   private final IntakePivot intakePivot = new IntakePivot();
   private final Climb climb = new Climb();
   
@@ -40,16 +32,17 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
 
 
-  public RobotContainer() {
-      drive.setDefaultCommand(new DefaultDriveCommand(
-          () -> -modifyAxis(driverController.getLeftY()) * Drive.MAX_VELOCITY,
-          () -> -modifyAxis(driverController.getLeftX()) * Drive.MAX_VELOCITY,
-          () -> -modifyAxis(driverController.getRightX()) * Drive.MAX_ANGULAR_VELOCITY,
-          drive));
 
-      robotCommands autoCommands = new robotCommands(intake, intakePivot, elevate, climb);
-      configureBindings(autoCommands);
-      addDriveCommand(autoCommands);
+  
+  private final SendableChooser<Command> autoChooser;
+  private final Drive drive = new Drive();
+
+  public RobotContainer() {
+    // Build an auto chooser. This will use Commands.none() as the default option.
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    configureBindings();
   }
 
   private void configureBindings(com.Commands.robotCommands autoCommands) {
