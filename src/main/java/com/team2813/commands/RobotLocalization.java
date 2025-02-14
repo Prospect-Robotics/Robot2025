@@ -1,54 +1,139 @@
 package com.team2813.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.team2813.util.Limelight;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
+
+import com.team2813.lib2813.limelight.Limelight;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import com.pathplanner.lib.path.PathConstraints;
 
+
 public class RobotLocalization {
-    private Limelight limelight;
+    private static Limelight limelight = Limelight.getDefaultLimelight();
 
-    public RobotLocalization(Limelight limelight) {
-        this.limelight = limelight;
+    public RobotLocalization() {
+
     }
 
-    public Pose2d getRobotPose() {
-        Optional<Pose2d> botpose = limelight.getPosition();
-        if (!botpose.isPresent()) return new Pose2d();
-        Pose2d botpose2 = (Pose2d) botpose.get();
-        return new Pose2d(new Translation2d(botpose2.getX(), botpose2.getY()), botpose2.getRotation());
+    public static Pose2d getRobotPose() {
+        Optional<Pose2d> botpose = limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
+        return botpose.orElseGet(Pose2d::new);
     }
 
-    Pose2d currentPose = getRobotPose();
+    /*private static ArrayList<Pose2d> setPositions(){
+        Pose2d one = new Pose2d(2.826,4.008,new Rotation2d(0));
+        Pose2d two = new Pose2d(3.666,5.46,new Rotation2d(0));
+        Pose2d three = new Pose2d(5.245,5.487,new Rotation2d(0));
+        Pose2d four = new Pose2d(6.147,3.995,new Rotation2d(0));
+        Pose2d five = new Pose2d(5.343,2.595,new Rotation2d(0));
+        Pose2d six = new Pose2d(3.699,2.563,new Rotation2d(0));
 
-    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+        ArrayList<Pose2d> arrayOfPos = new ArrayList<Pose2d>();
+        arrayOfPos.add(one);
+        arrayOfPos.add(two);
+        arrayOfPos.add(three);
+        arrayOfPos.add(four);
+        arrayOfPos.add(five);
+        arrayOfPos.add(six);
+
+        return arrayOfPos;
+    }*/
+
+    private static ArrayList<Pose2d> setPositions(){
+        ArrayList<Pose2d> arrayOfPos = new ArrayList<Pose2d>();
+
+        arrayOfPos.add(new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503))); //* 
+        arrayOfPos.add(new Pose2d(2.828, 3.866, Rotation2d.fromDegrees(179.503))); //1r * 
+        arrayOfPos.add(new Pose2d(3.784, 5.527, Rotation2d.fromDegrees(121.217))); //2l *
+        arrayOfPos.add(new Pose2d(3.497, 5.367, Rotation2d.fromDegrees(121.624))); //2r *
+        arrayOfPos.add(new Pose2d(5.147, 5.550, Rotation2d.fromDegrees(61.367))); //3l * 
+        arrayOfPos.add(new Pose2d(5.456, 5.377, Rotation2d.fromDegrees(60.198))); //3r* 
+        arrayOfPos.add(new Pose2d(6.148, 4.181, Rotation2d.fromDegrees(-0.564))); //4l *
+        arrayOfPos.add(new Pose2d(6.143, 3.857, Rotation2d.fromDegrees(-0.564))); //4r*
+        arrayOfPos.add(new Pose2d(5.448, 2.662, Rotation2d.fromDegrees(-60.854))); //5l*
+        arrayOfPos.add(new Pose2d(5.166, 2.499, Rotation2d.fromDegrees(-60.854))); //5r *
+        arrayOfPos.add(new Pose2d(3.825, 2.492, Rotation2d.fromDegrees(-121.125))); //6l * 
+        arrayOfPos.add(new Pose2d(3.503, 2.682, Rotation2d.fromDegrees(-121.125))); //6r*
+
+        return arrayOfPos;
+    }
+
+    private static Pose2d findClosest(){
+        Pose2d currentPose = getRobotPose();
+        ArrayList<Pose2d> positions = setPositions();
+        double smallest = 10000;
+        Pose2d goTo = new Pose2d(0,0,new Rotation2d(0));
+
+        for (Pose2d pose : positions){
+            if (((currentPose.getX()-pose.getX()) + ((currentPose.getY()-pose.getY())) < smallest)){
+                goTo = pose;
+            }
+        }
+        return goTo;
+    }
+
+    public static PathPlannerPath createPath(){
+        Pose2d currentPose = getRobotPose();
+        Pose2d newPosition = findClosest();
+
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
             currentPose,
-            new Pose2d(currentPose.getX() + 2.0, currentPose.getY(), Rotation2d.fromDegrees(0)),
-            new Pose2d(currentPose.getX() + 4.0, currentPose.getY(), Rotation2d.fromDegrees(0))
-    );
+            new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
+            newPosition
+        );
 
-    PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+        /*List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+            currentPose,
+            new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
+            new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503)) //* 
+            //new Pose2d(2.828, 3.866, Rotation2d.fromDegrees(179.503) //1r * 
 
-    PathPlannerPath path = new PathPlannerPath(
-            waypoints,
-            constraints,
-            null,
-            new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
-    );
-    
-    public void updateDashboard() {
-        Pose2d pose = getRobotPose();
-        SmartDashboard.putNumber("Robot X", pose.getX());
-        SmartDashboard.putNumber("Robot Y", pose.getY());
-        SmartDashboard.putNumber("Robot Rotation", pose.getRotation().getDegrees());
+            //new Pose2d(3.784, 5.527, Rotation2d.fromDegrees(121.217)) //2l *
+            //new Pose2d(3.497, 5.367, Rotation2d.fromDegrees(121.624)) //2r *
+
+            //new Pose2d(5.147, 5.550, Rotation2d.fromDegrees(61.367)) //3l * 
+            //new Pose2d(5.456, 5.377, Rotation2d.fromDegrees(60.198)) //3r* 
+
+            //new Pose2d(6.148, 4.181, Rotation2d.fromDegrees(-0.564)) //4l *
+            //new Pose2d(6.143, 3.857, Rotation2d.fromDegrees(-0.564)) //4r*
+
+            //new Pose2d(5.448, 2.662, Rotation2d.fromDegrees(-60.854)) //5l*
+            //new Pose2d(5.166, 2.499, Rotation2d.fromDegrees(-60.854)) //5r *
+
+            //new Pose2d(3.825, 2.492, Rotation2d.fromDegrees(-121.125)) //6l * 
+            //new Pose2d(3.503, 2.682, Rotation2d.fromDegrees(-121.125)) //6r*
+        );*/
+
+        PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                constraints,
+                null,
+                //new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
+                new GoalEndState(0.0, newPosition.getRotation())
+        );
+        return path;
     }
+
+    private static final StructPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructTopic("Limelight pose", Pose2d.struct).publish();
+    private static final BooleanPublisher hasData = NetworkTableInstance.getDefault().getBooleanTopic("Has Data").publish();
+    
+    public static void updateDashboard() {
+        Pose2d pose = getRobotPose();
+        botpose.accept(pose);
+        hasData.accept(limelight.getJsonDump().isPresent());
+    }
+
 }

@@ -39,7 +39,7 @@ public class LimelightValues {
         ledMode = table.getEntry("ledMode");
         stream = table.getEntry("stream");
         pipelineIndex = table.getEntry("pipeline");
-
+        
         fieldLocation = new DoubleArrayValue(table, "botpose");
         primaryApriltag = new DoubleValue(table, "tid");
         horizonalOffset = new DoubleValue(table, "tx");

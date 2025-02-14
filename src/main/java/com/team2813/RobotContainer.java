@@ -5,7 +5,9 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
+import com.team2813.commands.RobotLocalization;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
@@ -20,6 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.*;
+import static com.team2813.Constants.OperatorConstants.*;
+
+import com.team2813.commands.RobotLocalization.*;
 
 public class RobotContainer {
   private final Drive drive = new Drive();
@@ -27,6 +32,7 @@ public class RobotContainer {
   private final IntakePivot intakePivot = new IntakePivot();
   private final Elevator elevator = new Elevator();
   private final Climb climb = new Climb();
+
   public RobotContainer() {
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -66,6 +72,8 @@ public class RobotContainer {
     
     TMP_INTAKE.onTrue(new InstantCommand(climb::retract, climb));
     TMP_INTAKE.onFalse(new InstantCommand(climb::stop, climb));
+
+    AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath()));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);

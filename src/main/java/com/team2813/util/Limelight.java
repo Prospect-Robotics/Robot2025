@@ -25,7 +25,7 @@ public class Limelight extends SubsystemBase {
           
     }
 
-    private static final Limelight instance = new Limelight();
+    public static final Limelight instance = new Limelight();
 
     public static Limelight getInstance() {
         return instance;
@@ -54,8 +54,8 @@ public class Limelight extends SubsystemBase {
       public Optional<Pose2d> getPosition() {
           if (values.hasTargets()) {
               Double[] location = values.getFieldLocation();
-              location[0] = location[0] + 8.27;
-              location[1] = location[1] + 4.01;
+              location[0] = location[0] + 0.0;
+              location[1] = location[1] + 0.30506;
               Pose2d pose = new Pose2d(location[0], location[1], Rotation2d.fromDegrees(location[5]));
               return Optional.of(pose);
           } else {

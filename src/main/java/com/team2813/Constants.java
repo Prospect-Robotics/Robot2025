@@ -64,6 +64,8 @@ public class Constants {
         private OperatorConstants() {
             throw new AssertionError("Not instantionable");
         }
-        //public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+
+        public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
     }
 }

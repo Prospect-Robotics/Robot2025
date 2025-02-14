@@ -27,6 +27,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import com.team2813.commands.RobotLocalization;
+import com.team2813.commands.RobotLocalization.*;
+
 
 public class Drive extends SubsystemBase {
     
@@ -190,5 +193,7 @@ public class Drive extends SubsystemBase {
         expextedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
+        //RobotLocalization.getRobotPose();
+        RobotLocalization.updateDashboard();
     }
 }

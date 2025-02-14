@@ -72,6 +72,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13'
     implementation "com.team2813:lib2813"
+    implementation "com.team2813:limelight"
 }
 
 test {
@@ -82,6 +83,7 @@ test {
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":lib:jar")
+downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":limelight:jar")
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
