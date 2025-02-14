@@ -1,4 +1,4 @@
-package com.Commands;
+package com.team2813.Commands;
 
 import java.util.function.DoubleSupplier;
 
@@ -20,8 +20,8 @@ public class DefaultDriveCommand extends Command{
         this.translationYSupplier = translationYSupplier;
         this.rotationSupplier = rotationSupplier;
         this.driveSubsystem = driveSubsystem;
-
         addRequirements(driveSubsystem);
+        }
 
          @Override
     public void execute() {

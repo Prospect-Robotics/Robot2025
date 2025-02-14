@@ -17,6 +17,9 @@ ntcore/timesynctest.json
 
 nanopb_pb2.py
 
+# Created by some tests.
+ctre_sim/
+
 # Created by the jenkins test script
 test-reports
 
