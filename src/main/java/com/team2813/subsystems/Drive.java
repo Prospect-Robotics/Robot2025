@@ -43,6 +43,7 @@ public class Drive extends SubsystemBase {
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
     private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
+    private double multiplier = 1;
 
     static double frontDist = 0.330200;
     static double leftDist = 0.330200;
@@ -144,8 +145,8 @@ public class Drive extends SubsystemBase {
 
     public void drive(double xSpeed, double ySpeed, double rotation) {
         drivetrain.setControl(fieldCentricApplier
-            .withVelocityX(xSpeed)
-            .withVelocityY(ySpeed)
+            .withVelocityX(xSpeed * multiplier)
+            .withVelocityY(ySpeed * multiplier)
             .withRotationalRate(rotation)
             ); // Note: might not work, will need testing.
     }
@@ -203,5 +204,9 @@ public class Drive extends SubsystemBase {
         expextedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
+    }
+
+    public void enableSlowMode(boolean enable) {
+        multiplier = enable ? 0.5 : 1;
     }
 }
