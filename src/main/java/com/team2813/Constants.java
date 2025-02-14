@@ -38,4 +38,16 @@ public class Constants {
     public static final int ALGAE_PIVOT = 21;
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
+
+
+}
+public static class OperatorConstants {
+    public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+    public static Trigger Inake_Button = OPERATOR_CONTROLLER.R1();
+    public static Trigger Outake_Button = OPERATOR_CONTROLLER.L1();
+    public static Trigger Triangle =  OPERATOR_CONTROLLER.Triangle();
+    public static Trigger Cross =  OPERATOR_CONTROLLER.Cross();
+    public static Trigger Algea_Intake = OPERATOR_CONTROLLER.R2();
+    public static Trigger Climb_Down =  OPERATOR_CONTROLLER.povDown();
+    public static Trigger Climb_Up = OPERATOR_CONTROLLER.povUp();
 }

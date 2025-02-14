@@ -57,10 +57,10 @@ private void configureBindings() {
   R2.whileTrue(
     new InstantCommand()
     );*/
-  down.whileTrue(
+  Climb_Down.whileTrue(
   new InstantCommand(Climb.lower, climb)
     );
-  up.whileTrue(
+  Climb_Up.whileTrue(
     new InstantCommand(Climb.raise, climb)
     );
 }
