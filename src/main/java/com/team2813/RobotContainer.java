@@ -5,7 +5,7 @@
 package com.team2813;
 
 import com.team2813.Commands.DefaultDriveCommand;
-import com.team2813.Commands.robotCommands;
+import com.team2813.Commands.RobotCommands;
 import com.team2813.subsystems.Drive;
 import com.team2813.subsystems.Elevator;
 import com.team2813.subsystems.Intake;
@@ -27,8 +27,8 @@ public class RobotContainer {
   private final Drive drive = new Drive();
   private final Intake intake = new Intake();
   private final Elevator elevate = new Elevator();
-  private final AlgeaIntake algeaIntake = new AlgeaIntake();
-  private final IntakePivot intakePivot = new IntakePivot();
+  //private final AlgeaIntake algeaIntake = new AlgeaIntake();
+  private static IntakePivot intakePivot = new IntakePivot();
   private final Climb climb = new Climb();
   
   // Controller bindings
@@ -47,27 +47,28 @@ public class RobotContainer {
           () -> -modifyAxis(driverController.getRightX()) * Drive.MAX_ANGULAR_VELOCITY,
           drive));
 
-      robotCommands autoCommands = new robotCommands(intake, intakePivot, elevate, climb);
+      RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevate, climb);
       configureBindings(autoCommands);
-      addDriveCommand(autoCommands);
+      //addDriveCommand(autoCommands);
   }
 
-  private void configureBindings(com.Commands.robotCommands autoCommands) {
+  private void configureBindings(com.Commands.RobotCommands autoCommands) {
     placeCoral.onTrue(autoCommands.placeCoral());
     scoreAlgea.onTrue(autoCommands.scoreAlgea());
     //autoPlaceLeft.onTrue(autoCommands.autoPlaceLeft());
     //autoPlaceRight.onTrue(autoCommands.autoPlaceRight());
-    slowmodeButton.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
-    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+    slowmodeButton.whileTrue(new InstantCommand(() -> drive.enableSlowMode(), drive));
+    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(), drive));
 
   }
 
-  public void addDriveCommand(robotCommands autoCommands) {
+  /*public void addDriveCommand(RobotCommands autoCommands) {
     NamedCommands.registerCommand("place-coral", autoCommands.placeCoral());
     NamedCommands.registerCommand("score-algea", autoCommands.scoreAlgea());
     //NamedCommands.registerCommand("autoplace-left", autoCommands.autoPlaceLeft());
     //NamedCommands.registerCommand("autoplace-right", autoCommands.autoPlaceRight());
   }
+    */
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();

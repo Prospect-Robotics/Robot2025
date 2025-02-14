@@ -168,8 +168,8 @@ public class Drive extends SubsystemBase {
         // insert robot getSpeeds here
     }
 
-    public Object enableSlowMode(boolean b) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'enableSlowMode'");
+    public void enableSlowMode() {
+        drivetrain.setControl(fieldCentricApplier.withVelocityX(0.5).withVelocityY(0.5).withRotationalRate(0.5)); // Adjust speed to 50% for slow mode
+        System.out.println("Slow mode enabled");
     }
 }
