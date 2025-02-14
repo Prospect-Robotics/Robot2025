@@ -8,7 +8,7 @@ import edu.wpi.first.units.measure.Voltage;
 
 import java.util.function.Function;
 
-class Requests {
+final class Requests {
   public static final MotionMagicVoltage NEUTRAL_OUT = new MotionMagicVoltage(0)
           .withEnableFOC(false).withFeedForward(0).withSlot(0)
           .withOverrideBrakeDurNeutral(false).withLimitForwardMotion(false)

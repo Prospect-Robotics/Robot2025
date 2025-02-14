@@ -1,16 +1,18 @@
 package com.team2813.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.*;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be improper import.
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -18,6 +20,7 @@ import static edu.wpi.first.units.Units.Rotations;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -30,12 +33,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.commands.RobotLocalization.*;
 
-
+/**
+* This is the Drive. His name is Gary.
+* Please be kind to him and say hi.
+* Have a nice day!
+*/
 public class Drive extends SubsystemBase {
-    
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
 
     static double frontDist = 0.330200;
     static double leftDist = 0.330200;
@@ -43,10 +50,10 @@ public class Drive extends SubsystemBase {
 
     public Drive() {
         
-        double FLSteerOffset = -0.0029296875;
-        double FRSteerOffset = -0.072998046875;
-        double BLSteerOffset = -0.372314453125;
-        double BRSteerOffset = -0.29052734375;
+        double FLSteerOffset = 0.16796875;
+        double FRSteerOffset = -0.355712890625;
+        double BLSteerOffset = -0.367919921875;
+        double BRSteerOffset = 0.371337890625;
 
         Slot0Configs steerGains = new Slot0Configs()
 			      .withKP(46.619).withKI(0).withKD(3.0889)// Tune this.
@@ -68,7 +75,7 @@ public class Drive extends SubsystemBase {
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.TorqueCurrentFOC) // Tune this. (Important to tune ↓)
+            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune values below)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
@@ -131,7 +138,6 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-
     private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
@@ -169,16 +175,20 @@ public class Drive extends SubsystemBase {
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
+    
     public Pose2d getPose() {
-        return drivetrain.getState().Pose;
-        // insert robot getPose here
+        double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
+        double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
+        return new Pose2d(x,y,this.drivetrain.getState().Pose.getRotation());
     }
     public void resetPose() {
-        // insert robot odometry reset here
+        this.drivetrain.seedFieldCentric();
     }
-    public ChassisSpeeds getCurrentSpeeds() {
-        return drivetrain.getState().Speeds;
-        // insert robot getSpeeds here
+    public void setPose(Pose2d pose) {
+        drivetrain.resetPose(pose);
+    }
+    public ChassisSpeeds getRobotRelativeSpeeds() {
+        return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
     StructArrayPublisher<SwerveModuleState> expextedState =

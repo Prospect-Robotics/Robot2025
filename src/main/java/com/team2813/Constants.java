@@ -1,14 +1,9 @@
 package com.team2813;
 
-import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class Constants {
-    
-    private Constants() {
-        throw new AssertionError("Not instantionable");
-    }
+public final class Constants {
 
     // Drive train CAN IDs
     // Front Right swerve module
@@ -45,7 +40,6 @@ public class Constants {
     public static final int INTAKE_WHEEL = 19;
     public static final int INTAKE_ENCODER = 20;
 
-
     // Algae Mechanisms (might not be used)
     public static final int ALGAE_PIVOT = 21;
     public static final int ALGAE_WHEEL = 22;
@@ -64,8 +58,11 @@ public class Constants {
         private OperatorConstants() {
             throw new AssertionError("Not instantionable");
         }
-        public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+        public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
 
         public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
+    }
+    private Constants() {
+        throw new AssertionError("Not instantiable");
     }
 }

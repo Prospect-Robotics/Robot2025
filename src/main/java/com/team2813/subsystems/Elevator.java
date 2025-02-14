@@ -16,7 +16,11 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.Units;
 
 import java.util.function.Supplier;
-
+/**
+* This is the Elevator. His name is Pablo.
+* Please be kind to him and say hi.
+* Have a nice day!
+*/
 public class Elevator extends MotorSubsystem<Elevator.Position> {
 
     // You see a message written in blood on the wall...
@@ -24,7 +28,6 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
     // HERE BE DRAGONS.
     // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
-
     public Elevator() {
         super(
                 new MotorSubsystemConfiguration(

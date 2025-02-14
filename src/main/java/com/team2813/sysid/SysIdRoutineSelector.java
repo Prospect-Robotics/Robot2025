@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-public class SysIdRoutineSelector {
+public final class SysIdRoutineSelector {
   private final SendableChooser<SysIdRoutine> routineSelector = new SendableChooser<>();
   private final SendableChooser<SysIdRequestType> requestTypeSelector = new SendableChooser<>();
   private final SendableChooser<SysIdRoutine.Direction> directionSelector = new SendableChooser<>();
