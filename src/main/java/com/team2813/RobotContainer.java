@@ -12,12 +12,14 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 
@@ -26,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
-import static com.team2813.Constants.DriverConstants.SYSID_RUN;
+import static com.team2813.Constants.DriverConstants.*;
 
 import static com.team2813.Constants.OperatorConstants.*;
 
@@ -35,7 +36,11 @@ public class RobotContainer {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
   private final Drive drive = new Drive();
   private final SendableChooser<Command> autoChooser = configureAuto(drive);
-
+  private final Intake intake = new Intake();
+  private final IntakePivot intakePivot = new IntakePivot();
+  private final Elevator elevator = new Elevator();
+  private final Climb climb = new Climb();
+  
   public RobotContainer() {
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -101,10 +106,15 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+    TMP_OUTTAKE.onTrue(new InstantCommand(intake::outakeCoral, intake));
+    TMP_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    
+    TMP_INTAKE.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    TMP_INTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath()));
   }
   
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
+  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
   private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {

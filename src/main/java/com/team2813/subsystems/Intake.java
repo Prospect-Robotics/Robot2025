@@ -1,10 +1,14 @@
 package com.team2813.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 
+import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -18,23 +22,28 @@ public class Intake extends SubsystemBase{
     
     private boolean isIntaking = false;
     private final PIDMotor intakeMotor;
-    static final double INTAKE_SPEED = 0.6;
-    static final double OUTTAKE_SPEED = -0.6;
+    static final double INTAKE_SPEED = 4;
+    static final double OUTTAKE_SPEED = -4;
 
     public Intake() {
-        this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.COUNTER_CLOCKWISE));
+        this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
     }
 
     Intake(PIDMotor motor) {
         this.intakeMotor = motor;
+        if (motor instanceof TalonFXWrapper wrapper) {
+          TalonFXConfigurator config = wrapper.motor().getConfigurator();
+          ConfigUtils.phoenix6Config(() -> config.apply(new CurrentLimitsConfigs().withStatorCurrentLimitEnable(false)));
+          ConfigUtils.phoenix6Config(() -> config.apply(new VoltageConfigs().withPeakForwardVoltage(12).withPeakReverseVoltage(12)));
+        }
     }
 
     public void intakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, INTAKE_SPEED);
+        intakeMotor.set(ControlMode.VOLTAGE, INTAKE_SPEED);
         isIntaking = true;
     }
     public void outakeCoral(){
-        intakeMotor.set(ControlMode.DUTY_CYCLE, OUTTAKE_SPEED);
+        intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
         isIntaking = false;
     }
     public void stopIntakeMotor(){
