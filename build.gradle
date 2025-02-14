@@ -4,6 +4,14 @@ plugins {
     // Plugin needed for Git Build Info
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'
+    id 'idea'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
 java {

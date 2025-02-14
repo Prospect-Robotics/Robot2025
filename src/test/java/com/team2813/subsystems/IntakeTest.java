@@ -81,4 +81,25 @@ public final class IntakeTest {
     assertThat(intake.intaking()).isFalse();
     assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
   }
+  
+  @Test
+  public void bumpAlgae() {
+    Intake intake = new Intake(fakeMotor);
+    
+    intake.bumpAlgae();
+    
+    assertThat(intake.intaking()).isFalse();
+    assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(Intake.BUMP_SPEED);
+  }
+  
+  @Test
+  public void stopAfterBumpingAlgae() {
+    Intake intake = new Intake(fakeMotor);
+    intake.bumpAlgae();
+    
+    intake.stopIntakeMotor();
+    
+    assertThat(intake.intaking()).isFalse();
+    assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
+  }
 }

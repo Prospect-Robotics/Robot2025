@@ -23,13 +23,14 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -140,10 +141,6 @@ public class Drive extends SubsystemBase {
                 false); // May need to change later.
         drivetrain = new SwerveDrivetrain<>(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
-        for (int i = 0; i < 4; i++) {
-            int temp = i;
-            Shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-        }
     }
     
     private double getPosition(int moduleId) {
@@ -202,18 +199,21 @@ public class Drive extends SubsystemBase {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
-    StructArrayPublisher<SwerveModuleState> expextedState =
+    StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
     StructArrayPublisher<SwerveModuleState> actualState =
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     StructPublisher<Pose2d> currentPose =
             NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
+    DoubleArrayPublisher offsets = NetworkTableInstance.getDefault().getDoubleArrayTopic("Current Pose").publish();
     
     @Override
     public void periodic() {
-        expextedState.set(drivetrain.getState().ModuleTargets);
+        expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
+        // Get an array of each module's position
+        offsets.set(IntStream.iterate(0, (i) -> i + 1).limit(4).mapToDouble(this::getPosition).toArray());
     }
 
     public void enableSlowMode(boolean enable) {
