@@ -64,8 +64,8 @@ public class RobotContainer {
   private void configureBindings(RobotCommands autoCommands) {
     //Driver
     placeCoral.onTrue(autoCommands.placeCoral());
-    slowmodeButton.onTrue(new InstantCommand(() -> drive.enableSlowMode(), drive));
-    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(), drive));
+    slowmodeButton.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
+    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
 
   }
   
