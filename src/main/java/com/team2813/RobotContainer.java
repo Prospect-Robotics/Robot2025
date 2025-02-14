@@ -10,6 +10,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
+import com.team2813.commands.RobotLocalization;
 import com.team2813.subsystems.Drive;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
@@ -27,6 +28,8 @@ import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
 import static com.team2813.Constants.DriverConstants.SYSID_RUN;
+
+import static com.team2813.Constants.OperatorConstants.*;
 
 public class RobotContainer {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
@@ -98,6 +101,7 @@ public class RobotContainer {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+    AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath()));
   }
   
   private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
