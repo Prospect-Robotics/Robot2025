@@ -8,15 +8,22 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FakeShuffleboardTabs implements ShuffleboardTabs {
-  public static final FakeShuffleboardTabs INSTANCE = new FakeShuffleboardTabs();
   private static final AtomicInteger nextValue = new AtomicInteger(1);
+  private final String prefix;
 
-  private FakeShuffleboardTabs() {}
+  public FakeShuffleboardTabs() {
+    prefix = "f" + nextValue.getAndIncrement();
+  }
 
   @Override
   public ShuffleboardTab getTab(String title) {
     requireNonNullParam(title, "title", "getTab");
-    int value = nextValue.getAndIncrement();
-    return Shuffleboard.getTab("f" + value + title);
+    return Shuffleboard.getTab(prefix + title);
+  }
+
+  @Override
+  public void selectTab(String title) {
+    requireNonNullParam(title, "title", "getTab");
+    Shuffleboard.selectTab(prefix + title);
   }
 }

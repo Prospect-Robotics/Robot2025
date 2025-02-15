@@ -8,12 +8,18 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
  */
 public interface ShuffleboardTabs {
   ShuffleboardTab getTab(String title);
+  void selectTab(String title);
 
   static ShuffleboardTabs forDefaultNetworkTableInstance() {
     return new ShuffleboardTabs() {
       @Override
       public ShuffleboardTab getTab(String title) {
         return Shuffleboard.getTab(title);
+      }
+
+      @Override
+      public void selectTab(String title) {
+        Shuffleboard.selectTab(title);
       }
     };
   }
