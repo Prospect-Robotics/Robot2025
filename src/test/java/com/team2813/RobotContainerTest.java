@@ -8,6 +8,11 @@ import org.junit.runners.JUnit4;
 public final class RobotContainerTest {
     @Test
     public void constructorDoesNotRaise() {
-        new RobotContainer();
+        new RobotContainer(FakeShuffleboardTabs.INSTANCE);
+    }
+
+    @Test
+    public void conBeConstructedMultipleTimes() {
+        new RobotContainer(FakeShuffleboardTabs.INSTANCE);
     }
 }
