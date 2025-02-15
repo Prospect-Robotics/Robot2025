@@ -1,6 +1,5 @@
 package com.team2813;
 
-import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -65,6 +64,7 @@ public final class Constants {
         public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
         public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.triangle();
         public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.cross();
+        public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
         public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
         public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
         public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();

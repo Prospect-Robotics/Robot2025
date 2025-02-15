@@ -259,6 +259,15 @@ public class RobotContainer {
     
     CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
     CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
+    
+    ALGAE_BUMP.whileTrue(new SequentialCommandGroup(
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(Units.Seconds.of(2)),
+            new InstantCommand(intake::bumpAlgae, intake)
+    ));
+    ALGAE_BUMP.onFalse(new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(intake::stopIntakeMotor, intake)
+    ));
   }
 
   public Command getAutonomousCommand() {
