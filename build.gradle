@@ -7,6 +7,8 @@ plugins {
     id 'idea'
 }
 
+// Download the source code for dependencies and the javadoc (in IntelliJ IDEA).
+// Not required for running the robot, but helps with IntelliJ IDEA development.
 idea {
     module {
         downloadJavadoc = true

@@ -60,6 +60,10 @@ public class RobotContainer {
     configureAutoCommands();
   }
   
+  /**
+   * Configure PathPlanner named commands
+   * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
+   */
   private void configureAutoCommands() {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
