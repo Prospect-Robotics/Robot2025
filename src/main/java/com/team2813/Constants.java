@@ -27,6 +27,7 @@ public final class Constants {
     public static final int PIGEON_ID = 13;
     
     // Mechanism CAN IDs
+    /** Climb Top */
     public static final int CLIMB_1 = 14;
     /** Climb Bottom */
     public static final int CLIMB_2 = 15;
