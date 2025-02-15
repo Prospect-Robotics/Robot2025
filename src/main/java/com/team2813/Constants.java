@@ -48,6 +48,8 @@ public final class Constants {
         }
         public static final CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
         public static final Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
+        public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
+        public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     }
 
     public static final class OperatorConstants {
@@ -55,13 +57,13 @@ public final class Constants {
             throw new AssertionError("Not instantiable");
         }
         public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
-        public static Trigger Inake_Button = OPERATOR_CONTROLLER.R1();
-        public static Trigger Outake_Button = OPERATOR_CONTROLLER.L1();
-        public static Trigger Triangle =  OPERATOR_CONTROLLER.triangle();
-        public static Trigger Cross =  OPERATOR_CONTROLLER.cross();
-        public static Trigger Algea_Intake = OPERATOR_CONTROLLER.R2();
-        public static Trigger Climb_Down =  OPERATOR_CONTROLLER.povDown();
-        public static Trigger Climb_Up = OPERATOR_CONTROLLER.povUp();
+        public static Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
+        public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
+        public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.triangle();
+        public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.cross();
+        public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
+        public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
+        public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     }
 
     private Constants() {
