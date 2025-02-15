@@ -38,14 +38,10 @@ public class Climb extends SubsystemBase{
 				climbMotor1.addFollower(CLIMB_2, InvertType.FOLLOW_MASTER);
     }
     public void raise () {
-		climbMotor1.set(ControlMode.DUTY_CYCLE, 0);
+		climbMotor1.set(ControlMode.VOLTAGE, -8);
 	}
 	public void lower() {
-		climbMotor1.set(ControlMode.DUTY_CYCLE, 0);
-	}
-
-	public void retract() {
-			climbMotor1.set(ControlMode.VOLTAGE, -6);
+		climbMotor1.set(ControlMode.VOLTAGE, 8);
 	}
 
 	public void stop() {
