@@ -62,10 +62,10 @@ public class Drive extends SubsystemBase {
 
     public Drive() {
         
-        double FLSteerOffset = 0.16796875;
-        double FRSteerOffset = -0.355712890625;
+        double FLSteerOffset = 0.22021484375;
+        double FRSteerOffset = -0.085693359375;
         double BLSteerOffset = -0.367919921875;
-        double BRSteerOffset = 0.371337890625;
+        double BRSteerOffset = -0.258544921875;
 
         Slot0Configs steerGains = new Slot0Configs()
 			      .withKP(46.619).withKI(0).withKD(3.0889)// Tune this.
@@ -73,8 +73,8 @@ public class Drive extends SubsystemBase {
 
         // l: 0 h: 2.5
         Slot0Configs driveGains = new Slot0Configs()
-			      .withKP(0).withKI(0).withKD(0)// Tune this.
-			      .withKS(0).withKV(0).withKA(0);// Tune this.
+			      .withKP(2.5).withKI(0).withKD(0)// Tune this.
+			      .withKS(6.4111).withKV(0.087032).withKA(0);// Tune this.
 
 
         SwerveDrivetrainConstants drivetrainConstants = new SwerveDrivetrainConstants().withPigeon2Id(PIGEON_ID).withCANBusName("swerve"); // README: tweak to actual pigeon and CanBusName
@@ -87,7 +87,7 @@ public class Drive extends SubsystemBase {
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune values below)
+            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.TorqueCurrentFOC) // Tune this. (Important to tune values below)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.

@@ -33,8 +33,6 @@ import static com.team2813.Constants.OperatorConstants.*;
 
 public class RobotContainer {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
-  private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private final Climb climb = new Climb();
   private final Intake intake = new Intake();
