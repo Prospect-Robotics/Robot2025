@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -23,7 +25,7 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
-    m_robotContainer = new RobotContainer(ShuffleboardTabs.forDefaultNetworkTableInstance());
+    m_robotContainer = new RobotContainer(new RealShuffleboardTab());
   }
   
   @Override
@@ -104,4 +106,16 @@ public class Robot extends TimedRobot {
   @Override
   public void testExit() {
   }
+
+  private static class RealShuffleboardTab implements ShuffleboardTabs {
+    @Override
+    public ShuffleboardTab getTab(String title) {
+      return Shuffleboard.getTab(title);
+    }
+
+    @Override
+    public void selectTab(String title) {
+      Shuffleboard.selectTab(title);
+    }
+  };
 }
