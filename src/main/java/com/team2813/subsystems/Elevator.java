@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
@@ -31,7 +32,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
     // HERE BE DRAGONS.
     // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
-    public Elevator() {
+    public Elevator(ShuffleboardTabs shuffleboard) {
         super(
                 new MotorSubsystemConfiguration(
                         getMotor())
@@ -39,7 +40,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                         .acceptableError(0.5)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
-        Shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
+        shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
     }
     
     private static TalonFXWrapper getMotor() {

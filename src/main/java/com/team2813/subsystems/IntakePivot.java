@@ -1,6 +1,7 @@
 package com.team2813.subsystems;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
 */
 public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
   
-    public IntakePivot() {
+    public IntakePivot(ShuffleboardTabs shuffleboard) {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
@@ -30,7 +31,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             .controlMode(ControlMode.VOLTAGE)
             .PID(19.875, 0,0.4)
         );
-        Shuffleboard.getTab("Testing").addBoolean("Intakepivot pos", this::atPosition);
+        shuffleboard.getTab("Testing").addBoolean("Intakepivot pos", this::atPosition);
     }
 
     @Deprecated
