@@ -38,24 +38,26 @@ public class RobotContainer {
   private final Climb climb = new Climb();
   private final Intake intake = new Intake();
   private final Elevator elevator = new Elevator();
-  private final Drive drive = new Drive();
+  private final Drive drive;
   private final IntakePivot intakePivot = new IntakePivot();
   
-  private final SendableChooser<Command> autoChooser = configureAuto(drive);
+  private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
-  public RobotContainer() {
+  public RobotContainer(ShuffleboardTabs shuffleboard) {
+    this.drive = new Drive(shuffleboard);
+    autoChooser = configureAuto(this.drive);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
                     () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * Drive.MAX_VELOCITY,
                     () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * Drive.MAX_VELOCITY,
                     () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
-    sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines);
+    sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
   }
-  
+
   private static SendableChooser<Command> configureAuto(Drive drive) {
     RobotConfig config;
     try {

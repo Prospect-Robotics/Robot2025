@@ -1,6 +1,6 @@
 package com.team2813.sysid;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import com.team2813.ShuffleboardTabs;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -20,7 +19,8 @@ public final class SysIdRoutineSelector {
   
   private final Set<? extends Subsystem> requirements;
   
-  public SysIdRoutineSelector(SubsystemRegistry registry, Function<SubsystemRegistry, List<DropdownEntry>> routineSupplier) {
+  public SysIdRoutineSelector(SubsystemRegistry registry, Function<SubsystemRegistry, List<DropdownEntry>> routineSupplier,
+                              ShuffleboardTabs shuffleboard) {
     requirements = registry.allSubsystems();
     for (DropdownEntry entry : routineSupplier.apply(registry)) {
       routineSelector.addOption(entry.name(), entry.routine());
@@ -31,7 +31,7 @@ public final class SysIdRoutineSelector {
     for (SysIdRoutine.Direction direction : SysIdRoutine.Direction.values()) {
       directionSelector.addOption(direction.toString(), direction);
     }
-    ShuffleboardTab tab = Shuffleboard.getTab("SysId");
+    ShuffleboardTab tab = shuffleboard.getTab("SysId");
     tab.add("SysId Routine", routineSelector);
     tab.add("Request Type", requestTypeSelector);
     tab.add("Direction", directionSelector);

@@ -1,7 +1,6 @@
 package com.team2813.subsystems;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import com.team2813.ShuffleboardTabs;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -49,7 +48,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive() {
+    public Drive(ShuffleboardTabs shuffleboard) {
         
         double FLSteerOffset = 0.16796875;
         double FRSteerOffset = -0.355712890625;
@@ -132,7 +131,7 @@ public class Drive extends SubsystemBase {
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
         for (int i = 0; i < 4; i++) {
             int temp = i;
-            Shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
+            shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
         }
     }
     
