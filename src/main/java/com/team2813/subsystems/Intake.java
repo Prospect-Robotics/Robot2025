@@ -11,7 +11,6 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-
 import static com.team2813.Constants.INTAKE_WHEEL;
 /**
 * This is the Intake. His name is Joe.

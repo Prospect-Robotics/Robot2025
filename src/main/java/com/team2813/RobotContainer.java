@@ -11,6 +11,12 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.subsystems.*;
+import com.team2813.commands.RobotCommands;
+import com.team2813.commands.DefaultDriveCommand;
+import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.Elevator;
+import com.team2813.subsystems.Intake;
+import com.team2813.subsystems.IntakePivot;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -18,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 
@@ -36,6 +44,10 @@ public class RobotContainer {
   private final IntakePivot intakePivot = new IntakePivot();
   private final Elevator elevator = new Elevator();
   private final Climb climb = new Climb();
+  private final CommandPS4Controller driverController = new CommandPS4Controller(0);
+
+  private final Trigger slowmodeButton = driverController.L1();
+  private final Trigger placeCoral = driverController.R1();
   
   public RobotContainer() {
     drive.setDefaultCommand(
@@ -45,7 +57,8 @@ public class RobotContainer {
                     () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * Drive.MAX_VELOCITY,
                     () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines);
-    configureBindings();
+    RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
+    configureBindings(autoCommands);
   }
   
   private static SendableChooser<Command> configureAuto(Drive drive) {
@@ -78,6 +91,24 @@ public class RobotContainer {
     );
     return AutoBuilder.buildAutoChooser();
   }
+
+  private void configureBindings() {
+    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
+    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+    TMP_OUTTAKE.onTrue(new InstantCommand(intake::outakeCoral, intake));
+    TMP_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    
+    TMP_INTAKE.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    TMP_INTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+  }
+  
+  private void configureBindings(RobotCommands autoCommands) {
+    //Driver
+    placeCoral.onTrue(autoCommands.placeCoral());
+    slowmodeButton.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
+    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+
+  }
   
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
@@ -99,17 +130,12 @@ public class RobotContainer {
     return value;
   }
 
-  private void configureBindings() {
-    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-    TMP_OUTTAKE.onTrue(new InstantCommand(intake::outakeCoral, intake));
-    TMP_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
-    
-    TMP_INTAKE.onTrue(new InstantCommand(intake::intakeCoral, intake));
-    TMP_INTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+  
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
   }
   
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
+  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
   private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
@@ -140,8 +166,4 @@ public class RobotContainer {
     )));
     return routines;
   }
-
-    public Command getAutonomousCommand() {
-      return autoChooser.getSelected();
-    }
-  }
+}
