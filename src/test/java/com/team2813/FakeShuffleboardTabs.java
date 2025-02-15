@@ -23,7 +23,7 @@ public class FakeShuffleboardTabs implements ShuffleboardTabs {
 
   @Override
   public void selectTab(String title) {
-    requireNonNullParam(title, "title", "getTab");
+    requireNonNullParam(title, "title", "selectTab");
     Shuffleboard.selectTab(prefix + title);
   }
 }
