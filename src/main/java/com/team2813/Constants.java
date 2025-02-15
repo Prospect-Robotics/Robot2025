@@ -1,6 +1,9 @@
 package com.team2813;
 
-public class Constants {
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+public final class Constants {
 
     // Drive train CAN IDs
     // Front Right swerve module
@@ -21,8 +24,8 @@ public class Constants {
     public static final int FRONT_LEFT_DRIVE_ID = 12;
 
     public static final int PIGEON_ID = 13;
-     
-    // Mechanism CAN IDs 
+    
+    // Mechanism CAN IDs
     public static final int CLIMB_1 = 14;
     public static final int CLIMB_2 = 15;
 
@@ -33,21 +36,35 @@ public class Constants {
     public static final int INTAKE_WHEEL = 19;
     public static final int INTAKE_ENCODER = 20;
 
-
     // Algae Mechanisms (might not be used)
     public static final int ALGAE_PIVOT = 21;
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
 
 
-}
-public static class OperatorConstants {
-    public static CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
-    public static Trigger Inake_Button = OPERATOR_CONTROLLER.R1();
-    public static Trigger Outake_Button = OPERATOR_CONTROLLER.L1();
-    public static Trigger Triangle =  OPERATOR_CONTROLLER.Triangle();
-    public static Trigger Cross =  OPERATOR_CONTROLLER.Cross();
-    public static Trigger Algea_Intake = OPERATOR_CONTROLLER.R2();
-    public static Trigger Climb_Down =  OPERATOR_CONTROLLER.povDown();
-    public static Trigger Climb_Up = OPERATOR_CONTROLLER.povUp();
+    public static final class DriverConstants {
+        private DriverConstants() {
+            throw new AssertionError("Not instantiable");
+        }
+        public static final CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
+        public static final Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
+    }
+
+    public static final class OperatorConstants {
+        private OperatorConstants() {
+            throw new AssertionError("Not instantiable");
+        }
+        public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
+        public static Trigger Inake_Button = OPERATOR_CONTROLLER.R1();
+        public static Trigger Outake_Button = OPERATOR_CONTROLLER.L1();
+        public static Trigger Triangle =  OPERATOR_CONTROLLER.triangle();
+        public static Trigger Cross =  OPERATOR_CONTROLLER.cross();
+        public static Trigger Algea_Intake = OPERATOR_CONTROLLER.R2();
+        public static Trigger Climb_Down =  OPERATOR_CONTROLLER.povDown();
+        public static Trigger Climb_Up = OPERATOR_CONTROLLER.povUp();
+    }
+
+    private Constants() {
+        throw new AssertionError("Not instantiable");
+    }
 }
