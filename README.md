@@ -81,7 +81,7 @@ To deploy from the command line you can run the following command while in the d
 ### Command line one-liner
 
 > [!NOTE]
-> This command is only tested under linux and mav, and may not work on windows due to different functionality of commands.
+> This command is only tested under linux and mac, and may not work on windows due to different functionality of commands.
 
 In order to use this, you need to run it, and you will eventuall get a successful ping from 10.28.13.2 (roboRIO's ip address).
 After that, you can press control and c to cancel the ping, and start the deploy process.
