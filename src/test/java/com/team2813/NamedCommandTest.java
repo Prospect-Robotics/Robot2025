@@ -1,6 +1,7 @@
 package com.team2813;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,15 +16,18 @@ import static org.junit.Assume.assumeNotNull;
 
 @RunWith(Parameterized.class)
 public class NamedCommandTest {
+  @Rule
+  public RobotContainerResource robotContainer = new RobotContainerResource();
   @Parameters
   public static Collection<Object[]> data() {
     return Arrays.asList(new Object[][] {
             {"ScoreL1"}, {"ScoreL2"}, {"ScoreL3"}, {"BumpAlgaeLow"}, {"BumpAlgaeHigh"}, {"IntakeCoral"}
     });
   }
-  private static final RobotContainer robotContainer = new RobotContainer();
+  
   @Parameter(0)
   public String commandName;
+  
   @Test
   public void commandExists() {
     assumeNotNull(commandName);

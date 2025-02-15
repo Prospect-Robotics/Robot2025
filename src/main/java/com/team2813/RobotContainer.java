@@ -16,6 +16,7 @@ import com.team2813.commands.RobotCommands;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
@@ -58,13 +59,15 @@ public class RobotContainer {
   }
   
   private void configureAutoCommands() {
+    Time SECONDS_1 = Units.Seconds.of(1);
+    Time SECONDS_2 = Units.Seconds.of(2);
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
-                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
-                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(Units.Seconds.of(1)),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator)
@@ -74,11 +77,11 @@ public class RobotContainer {
     NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
     NamedCommands.registerCommand("ScoreL3", new SequentialCommandGroup(
             new ParallelCommandGroup(
-                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(Units.Seconds.of(2)),
-                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(Units.Seconds.of(1)),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator)
@@ -86,24 +89,37 @@ public class RobotContainer {
     ));
     NamedCommands.registerCommand("BumpAlgaeLow", new SequentialCommandGroup(
             new ParallelCommandGroup(
-                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
-                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(Units.Seconds.of(2))
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(Units.Seconds.of(1)),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we bump low algae
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                    new InstantCommand(intakePivot::disable, intakePivot)
+            )
+    ));
+    NamedCommands.registerCommand("BumpAlgaeHigh", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::bumpAlgae, intake),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we bump high algae
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator),
                     new InstantCommand(intakePivot::disable, intakePivot)
             )
     ));
-    NamedCommands.registerCommand("BumpAlgaeHigh", new SequentialCommandGroup(
+    NamedCommands.registerCommand("IntakeCoral", new SequentialCommandGroup(
             new ParallelCommandGroup(
-                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(Units.Seconds.of(2)),
-                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(Units.Seconds.of(2))
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
-            new InstantCommand(intake::bumpAlgae, intake),
-            new WaitCommand(Units.Seconds.of(1)),
+            new InstantCommand(intake::intakeCoral),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we have intaked a note.
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator),

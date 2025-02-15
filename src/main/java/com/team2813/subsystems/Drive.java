@@ -141,6 +141,10 @@ public class Drive extends SubsystemBase {
                 false); // May need to change later.
         drivetrain = new SwerveDrivetrain<>(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
+        for (int i = 0; i < 4; i++) {
+            int temp = i;
+            Shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
+       }
     }
     
     private double getPosition(int moduleId) {
@@ -205,15 +209,12 @@ public class Drive extends SubsystemBase {
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     StructPublisher<Pose2d> currentPose =
             NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
-    DoubleArrayPublisher offsets = NetworkTableInstance.getDefault().getDoubleArrayTopic("Current Pose").publish();
     
     @Override
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
-        // Get an array of each module's position
-        offsets.set(IntStream.iterate(0, (i) -> i + 1).limit(4).mapToDouble(this::getPosition).toArray());
     }
 
     public void enableSlowMode(boolean enable) {
