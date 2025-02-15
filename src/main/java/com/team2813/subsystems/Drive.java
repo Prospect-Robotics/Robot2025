@@ -220,8 +220,9 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         expextedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
-        currentPose.set(getPose());
+        //currentPose.set(getPose());
         //RobotLocalization.getRobotPose();
+        currentPose.set(RobotLocalization.getRobotPose());
         RobotLocalization.updateDashboard();
     }
 }
