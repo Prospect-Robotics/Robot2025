@@ -231,7 +231,7 @@ public class RobotContainer {
     );
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
-    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));
     OUTTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
     PREP_L2_CORAL.onTrue(new ParallelCommandGroup(

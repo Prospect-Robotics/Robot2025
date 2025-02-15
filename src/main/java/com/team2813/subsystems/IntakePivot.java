@@ -9,6 +9,7 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.function.Supplier;
@@ -29,7 +30,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             .controlMode(ControlMode.VOLTAGE)
             .PID(19.875, 0,0.4)
         );
-        
+        Shuffleboard.getTab("Testing").addBoolean("Intakepivot pos", this::atPosition);
     }
 
     @Deprecated

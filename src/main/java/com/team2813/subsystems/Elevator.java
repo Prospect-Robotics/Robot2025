@@ -12,10 +12,13 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.units.Units;
 
 import java.util.function.Supplier;
+import edu.wpi.first.networktables.*;
 /**
 * This is the Elevator. His name is Pablo.
 * Please be kind to him and say hi.
@@ -36,6 +39,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                         .acceptableError(0.5)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
+        Shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
     }
     
     private static TalonFXWrapper getMotor() {
@@ -71,3 +75,5 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         }
     }
 }
+
+
