@@ -9,20 +9,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.team2813.commands.RobotCommands;
 import com.team2813.commands.DefaultDriveCommand;
-import com.team2813.subsystems.Drive;
-import com.team2813.subsystems.Elevator;
-import com.team2813.subsystems.Intake;
-import com.team2813.subsystems.IntakePivot;
+import com.team2813.commands.LockFunctionCommand;
+import com.team2813.commands.RobotCommands;
+import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
@@ -32,23 +27,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
-import static com.team2813.Constants.DriverConstants.SYSID_RUN;
+import static com.team2813.Constants.DriverConstants.*;
+import static com.team2813.Constants.OperatorConstants.*;
 
 public class RobotContainer {
-  private final CommandPS4Controller driverController = new CommandPS4Controller(0);
-  private final Drive drive = new Drive();
-  private final Intake intake = new Intake();;
-  private final Elevator elevator = new Elevator();;
-  private final IntakePivot intakePivot = new IntakePivot();;
-  
-  // Controller bindings
-  private final Trigger slowmodeButton = driverController.L1();
-  private final Trigger placeCoral = driverController.R1();
-
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
+  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
+  private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
+  
+  private final Climb climb = new Climb();
+  private final Intake intake = new Intake();
+  private final Elevator elevator = new Elevator();
+  private final Drive drive = new Drive();
+  private final IntakePivot intakePivot = new IntakePivot();
+  
   private final SendableChooser<Command> autoChooser = configureAuto(drive);
-
+  private final SysIdRoutineSelector sysIdRoutineSelector;
+  
   public RobotContainer() {
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -59,14 +54,6 @@ public class RobotContainer {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
-  }
-
-  private void configureBindings(RobotCommands autoCommands) {
-    //Driver
-    placeCoral.onTrue(autoCommands.placeCoral());
-    slowmodeButton.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
-    slowmodeButton.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
-
   }
   
   private static SendableChooser<Command> configureAuto(Drive drive) {
@@ -100,8 +87,6 @@ public class RobotContainer {
     return AutoBuilder.buildAutoChooser();
   }
   
-  private final SysIdRoutineSelector sysIdRoutineSelector;
-  
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
       if (value > 0) {
@@ -119,19 +104,6 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
     return value;
   }
-
-  
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
-  
-  private void configureBindings() {
-    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-  }
-  
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
-  private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
     List<DropdownEntry> routines = new ArrayList<>();
@@ -161,4 +133,50 @@ public class RobotContainer {
     )));
     return routines;
   }
+  
+  private void configureBindings(RobotCommands autoCommands) {
+    //Driver
+    PLACE_CORAL.onTrue(autoCommands.placeCoral());
+    SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
+    SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+    
+    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
+    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+    INTAKE_BUTTON.whileTrue(
+            new SequentialCommandGroup(
+                    new ParallelCommandGroup(
+                            new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
+                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                    ),
+                    new InstantCommand(intake::intakeCoral, intake)
+            )
+    );
+    INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    
+    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    OUTTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    
+    PREP_L2_CORAL.onTrue(new ParallelCommandGroup(
+            new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot)
+    ));
+    PREP_L3_CORAL.onTrue(new ParallelCommandGroup(
+            new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator),
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot)
+    ));
+  /* Is there code for algea intake?
+  R2.whileTrue(
+    new InstantCommand()
+    );*/
+    CLIMB_DOWN.onTrue(new InstantCommand(climb::lower, climb));
+    CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
+    
+    CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
+    CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
+  }
+
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
 }
+
