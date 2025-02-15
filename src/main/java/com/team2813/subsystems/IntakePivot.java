@@ -23,7 +23,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
-            .acceptableError(0.001)
+            .acceptableError(0.5)
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)

@@ -33,7 +33,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                 new MotorSubsystemConfiguration(
                         getMotor())
                         .controlMode(ControlMode.VOLTAGE)
-                        .acceptableError(0.01)
+                        .acceptableError(0.5)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
     }
