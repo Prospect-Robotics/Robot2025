@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
-    m_robotContainer = new RobotContainer(new RealShuffleboardTab());
+    m_robotContainer = new RobotContainer(new RealShuffleboardTabs());
   }
   
   @Override
@@ -107,7 +107,7 @@ public class Robot extends TimedRobot {
   public void testExit() {
   }
 
-  private static class RealShuffleboardTab implements ShuffleboardTabs {
+  private static class RealShuffleboardTabs implements ShuffleboardTabs {
     @Override
     public ShuffleboardTab getTab(String title) {
       return Shuffleboard.getTab(title);
