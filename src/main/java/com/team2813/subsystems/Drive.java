@@ -143,7 +143,7 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-    private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
+    private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds().withDriveRequestType(SwerveModule.DriveRequestType.Velocity); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
