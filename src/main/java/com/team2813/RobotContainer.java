@@ -19,6 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
@@ -48,6 +49,7 @@ public class RobotContainer {
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
     autoChooser = configureAuto(this.drive);
+    SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
