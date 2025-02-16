@@ -6,6 +6,7 @@ package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -15,10 +16,10 @@ import com.team2813.commands.RobotCommands;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 
@@ -32,20 +33,20 @@ import static com.team2813.Constants.OperatorConstants.*;
 
 public class RobotContainer {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
-  private static SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.VoltageOut);
-  private static SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private final Climb climb = new Climb();
   private final Intake intake = new Intake();
-  private final Elevator elevator = new Elevator();
+  private final Elevator elevator;
   private final Drive drive;
-  private final IntakePivot intakePivot = new IntakePivot();
+  private final IntakePivot intakePivot;
   
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
   public RobotContainer(ShuffleboardTabs shuffleboard) {
     this.drive = new Drive(shuffleboard);
+    this.elevator = new Elevator(shuffleboard);
+    this.intakePivot = new IntakePivot(shuffleboard);
     autoChooser = configureAuto(this.drive);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -56,6 +57,81 @@ public class RobotContainer {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
+    configureAutoCommands();
+  }
+  
+  /**
+   * Configure PathPlanner named commands
+   * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
+   */
+  private void configureAutoCommands() {
+    Time SECONDS_1 = Units.Seconds.of(1);
+    Time SECONDS_2 = Units.Seconds.of(2);
+    NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new InstantCommand(elevator::disable, elevator)
+            )
+    ));
+    //TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an actual command)
+    NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
+    NamedCommands.registerCommand("ScoreL3", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new InstantCommand(elevator::disable, elevator)
+            )
+    ));
+    NamedCommands.registerCommand("BumpAlgaeLow", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we bump low algae
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                    new InstantCommand(intakePivot::disable, intakePivot)
+            )
+    ));
+    NamedCommands.registerCommand("BumpAlgaeHigh", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::bumpAlgae, intake),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we bump high algae
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new InstantCommand(elevator::disable, elevator),
+                    new InstantCommand(intakePivot::disable, intakePivot)
+            )
+    ));
+    NamedCommands.registerCommand("IntakeCoral", new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                    new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
+                    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(SECONDS_2)
+            ),
+            new InstantCommand(intake::intakeCoral),
+            new WaitCommand(SECONDS_1), //TODO: Wait until we have intaked a note.
+            new ParallelCommandGroup(
+                    new InstantCommand(intake::stopIntakeMotor, intake),
+                    new InstantCommand(elevator::disable, elevator),
+                    new InstantCommand(intakePivot::disable, intakePivot)
+            )
+    ));
   }
 
   private static SendableChooser<Command> configureAuto(Drive drive) {
@@ -88,6 +164,11 @@ public class RobotContainer {
     );
     return AutoBuilder.buildAutoChooser();
   }
+
+  private void configureBindings() {
+    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
+    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
+  }
   
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
@@ -106,6 +187,9 @@ public class RobotContainer {
     value = Math.copySign(value * value, value);
     return value;
   }
+  
+  private static final SwerveSysidRequest DRIVE_SYSID = new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
+  private static final SwerveSysidRequest STEER_SYSID = new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
   
   private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
     List<DropdownEntry> routines = new ArrayList<>();
@@ -148,23 +232,23 @@ public class RobotContainer {
             new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
-                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
                     ),
                     new InstantCommand(intake::intakeCoral, intake)
             )
     );
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
-    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::intakeCoral, intake));
+    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));
     OUTTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
     PREP_L2_CORAL.onTrue(new ParallelCommandGroup(
             new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
-            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot)
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot)
     ));
     PREP_L3_CORAL.onTrue(new ParallelCommandGroup(
             new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.TOP), elevator),
-            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Position.OUTTAKE), intakePivot)
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot)
     ));
   /* Is there code for algea intake?
   R2.whileTrue(
@@ -175,6 +259,15 @@ public class RobotContainer {
     
     CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
     CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
+    
+    ALGAE_BUMP.whileTrue(new SequentialCommandGroup(
+            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot).withTimeout(Units.Seconds.of(2)),
+            new InstantCommand(intake::bumpAlgae, intake)
+    ));
+    ALGAE_BUMP.onFalse(new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(intake::stopIntakeMotor, intake)
+    ));
   }
 
   public Command getAutonomousCommand() {

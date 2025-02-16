@@ -28,9 +28,9 @@ public class Climb extends SubsystemBase{
 				ConfigUtils.phoenix6Config(
 						() -> cnf.apply(
 							new SoftwareLimitSwitchConfigs()
-							.withForwardSoftLimitEnable(true)
+							.withForwardSoftLimitEnable(false)
 							.withForwardSoftLimitThreshold(0)
-							.withReverseSoftLimitEnable(true)
+							.withReverseSoftLimitEnable(false)
 							.withReverseSoftLimitThreshold(0)
 						)
 				);
@@ -38,15 +38,14 @@ public class Climb extends SubsystemBase{
 				climbMotor1.addFollower(CLIMB_2, InvertType.FOLLOW_MASTER);
     }
     public void raise () {
-		climbMotor1.set(ControlMode.DUTY_CYCLE, 0);
+		climbMotor1.set(ControlMode.VOLTAGE, -8);
 	}
 	public void lower() {
-		climbMotor1.set(ControlMode.DUTY_CYCLE, 0);
+		climbMotor1.set(ControlMode.VOLTAGE, 8);
 	}
 
-
 	public void stop() {
-		climbMotor1.set(ControlMode.DUTY_CYCLE, 0);
+		climbMotor1.set(ControlMode.VOLTAGE, 0);
 	}
    
 }

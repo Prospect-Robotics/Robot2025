@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class RobotCommands {
-    private Intake intake = new Intake();
-    private IntakePivot intakePivot = new IntakePivot();
-    private Elevator elevator = new Elevator();
+    private final Intake intake;
+    private final IntakePivot intakePivot;
+    private final Elevator elevator;
     //private  AlgeaIntake algeaIntake;
     public RobotCommands(Intake intake,IntakePivot intakePivot, Elevator elevator){
         this.intake = intake;

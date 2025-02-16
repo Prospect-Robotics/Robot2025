@@ -1,32 +1,32 @@
 package com.team2813.subsystems;
 
-import com.team2813.ShuffleboardTabs;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.*;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be improper import.
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be improper import.
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-
-import static com.team2813.Constants.*;
-import static edu.wpi.first.units.Units.Rotations;
-
+import com.team2813.ShuffleboardTabs;
 import com.team2813.sysid.SwerveSysidRequest;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static com.team2813.Constants.*;
+import static edu.wpi.first.units.Units.Rotations;
 
 // Also add all the nescesary imports for constants and other things
 
@@ -41,6 +41,11 @@ public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    
+    /**
+     * This measurement is <em>IN INCHES</em>
+     */
+    private static final double WHEEL_RADIUS_IN = 1.875;
     private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
     private double multiplier = 1;
 
@@ -50,10 +55,10 @@ public class Drive extends SubsystemBase {
 
     public Drive(ShuffleboardTabs shuffleboard) {
         
-        double FLSteerOffset = 0.16796875;
-        double FRSteerOffset = -0.355712890625;
+        double FLSteerOffset = 0.22021484375;
+        double FRSteerOffset = -0.085693359375;
         double BLSteerOffset = -0.367919921875;
-        double BRSteerOffset = 0.371337890625;
+        double BRSteerOffset = -0.258544921875;
 
         Slot0Configs steerGains = new Slot0Configs()
 			      .withKP(46.619).withKI(0).withKD(3.0889)// Tune this.
@@ -61,8 +66,8 @@ public class Drive extends SubsystemBase {
 
         // l: 0 h: 2.5
         Slot0Configs driveGains = new Slot0Configs()
-			      .withKP(0).withKI(0).withKD(0)// Tune this.
-			      .withKS(0).withKV(0).withKA(0);// Tune this.
+			      .withKP(2.5).withKI(0).withKD(0)// Tune this.
+			      .withKS(6.4111).withKV(0.087032).withKA(0);// Tune this.
 
 
         SwerveDrivetrainConstants drivetrainConstants = new SwerveDrivetrainConstants().withPigeon2Id(PIGEON_ID).withCANBusName("swerve"); // README: tweak to actual pigeon and CanBusName
@@ -71,11 +76,11 @@ public class Drive extends SubsystemBase {
             // WARNING: TUNE ALL OF THESE THINGS!!!!!!
             .withDriveMotorGearRatio(6.75)
             .withSteerMotorGearRatio(150.0 / 7)
-            .withWheelRadius(1.75)
+            .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
             .withSlipCurrent(90)
             .withSteerMotorGains(steerGains)
             .withDriveMotorGains(driveGains)
-            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this. (Important to tune values below)
+            .withDriveMotorClosedLoopOutput(ClosedLoopOutputType.TorqueCurrentFOC) // Tune this. (Important to tune values below)
             .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
             .withSpeedAt12Volts(5) // Tune this.
             .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
@@ -132,7 +137,7 @@ public class Drive extends SubsystemBase {
         for (int i = 0; i < 4; i++) {
             int temp = i;
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-        }
+       }
     }
     
     private double getPosition(int moduleId) {
@@ -191,7 +196,7 @@ public class Drive extends SubsystemBase {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
-    StructArrayPublisher<SwerveModuleState> expextedState =
+    StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
     StructArrayPublisher<SwerveModuleState> actualState =
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
@@ -200,7 +205,7 @@ public class Drive extends SubsystemBase {
     
     @Override
     public void periodic() {
-        expextedState.set(drivetrain.getState().ModuleTargets);
+        expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
     }

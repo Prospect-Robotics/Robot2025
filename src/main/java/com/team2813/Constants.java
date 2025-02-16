@@ -26,10 +26,14 @@ public final class Constants {
     public static final int PIGEON_ID = 13;
     
     // Mechanism CAN IDs
+    /** Climb Top */
     public static final int CLIMB_1 = 14;
+    /** Climb Bottom */
     public static final int CLIMB_2 = 15;
 
+    /** Elevator Top */
     public static final int ELEVATOR_1 = 16;
+    /** Elevator Bottom */
     public static final int ELEVATOR_2 = 17;
 
     public static final int INTAKE_PIVOT = 18;
@@ -51,7 +55,6 @@ public final class Constants {
         public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
         public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     }
-
     public static final class OperatorConstants {
         private OperatorConstants() {
             throw new AssertionError("Not instantiable");
@@ -61,11 +64,11 @@ public final class Constants {
         public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
         public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.triangle();
         public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.cross();
+        public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
         public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
         public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
         public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     }
-
     private Constants() {
         throw new AssertionError("Not instantiable");
     }

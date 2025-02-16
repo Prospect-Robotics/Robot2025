@@ -4,17 +4,22 @@ import static com.team2813.Constants.ELEVATOR_1;
 import static com.team2813.Constants.ELEVATOR_2;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.units.Units;
 
 import java.util.function.Supplier;
+import edu.wpi.first.networktables.*;
 /**
 * This is the Elevator. His name is Pablo.
 * Please be kind to him and say hi.
@@ -27,27 +32,22 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
     // HERE BE DRAGONS.
     // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
-    public Elevator() {
+    public Elevator(ShuffleboardTabs shuffleboard) {
         super(
                 new MotorSubsystemConfiguration(
                         getMotor())
                         .controlMode(ControlMode.VOLTAGE)
-                        .acceptableError(2.5)
-                        .controller(getPIDController())
+                        .acceptableError(0.5)
+                        .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
-        ((TalonFXWrapper) motor).addFollower(ELEVATOR_2, "swerve", InvertType.OPPOSE_MASTER); // TODO: See if the motors need to be reversed.
+        shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
     }
     
     private static TalonFXWrapper getMotor() {
-        TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, "swerve", InvertType.COUNTER_CLOCKWISE); // TODO: See if the motors need to be reversed.
+        TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, InvertType.CLOCKWISE); // TODO: See if the motors need to be reversed.
         wrapper.setNeutralMode(NeutralModeValue.Brake);
+        wrapper.addFollower(ELEVATOR_2, InvertType.FOLLOW_MASTER);
         return wrapper;
-    }
-    
-    private static PIDController getPIDController() {
-        PIDController controller = new PIDController(0.051524, 0.01, 0);
-        controller.setTolerance(1.5, 23.784);
-        return controller;
     }
     
     @Override
@@ -56,13 +56,13 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         if (output > 0) {
             output += 0.40798;
         }
-        super.useOutput(MathUtil.clamp(output, -7, 7), setpoint);
+        super.useOutput(MathUtil.clamp(output, -8, 8), setpoint);
     }
 
     public enum Position implements Supplier<Angle> {
-        BOTTOM(0.283203),
+        BOTTOM(-0.241211),
         TEST(10),
-        TOP(19.644043);
+        TOP(25.463379);
 
         private final Angle position;
 
@@ -76,3 +76,5 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         }
     }
 }
+
+
