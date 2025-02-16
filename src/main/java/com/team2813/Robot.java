@@ -94,8 +94,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    System.out.println("Hhhhhhhhh: " + BuildConstants.GIT_SHA);
-    // DriverStation.reportWarning("Hhhhhhhhh: " + BuildConstants.GIT_SHA, false);
     CommandScheduler.getInstance().cancelAll();
   }
 
