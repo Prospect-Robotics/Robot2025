@@ -19,6 +19,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
@@ -48,6 +49,7 @@ public class RobotContainer {
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
     autoChooser = configureAuto(this.drive);
+    SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
@@ -148,8 +150,8 @@ public class RobotContainer {
             drive::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             drive::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                    new PIDConstants(15, 0.0, 0), // Translation PID constants
+                    new PIDConstants(15, 0.0, 0.0) // Rotation PID constants //make lower but 5 doesnt work
             ),
             config, // The robot configuration
             () -> {

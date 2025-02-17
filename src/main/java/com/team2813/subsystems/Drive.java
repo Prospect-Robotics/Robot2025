@@ -182,9 +182,9 @@ public class Drive extends SubsystemBase {
     }
     
     public Pose2d getPose() {
-        double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
-        double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
-        return new Pose2d(x,y,this.drivetrain.getState().Pose.getRotation());
+        //double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
+        //double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
+        return drivetrain.getState().Pose;
     }
     public void resetPose() {
         this.drivetrain.seedFieldCentric();
