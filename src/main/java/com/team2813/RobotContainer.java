@@ -239,6 +239,9 @@ public class RobotContainer {
                     new InstantCommand(intake::intakeCoral, intake)
             )
     );
+
+    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
+
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
     OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));

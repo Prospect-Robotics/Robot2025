@@ -54,6 +54,7 @@ public final class Constants {
         public static final Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
         public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
         public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
+        public static final Trigger RESET_POSE = DRIVER_CONTROLLER.triangle();
     }
     public static final class OperatorConstants {
         private OperatorConstants() {
