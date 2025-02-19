@@ -4,6 +4,16 @@ plugins {
     // Plugin needed for Git Build Info
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'
+    id 'idea'
+}
+
+// Download the source code for dependencies and the javadoc (in IntelliJ IDEA).
+// Not required for running the robot, but helps with IntelliJ IDEA development.
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
 
 java {

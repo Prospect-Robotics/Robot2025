@@ -1,6 +1,7 @@
 package com.team2813.subsystems;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
@@ -9,6 +10,7 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.function.Supplier;
@@ -19,17 +21,17 @@ import java.util.function.Supplier;
 */
 public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
   
-    public IntakePivot() {
+    public IntakePivot(ShuffleboardTabs shuffleboard) {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
-            .acceptableError(0.001)
+            .acceptableError(0.5)
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)
             .PID(19.875, 0,0.4)
         );
-        
+        shuffleboard.getTab("Testing").addBoolean("Intakepivot pos", this::atPosition);
     }
 
     @Deprecated
@@ -56,8 +58,11 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     }
 
     public enum Rotations implements Supplier<Angle>{
-        OUTTAKE(Units.Rotations.of(0.754883)), // TODO: NEEDS TUNING
-        INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDS TUNING
+        //0.754883
+        //0.695801
+        //0.448721
+        OUTTAKE(Units.Rotations.of(0.695801)), // TODO: NEEDS TUNING
+        INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDSTUNING
         ALGAE_BUMP(Units.Rotations.of(1.108418)),
         HARD_STOP(Units.Rotations.of(0.438721)); // TODO: NEEDS TUNING
 

@@ -11,7 +11,6 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-
 import static com.team2813.Constants.INTAKE_WHEEL;
 /**
 * This is the Intake. His name is Joe.
@@ -24,6 +23,7 @@ public class Intake extends SubsystemBase{
     private final PIDMotor intakeMotor;
     static final double INTAKE_SPEED = 4;
     static final double OUTTAKE_SPEED = -4;
+    static final double BUMP_SPEED = -4;
 
     public Intake() {
         this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
@@ -44,6 +44,10 @@ public class Intake extends SubsystemBase{
     }
     public void outakeCoral(){
         intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
+        isIntaking = false;
+    }
+    public void bumpAlgae() {
+        intakeMotor.set(ControlMode.VOLTAGE, BUMP_SPEED);
         isIntaking = false;
     }
     public void stopIntakeMotor(){

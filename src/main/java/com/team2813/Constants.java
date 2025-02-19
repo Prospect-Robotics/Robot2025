@@ -25,7 +25,7 @@ public final class Constants {
     public static final int FRONT_LEFT_DRIVE_ID = 12;
 
     public static final int PIGEON_ID = 13;
-     
+    
     // Mechanism CAN IDs
     /** Climb Top */
     public static final int CLIMB_1 = 14;
@@ -46,21 +46,28 @@ public final class Constants {
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
     
-    public static class DriverConstants {
+    public static final class DriverConstants {
         private DriverConstants() {
             throw new AssertionError("Not instantiable");
         }
         public static CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
         public static Trigger SYSID_RUN = DRIVER_CONTROLLER.cross();
-        public static Trigger TMP_INTAKE = DRIVER_CONTROLLER.square();
-        public static Trigger TMP_OUTTAKE = DRIVER_CONTROLLER.circle();
+        public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
+        public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     }
-    public static class OperatorConstants {
+    public static final class OperatorConstants {
         private OperatorConstants() {
             throw new AssertionError("Not instantiable");
         }
         public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
-
+        public static Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
+        public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
+        public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.cross();
+        public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.triangle();
+        public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
+        public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
+        public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
+        public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
         public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
     }
     private Constants() {

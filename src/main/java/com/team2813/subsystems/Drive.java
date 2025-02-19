@@ -1,31 +1,20 @@
 package com.team2813.subsystems;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.*;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType; // Might be improper import.
-import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType; // Might be improper import.
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
-import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-
-import static com.team2813.Constants.*;
-import static edu.wpi.first.units.Units.Rotations;
-
-import com.team2813.sysid.SwerveSysidRequest;
-import edu.wpi.first.math.geometry.Rotation2d;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.team2813.ShuffleboardTabs;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -61,12 +50,13 @@ public class Drive extends SubsystemBase {
      */
     private static final double WHEEL_RADIUS_IN = 1.875;
     private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
+    private double multiplier = 1;
 
     static double frontDist = 0.330200;
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive() {
+    public Drive(ShuffleboardTabs shuffleboard) {
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -149,8 +139,8 @@ public class Drive extends SubsystemBase {
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
         for (int i = 0; i < 4; i++) {
             int temp = i;
-            Shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-        }
+            shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
+       }
     }
     
     private double getPosition(int moduleId) {
@@ -162,8 +152,8 @@ public class Drive extends SubsystemBase {
 
     public void drive(double xSpeed, double ySpeed, double rotation) {
         drivetrain.setControl(fieldCentricApplier
-            .withVelocityX(xSpeed)
-            .withVelocityY(ySpeed)
+            .withVelocityX(xSpeed * multiplier)
+            .withVelocityY(ySpeed * multiplier)
             .withRotationalRate(rotation)
             ); // Note: might not work, will need testing.
     }
@@ -195,9 +185,9 @@ public class Drive extends SubsystemBase {
     }
     
     public Pose2d getPose() {
-        double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
-        double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
-        return new Pose2d(x,y,this.drivetrain.getState().Pose.getRotation());
+        //double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
+        //double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
+        return drivetrain.getState().Pose;
     }
     public void resetPose() {
         this.drivetrain.seedFieldCentric();
@@ -209,7 +199,7 @@ public class Drive extends SubsystemBase {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
-    StructArrayPublisher<SwerveModuleState> expextedState =
+    StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
     StructArrayPublisher<SwerveModuleState> actualState =
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
@@ -218,11 +208,15 @@ public class Drive extends SubsystemBase {
     
     @Override
     public void periodic() {
-        expextedState.set(drivetrain.getState().ModuleTargets);
+        expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         //currentPose.set(getPose());
         //RobotLocalization.getRobotPose();
         currentPose.set(RobotLocalization.getRobotPose());
         RobotLocalization.updateDashboard();
+    }
+
+    public void enableSlowMode(boolean enable) {
+        multiplier = enable ? 0.3 : 1;
     }
 }
