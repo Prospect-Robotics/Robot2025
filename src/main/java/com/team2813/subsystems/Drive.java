@@ -211,6 +211,6 @@ public class Drive extends SubsystemBase {
     }
 
     public void enableSlowMode(boolean enable) {
-        multiplier = enable ? 0.5 : 1;
+        multiplier = enable ? 0.3 : 1;
     }
 }
