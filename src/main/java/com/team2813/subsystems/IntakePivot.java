@@ -58,8 +58,11 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     }
 
     public enum Rotations implements Supplier<Angle>{
-        OUTTAKE(Units.Rotations.of(0.754883)), // TODO: NEEDS TUNING
-        INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDS TUNING
+        //0.754883
+        //0.695801
+        //0.448721
+        OUTTAKE(Units.Rotations.of(0.695801)), // TODO: NEEDS TUNING
+        INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDSTUNING
         ALGAE_BUMP(Units.Rotations.of(1.108418)),
         HARD_STOP(Units.Rotations.of(0.438721)); // TODO: NEEDS TUNING
 
