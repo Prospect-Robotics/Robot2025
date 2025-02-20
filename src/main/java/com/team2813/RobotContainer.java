@@ -12,7 +12,9 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.LockFunctionCommand;
+import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
+import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
@@ -151,7 +153,7 @@ public class RobotContainer {
             drive::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
             new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                     new PIDConstants(15, 0.0, 0), // Translation PID constants
-                    new PIDConstants(15, 0.0, 0.0) // Rotation PID constants //make lower but 5 doesnt work
+                    new PIDConstants(6.85, 0.0, 1.3) // Rotation PID constants //make lower but 5 doesnt work
             ),
             config, // The robot configuration
             () -> {
@@ -224,6 +226,8 @@ public class RobotContainer {
   
   private void configureBindings(RobotCommands autoCommands) {
     //Driver
+    SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
+    SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     PLACE_CORAL.onTrue(autoCommands.placeCoral());
     SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
@@ -259,7 +263,14 @@ public class RobotContainer {
   R2.whileTrue(
     new InstantCommand()
     );*/
-    CLIMB_DOWN.onTrue(new InstantCommand(climb::lower, climb));
+    elevator.setDefaultCommand(
+        new ElevatorDefaultCommand(elevator, () -> -OPERATOR_CONTROLLER.getRightY()));
+    intakePivot.setDefaultCommand(
+        new ManuelIntakePivot(intakePivot, () -> -OPERATOR_CONTROLLER.getLeftY()));
+                     
+    CLIMB_DOWN.onTrue(new SequentialCommandGroup(
+    new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP), intakePivot)
+    ,new InstantCommand(climb::lower, climb)));
     CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
     
     CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
