@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.ShuffleboardTabs;
@@ -143,7 +143,7 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-    private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
+    private final ApplyRobotSpeeds ApplyRobotSpeedsApplier = new ApplyRobotSpeeds(); // Looks stupid, but ApplyRobotSpeeds needs to be instanced.
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
@@ -160,7 +160,7 @@ public class Drive extends SubsystemBase {
     }
     
     public void drive(ChassisSpeeds demand) {
-        drivetrain.setControl(applyFieldSpeedsApplier.withSpeeds(demand));
+        drivetrain.setControl(ApplyRobotSpeedsApplier.withSpeeds(demand));
     }
 
     public void turnToFace(Rotation2d rotation) {
