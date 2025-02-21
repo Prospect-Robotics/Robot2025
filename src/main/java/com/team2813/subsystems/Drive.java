@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.ClosedLoopOutputType;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
-import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.ShuffleboardTabs;
@@ -143,10 +143,18 @@ public class Drive extends SubsystemBase {
     private double getPosition(int moduleId) {
         return drivetrain.getModule(moduleId).getEncoder().getAbsolutePosition().getValue().in(Rotations);
     }
-    private final ApplyFieldSpeeds applyFieldSpeedsApplier = new ApplyFieldSpeeds(); // Looks stupid, but ApplyFieldSpeeds needs to be instanced.
-    private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle(); // Same as above
+    private final ApplyRobotSpeeds applyRobotSpeedsApplier = new ApplyRobotSpeeds();
+    /*
+     * IT IS ABSOLUTELY IMPERATIVE THAT YOU USE ApplyRobotSpeeds() RATHER THAN THE DEMENTED ApplyFieldSpeeds() HERE!
+     * If ApplyFieldSpeeds() is used, pathplanner & all autonomus paths will not function properly.
+     * This is because pathplanner knows where the robot is, but needs to use ApplyRobotSpeeds() in order to convert knowledge
+     * of where the robot is on the field, to instruction centered on the robot.
+     * Or something like this, I'm still not too sure how this works.
+     */
+    private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle();
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
+    // Note: This is used for teleop drive.
     public void drive(double xSpeed, double ySpeed, double rotation) {
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
@@ -159,8 +167,9 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(request);
     }
     
+    // Note: This is used for auto drive. 
     public void drive(ChassisSpeeds demand) {
-        drivetrain.setControl(applyFieldSpeedsApplier.withSpeeds(demand));
+        drivetrain.setControl(applyRobotSpeedsApplier.withSpeeds(demand));
     }
 
     public void turnToFace(Rotation2d rotation) {
