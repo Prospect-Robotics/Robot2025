@@ -197,12 +197,20 @@ public class Drive extends SubsystemBase {
         //double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
         return drivetrain.getState().Pose;
     }
+
+    /**
+     * From <em>com.ctre.phoenix6.swerve.SwerveDrivetrain;</em>
+     * <p>Zero's this swerve drive's odometry entirely and places the robot at 0,0</p>
+     */
+
     public void resetPose() {
-        this.drivetrain.seedFieldCentric();
+        this.drivetrain.tareEverything();
     }
+
     public void setPose(Pose2d pose) {
         drivetrain.resetPose(pose);
     }
+
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
