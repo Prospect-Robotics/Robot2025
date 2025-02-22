@@ -149,17 +149,19 @@ public class Drive extends SubsystemBase {
      * If ApplyFieldSpeeds() is used, pathplanner & all autonomus paths will not function properly.
      * This is because pathplanner knows where the robot is, but needs to use ApplyRobotSpeeds() in order to convert knowledge
      * of where the robot is on the field, to instruction centered on the robot.
-     * Or something like this, I'm still not too sure how this works.
+     * Or something like this, I'm still not to sure how this works.
      */
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle();
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
-    // Note: This is used for teleop drive.
+    /* Note: This is used for teleop drive.
+    * Another note: multiplier is applied for slow-mode.
+    */
     public void drive(double xSpeed, double ySpeed, double rotation) {
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
             .withVelocityY(ySpeed * multiplier)
-            .withRotationalRate(rotation)
+            .withRotationalRate(rotation * multiplier)
             ); // Note: might not work, will need testing.
     }
     
