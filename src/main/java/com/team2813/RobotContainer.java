@@ -11,14 +11,15 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.team2813.commands.DefaultDriveCommand;
+import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
-import com.team2813.commands.ElevatorDefaultCommand;
+import com.team2813.lib2813.util.ControlUtils;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -195,7 +196,7 @@ public class RobotContainer {
    * @see https://www.desmos.com/calculator/jf7ijovwqr for demo of the filter.
    */
   private static double modifyAxis(double value) {
-    value = deadband(value, 0.1);
+    value = ControlUtils.deadband(value, 0.1);
     value = Math.copySign(value * value, value);
     return value;
   }
@@ -291,7 +292,7 @@ public class RobotContainer {
     ));
   }
 
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
+        public Command getAutonomousCommand() {
+                return autoChooser.getSelected();
+        }
 }
