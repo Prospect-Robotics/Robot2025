@@ -44,13 +44,13 @@ spotless {
 project.compileJava.dependsOn(createVersionFile)
 def BUILD_CONSTANTS_AUTOGEN_PATH = 'build/build_constants_autogen/'
 gversion {
-  // Build outside src/main/ so that it can be ignored by git
-  srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
-  classPackage = 'com.team2813'
-  className    = 'BuildConstants'
-  dateFormat   = 'yyyy-MM-dd HH:mm:ss z'
-  timeZone     = 'America/Los_Angeles' // Use preferred time zone
-  indent       = '  '
+    // Build outside src/main/ so that it can be ignored by git
+    srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
+    classPackage = 'com.team2813'
+    className    = 'BuildConstants'
+    dateFormat   = 'yyyy-MM-dd HH:mm:ss z'
+    timeZone     = 'America/Los_Angeles' // Use preferred time zone
+    indent       = '  '
 }
 sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
 
@@ -80,7 +80,7 @@ deploy {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
                     deleteOldFiles = true // Change to true to delete files on roboRIO that no
-                                           // longer exist in deploy directory of this project
+                    // longer exist in deploy directory of this project
                 }
             }
         }
@@ -136,7 +136,11 @@ downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:ja
 // in order to make them all available at runtime. Also adding the manifest so WPILib
 // knows where to look for our Robot Class.
 jar {
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
