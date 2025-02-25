@@ -61,18 +61,15 @@ public class RobotContainer {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
-    configureAutoCommands(autoCommands);
-
   }
   
   /**
    * Configure PathPlanner named commands
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private void configureAutoCommands(RobotCommands autoCommands) {
+  private void configureAutoCommands() {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
-    NamedCommands.registerCommand("score-coral", autoCommands.placeCoral());
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
                     new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
