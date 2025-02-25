@@ -27,7 +27,7 @@ public final class RobotContainerProvider extends ExternalResource  {
 
   @Override
   protected void before() throws Throwable {
-    assertWithMessage("before() cannot be called twice").that(robotContainer).isNull();;
+    assertWithMessage("before() cannot be called twice").that(robotContainer).isNull();
     robotContainer = this.supplier.get();
   }
 
