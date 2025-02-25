@@ -50,8 +50,7 @@ public class RobotContainer {
     this.drive = new Drive(shuffleboard);
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
-    autoChooser = configureAuto(this.drive);
-
+    autoChooser = configureAuto();
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -83,7 +82,8 @@ public class RobotContainer {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(elevator::disable, elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
 
@@ -98,7 +98,8 @@ public class RobotContainer {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
     NamedCommands.registerCommand("BumpAlgaeLow", new SequentialCommandGroup(
@@ -142,7 +143,7 @@ public class RobotContainer {
     ));
   }
 
-  private static SendableChooser<Command> configureAuto(Drive drive) {
+  private SendableChooser<Command> configureAuto() {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -170,6 +171,7 @@ public class RobotContainer {
             },
             drive // Reference to this subsystem to set requirements
     );
+    configureAutoCommands();
     return AutoBuilder.buildAutoChooser();
   }
 
