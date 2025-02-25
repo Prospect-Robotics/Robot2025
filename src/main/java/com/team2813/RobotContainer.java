@@ -51,6 +51,7 @@ public class RobotContainer {
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
     autoChooser = configureAuto(this.drive);
+
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -61,16 +62,18 @@ public class RobotContainer {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
-    configureAutoCommands();
+    configureAutoCommands(autoCommands);
+
   }
   
   /**
    * Configure PathPlanner named commands
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private void configureAutoCommands() {
+  private void configureAutoCommands(RobotCommands autoCommands) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
+    NamedCommands.registerCommand("score-coral", autoCommands.placeCoral());
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
                     new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
@@ -83,6 +86,7 @@ public class RobotContainer {
                     new InstantCommand(elevator::disable, elevator)
             )
     ));
+
     //TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an actual command)
     NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
     NamedCommands.registerCommand("ScoreL3", new SequentialCommandGroup(
@@ -238,14 +242,11 @@ public class RobotContainer {
             new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
-                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(Units.Seconds.of(0.5))
                     ),
                     new InstantCommand(intake::intakeCoral, intake)
             )
     );
-
-    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
-
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
     OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));
