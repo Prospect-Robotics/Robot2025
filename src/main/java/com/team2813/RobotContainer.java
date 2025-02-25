@@ -50,9 +50,7 @@ public class RobotContainer implements AutoCloseable {
     this.drive = new Drive(shuffleboard);
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
-    autoChooser = configureAuto(this.drive);
 
-    SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
                     drive,
@@ -63,7 +61,8 @@ public class RobotContainer implements AutoCloseable {
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
     configureAutoCommands(autoCommands);
-
+    autoChooser = configureAuto(this.drive);
+    SmartDashboard.putData("Auto Routine", autoChooser);
   }
   
   /**
