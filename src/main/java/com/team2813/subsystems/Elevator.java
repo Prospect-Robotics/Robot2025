@@ -37,7 +37,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                 new MotorSubsystemConfiguration(
                         getMotor())
                         .controlMode(ControlMode.VOLTAGE)
-                        .acceptableError(0.5)
+                        .acceptableError(10)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
         shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
@@ -56,7 +56,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         if (output > 0) {
             output += 0.40798;
         }
-        super.useOutput(MathUtil.clamp(output, -8, 8), setpoint);
+        super.useOutput(MathUtil.clamp(output, -6, 6), setpoint);
     }
 
     public enum Position implements Supplier<Angle> {
