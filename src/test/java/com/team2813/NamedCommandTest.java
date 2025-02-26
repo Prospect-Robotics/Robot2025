@@ -1,7 +1,6 @@
 package com.team2813;
 
 import com.pathplanner.lib.auto.NamedCommands;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assume.assumeNotNull;
 
 @RunWith(Parameterized.class)
 public class NamedCommandTest {
@@ -25,7 +23,7 @@ public class NamedCommandTest {
     return Arrays.asList("ScoreL1", "ScoreL2", "ScoreL3", "BumpAlgaeLow", "BumpAlgaeHigh", "IntakeCoral");
   }
   
-  @Parameter(0)
+  @Parameter
   public String commandName;
   
   @Test
