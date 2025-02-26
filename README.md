@@ -12,7 +12,7 @@ In order to clone the repository, with the `lib2813` submodule cloned as well.
 git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.git
 ```
 
-> ![NOTE]
+> [!NOTE]
 > The `--recurse-submodules` can be omitted to only clone the `Robot2025` repo, and not the `lib2813` submodule. If the `lib2813` submodule is not present, the code will not build
 
 ### Cloning with ssh
