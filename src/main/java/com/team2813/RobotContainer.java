@@ -33,6 +33,7 @@ import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
+import static com.team2813.lib2813.util.ControlUtils.deadband;
 
 public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
@@ -176,18 +177,6 @@ public class RobotContainer implements AutoCloseable {
   private void configureBindings() {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-  }
-  
-  private static double deadband(double value, double deadband) {
-    if (Math.abs(value) > deadband) {
-      if (value > 0) {
-        return (value - deadband) / (1 - deadband);
-      } else {
-        return (value + deadband) / (1 - deadband);
-      }
-    } else {
-      return 0;
-    }
   }
   
   private static double modifyAxis(double value) {
