@@ -18,22 +18,12 @@ import static org.junit.Assume.assumeNotNull;
 
 @RunWith(Parameterized.class)
 public class NamedCommandTest {
-  @Parameters
-  public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][] {
-            {"ScoreL1"}, {"ScoreL2"}, {"ScoreL3"}, {"BumpAlgaeLow"}, {"BumpAlgaeHigh"}, {"IntakeCoral"}
-    });
-  }
-  private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
-  private RobotContainer robotContainer;
-  
-  @Before
-  public void startRobotContainer() {
-    try {
-      robotContainer = new RobotContainer(shuffleboard);
-    } catch (Exception e) {
-      // Don't need to do anything
-    }
+  @Rule
+  public final RobotContainerProvider robotContainerProvider = new RobotContainerProvider();
+
+  @Parameters(name = "{0}")
+  public static Collection<?> data() {
+    return Arrays.asList("ScoreL1", "ScoreL2", "ScoreL3", "BumpAlgaeLow", "BumpAlgaeHigh", "IntakeCoral");
   }
   
   @Parameter(0)
@@ -41,7 +31,8 @@ public class NamedCommandTest {
   
   @Test
   public void commandExists() {
-    assumeNotNull(commandName, robotContainer);
+    var robotContainer = robotContainerProvider.get();
+
     assertThat(NamedCommands.hasCommand(commandName)).isTrue();
   }
 }

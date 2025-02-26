@@ -1,5 +1,7 @@
 package com.team2813;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -10,11 +12,13 @@ public final class RobotContainerTest {
 
     @Test
     public void constructorDoesNotRaise() {
-        new RobotContainer(shuffleboard);
+        //noinspection EmptyTryBlock
+        try (var container = new RobotContainer(shuffleboard)) {}
     }
 
     @Test
     public void conBeConstructedMultipleTimes() {
-        new RobotContainer(shuffleboard);
+        //noinspection EmptyTryBlock
+        try (var container = new RobotContainer(shuffleboard)) {}
     }
 }
