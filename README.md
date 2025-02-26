@@ -1,23 +1,26 @@
 # Robot2025
 
-This is the repository for FRC team 2813's code for our yet-to-be-named 2025 robot.
+This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
 ## Cloning the Repository
 
 ### Cloning with HTTPS
 
-In order to clone the repository (with the `lib2813` submodule cloned as well)
+In order to clone the repository, with the `lib2813` submodule cloned as well.
 
 ```
 git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.git
 ```
 
+> ![NOTE]
+> The `--recurse-submodules` can be omitted to only clone the `Robot2025` repo, and not the `lib2813` submodule. If the `lib2813` submodule is not present, the code will not build
+
 ### Cloning with ssh
 
 > [!CAUTION]
-> Currently, a ssh robot code setup will not be able to access gihub on school wifi due to the ssh port being used.
+> Currently, a ssh robot code setup will not be able to access GitHub on school wifi due to the ssh port being used.
 > If you plan to work on school wifi, you may want to consider using https.
-> This does not apply with the Coder setup, as the machine that it is running on does not have the ssh port blocked, so you will be able to work with github regardless of location, as long as you have internet access.
+> This does not apply with the Coder setup, as the machine that it is running on does not have the ssh port blocked, so you will be able to work with GitHub regardless of location, as long as you have internet access.
 
 #### Setting up a SSH key
 
@@ -32,7 +35,7 @@ You can also create a different type of ssh key, or use the default number of bi
 See the [ssh-keygen man page](https://linux.die.net/man/1/ssh-keygen) for more information.
 
 Then, you need to copy the contents of the public fingerprint (in the directory ~/.ssh by default).
-The default name is id_rsa, so the command to copy it would be
+The default name is `id_rsa`, so the command to copy it would be
 ```
 # linux
 cat ~/.ssh/id_rsa.pub | xclip -selection clipboard
@@ -45,8 +48,8 @@ type ~\.ssh\id_rsa.pub | clip
 > Do not give the contents of your private key to anyone!
 > The file should have the same name as the public key, but without the .pub
 
-Then, in github settings, you can add an ssh key, and add your new key, and then authentication should work! you can verfy it by running the following command, which should tell you your
-github username if you are successfully authenticated.
+Then, in GitHub settings, you can add an ssh key, and add your new key, and then authentication should work!
+You can verfy it by running the following command, which should tell you your GitHub username if you are successfully authenticated.
 ```
 ssh -T git@github.com
 ```
@@ -81,10 +84,10 @@ To deploy from the command line you can run the following command while in the d
 ### Command line one-liner
 
 > [!NOTE]
-> This command is only tested under linux and mac, and may not work on windows due to different functionality of commands.
+> This command is only tested under Linux and Mac, and will likely fail on Windows due to different functionality of the ping command.
 
 In order to use this, you need to run it, and you will eventuall get a successful ping from 10.28.13.2 (roboRIO's ip address).
-After that, you can press control and c to cancel the ping, and start the deploy process.
+After that, you can press CTRL+C to cancel the ping, and start the deploy process.
 If the deploy was successful, the terminal will be cleared, and if it fails, it will not be cleared, so you can see the error message.
 
 ```
