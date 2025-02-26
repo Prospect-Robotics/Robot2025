@@ -238,7 +238,7 @@ public class RobotContainer {
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath()));
+    AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath(drive::getPose)));
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
     INTAKE_BUTTON.whileTrue(
             new SequentialCommandGroup(

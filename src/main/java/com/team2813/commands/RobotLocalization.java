@@ -1,11 +1,13 @@
 package com.team2813.commands;
 
+import static com.team2813.Constants.StaticConfiguration.USE_LIMELIGHT_LOCATION;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructArrayPublisher;
 
 import com.team2813.lib2813.limelight.Limelight;
 import com.pathplanner.lib.path.GoalEndState;
@@ -15,20 +17,27 @@ import com.pathplanner.lib.path.Waypoint;
 import java.util.List;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.PathConstraints;
 
 
 public class RobotLocalization {
-    private static Limelight limelight = Limelight.getDefaultLimelight();
+    private static final Limelight limelight = Limelight.getDefaultLimelight();
 
-    public RobotLocalization() {
-
+    private RobotLocalization()  {
+        throw new AssertionError("Not instantiable");
     }
 
-    public static Pose2d getRobotPose() {
-        Optional<Pose2d> botpose = limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
-        return botpose.orElseGet(Pose2d::new);
+    public static Optional<Pose2d> limelightRobotPose() {
+        if (!USE_LIMELIGHT_LOCATION) {
+            return Optional.empty();
+        }
+        return rawLimelightRobotPose();
+    }
+
+    private static Optional<Pose2d> rawLimelightRobotPose() {
+        return limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
     }
 
     /*private static ArrayList<Pose2d> setPositions(){
@@ -50,8 +59,8 @@ public class RobotLocalization {
         return arrayOfPos;
     }*/
 
-    private static ArrayList<Pose2d> setPositions(){
-        ArrayList<Pose2d> arrayOfPos = new ArrayList<Pose2d>();
+    private static List<Pose2d> setPositions(){
+        List<Pose2d> arrayOfPos = new ArrayList<>();
 
         arrayOfPos.add(new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503))); //* 
         arrayOfPos.add(new Pose2d(2.828, 3.866, Rotation2d.fromDegrees(179.503))); //1r * 
@@ -69,22 +78,23 @@ public class RobotLocalization {
         return arrayOfPos;
     }
 
-    private static Pose2d findClosest(){
-        Pose2d currentPose = getRobotPose();
-        ArrayList<Pose2d> positions = setPositions();
-        double smallest = 10000;
-        Pose2d goTo = new Pose2d(0,0,new Rotation2d(0));
+    private static Optional<Pose2d> findClosest() {
+        return limelightRobotPose().map(currentPose -> {
+            List<Pose2d> positions = setPositions();
+            double smallest = 10000;
+            Pose2d goTo = new Pose2d(0, 0, new Rotation2d(0));
 
-        for (Pose2d pose : positions){
-            if (((currentPose.getX()-pose.getX()) + ((currentPose.getY()-pose.getY())) < smallest)){
-                goTo = pose;
+            for (Pose2d pose : positions) {
+                if (((currentPose.getX() - pose.getX()) + ((currentPose.getY() - pose.getY())) < smallest)) {
+                    goTo = pose;
+                }
             }
-        }
-        return goTo;
+            return goTo;
+        });
     }
 
-    public static PathPlannerPath createPath(){
-        Pose2d currentPose = getRobotPose();
+    public static PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
+        Pose2d currentPose = limelightRobotPose().orElseGet(drivePosSupplier);
         //Pose2d newPosition = findClosest();
         Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
 
@@ -130,12 +140,12 @@ public class RobotLocalization {
         return path;
     }
 
-    private static final StructPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructTopic("Limelight pose", Pose2d.struct).publish();
-    private static final BooleanPublisher hasData = NetworkTableInstance.getDefault().getBooleanTopic("Has Data").publish();
-    
+    private static final StructArrayPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructArrayTopic("Limelight pose", Pose2d.struct).publish();
+    private static final BooleanPublisher hasData = NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
+    private static final Pose2d[] NO_POS = new Pose2d[0];
+
     public static void updateDashboard() {
-        Pose2d pose = getRobotPose();
-        botpose.accept(pose);
+        botpose.set(rawLimelightRobotPose().map(pos -> new Pose2d[]{pos}).orElse(NO_POS));
         hasData.accept(limelight.getJsonDump().isPresent());
     }
 
