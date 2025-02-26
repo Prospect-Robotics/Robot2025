@@ -17,10 +17,6 @@ public class AllPreferences {
     return booleanPref(Key.USE_LIMELIGHT_LOCATION, false);
   }
 
-  public static DoubleSupplier maxLimelightError() {
-    return doublePref(Key.MAX_LIMELIGHT_ERROR, 0.1d); // 10%
-  }
-
   private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
     String name = key.name();
     if (!Preferences.containsKey(name)) {
@@ -39,7 +35,6 @@ public class AllPreferences {
 
   private enum Key {
     USE_LIMELIGHT_LOCATION,
-    MAX_LIMELIGHT_ERROR,
   }
 
   private AllPreferences() {

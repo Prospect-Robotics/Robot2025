@@ -13,9 +13,10 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.PathConstraints;
@@ -24,22 +25,26 @@ import com.pathplanner.lib.path.PathConstraints;
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
     private static final Limelight limelight = Limelight.getDefaultLimelight();
     private final BooleanSupplier useLimelightLocation;
-    private final DoubleSupplier maxLimelightError;
+
+    public record Location(Pose2d pos, double timestampSeconds) {
+    }
 
     public RobotLocalization() {
         useLimelightLocation = AllPreferences.useLimelightLocation();
-        maxLimelightError = AllPreferences.maxLimelightError();
     }
 
-    public Optional<Pose2d> limelightRobotPose() {
+    public Optional<Location> limelightLocation() {
         if (!useLimelightLocation.getAsBoolean()) {
             return Optional.empty();
         }
-        return rawLimelightRobotPose();
+        return rawLocation();
     }
 
-    private Optional<Pose2d> rawLimelightRobotPose() {
-        return limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
+    private Optional<Location> rawLocation() {
+        // TODO: Update lib2813 limelight code to include the time in LocationalData.
+        return limelight.getLocationalData().getBotposeBlue()
+                .map(Pose3d::toPose2d)
+                .map(pos -> new Location(pos, System.currentTimeMillis()));
     }
 
     /*private static ArrayList<Pose2d> positions() {
@@ -81,7 +86,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     }
 
     public PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
-        Pose2d currentPose = limelightRobotPose().orElseGet(drivePosSupplier);
+        Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
         //Pose2d newPosition = currentPose.nearest(positions());
         Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
 
@@ -132,7 +137,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     private static final Pose2d[] NO_POS = new Pose2d[0];
 
     public void updateDashboard() {
-        botpose.set(rawLimelightRobotPose().map(pos -> new Pose2d[]{pos}).orElse(NO_POS));
+        botpose.set(rawLocation().map(location -> new Pose2d[]{location.pos()}).orElse(NO_POS));
         hasData.accept(limelight.getJsonDump().isPresent());
     }
 

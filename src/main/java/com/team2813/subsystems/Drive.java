@@ -203,6 +203,9 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
+    public void addVisionMeasurement(RobotLocalization.Location location) {
+        drivetrain.addVisionMeasurement(location.pos(), location.timestampSeconds());
+    }
     
     StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
@@ -216,6 +219,7 @@ public class Drive extends SubsystemBase {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
+        localization.limelightLocation().ifPresent(this::addVisionMeasurement);
         localization.updateDashboard();
     }
 
