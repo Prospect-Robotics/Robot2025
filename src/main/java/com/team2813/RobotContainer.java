@@ -235,6 +235,8 @@ public class RobotContainer implements AutoCloseable {
     SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     
+    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
+    
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
     INTAKE_BUTTON.whileTrue(
