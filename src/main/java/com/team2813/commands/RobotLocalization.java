@@ -14,9 +14,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.PathConstraints;
@@ -40,7 +38,7 @@ public class RobotLocalization {
         return limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
     }
 
-    /*private static ArrayList<Pose2d> setPositions(){
+    /*private static ArrayList<Pose2d> positions() {
         Pose2d one = new Pose2d(2.826,4.008,new Rotation2d(0));
         Pose2d two = new Pose2d(3.666,5.46,new Rotation2d(0));
         Pose2d three = new Pose2d(5.245,5.487,new Rotation2d(0));
@@ -59,7 +57,7 @@ public class RobotLocalization {
         return arrayOfPos;
     }*/
 
-    private static List<Pose2d> setPositions(){
+    private static List<Pose2d> positions() {
         List<Pose2d> arrayOfPos = new ArrayList<>();
 
         arrayOfPos.add(new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503))); //* 
@@ -78,24 +76,9 @@ public class RobotLocalization {
         return arrayOfPos;
     }
 
-    private static Optional<Pose2d> findClosest() {
-        return limelightRobotPose().map(currentPose -> {
-            List<Pose2d> positions = setPositions();
-            double smallest = 10000;
-            Pose2d goTo = new Pose2d(0, 0, new Rotation2d(0));
-
-            for (Pose2d pose : positions) {
-                if (((currentPose.getX() - pose.getX()) + ((currentPose.getY() - pose.getY())) < smallest)) {
-                    goTo = pose;
-                }
-            }
-            return goTo;
-        });
-    }
-
     public static PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
         Pose2d currentPose = limelightRobotPose().orElseGet(drivePosSupplier);
-        //Pose2d newPosition = findClosest();
+        //Pose2d newPosition = currentPose.nearest(positions());
         Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
