@@ -50,7 +50,7 @@ public class RobotContainer implements AutoCloseable {
     this.drive = new Drive(shuffleboard);
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
-    autoChooser = configureAuto();
+    autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -67,7 +67,7 @@ public class RobotContainer implements AutoCloseable {
    * Configure PathPlanner named commands
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private void configureAutoCommands() {
+  private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
@@ -140,7 +140,7 @@ public class RobotContainer implements AutoCloseable {
     ));
   }
 
-  private SendableChooser<Command> configureAuto() {
+  private static SendableChooser<Command> configureAuto(Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -168,7 +168,7 @@ public class RobotContainer implements AutoCloseable {
             },
             drive // Reference to this subsystem to set requirements
     );
-    configureAutoCommands();
+    configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
   }
 
