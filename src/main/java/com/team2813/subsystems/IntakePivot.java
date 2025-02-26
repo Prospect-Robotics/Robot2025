@@ -25,7 +25,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
-            .acceptableError(0.5)
+            .acceptableError(10)
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)
@@ -61,7 +61,8 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
         //0.754883
         //0.695801
         //0.448721
-        OUTTAKE(Units.Rotations.of(0.695801)), // TODO: NEEDS TUNING
+        //0.695801
+        OUTTAKE(Units.Rotations.of(0.723389)), // TODO: NEEDS TUNING
         INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDSTUNING
         ALGAE_BUMP(Units.Rotations.of(1.108418)),
         HARD_STOP(Units.Rotations.of(0.438721)); // TODO: NEEDS TUNING

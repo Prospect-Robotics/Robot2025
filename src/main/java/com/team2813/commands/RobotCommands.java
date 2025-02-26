@@ -27,9 +27,8 @@ public class RobotCommands {
             new InstantCommand(intake::stopIntakeMotor, intake)
             );
             
-            }
-        
-            public Command placeCoral() {
+    }
+    public Command placeCoral() {
                 if (placeCoral == null) {
                 synchronized (RobotCommands.class) {
                     if (placeCoral == null) {

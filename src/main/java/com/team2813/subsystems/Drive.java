@@ -159,7 +159,7 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
             .withVelocityY(ySpeed * multiplier)
-            .withRotationalRate(rotation)
+            .withRotationalRate(rotation * multiplier)
             ); // Note: might not work, will need testing.
     }
     
