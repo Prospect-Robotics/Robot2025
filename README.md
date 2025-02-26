@@ -4,6 +4,12 @@ This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
 ## Cloning the Repository
 
+There are two different ways to clone the robot code in order to work on it.
+The only difference between the two is what protocol is used to communicate with GitHub.
+The reccomended method is HTTPS (Hypertext Transfer Protocol Secure), which will work on school wifi.
+The alternative is SSH (Secure Shell Protocol), which will not work on school wifi.
+You only need to follow the instructions for cloning with one protocol
+
 ### Cloning with HTTPS
 
 In order to clone the repository, with the `lib2813` submodule cloned as well.
@@ -13,9 +19,10 @@ git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.gi
 ```
 
 > [!NOTE]
-> The `--recurse-submodules` can be omitted to only clone the `Robot2025` repo, and not the `lib2813` submodule. If the `lib2813` submodule is not present, the code will not build
+> The `--recurse-submodules` can be omitted to only clone the `Robot2025` repo, and not the `lib2813` submodule.
+> If the `lib2813` submodule is not present, the code will not build.
 
-### Cloning with ssh
+### Cloning with SSH
 
 > [!CAUTION]
 > Currently, a ssh robot code setup will not be able to access GitHub on school wifi due to the ssh port being used.
