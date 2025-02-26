@@ -34,7 +34,7 @@ import java.util.Set;
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
 
-public class RobotContainer {
+public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
   
   private final Climb climb = new Climb();
@@ -289,5 +289,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
-}
 
+  @Override
+  public void close() {
+    climb.close();
+  }
+}

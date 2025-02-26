@@ -5,6 +5,8 @@ plugins {
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'
     id 'idea'
+    // Spotless code formatter.
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 // Download the source code for dependencies and the javadoc (in IntelliJ IDEA).
@@ -21,19 +23,34 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+spotless {
+    // See https://github.com/diffplug/spotless/tree/main/plugin-gradle
+    format 'misc', {
+        // define the files to apply `misc` to
+        target '.gitattributes', '.gitignore'
+
+        // define the steps to apply to those files
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+    groovyGradle {
+        greclipse().configFile('greclipse-gradle.properties')
+    }
+}
 
 // Generates a BuildConstats file.
 // https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html
 project.compileJava.dependsOn(createVersionFile)
 def BUILD_CONSTANTS_AUTOGEN_PATH = 'build/build_constants_autogen/'
 gversion {
-  // Build outside src/main/ so that it can be ignored by git
-  srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
-  classPackage = 'com.team2813'
-  className    = 'BuildConstants'
-  dateFormat   = 'yyyy-MM-dd HH:mm:ss z'
-  timeZone     = 'America/Los_Angeles' // Use preferred time zone
-  indent       = '  '
+    // Build outside src/main/ so that it can be ignored by git
+    srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
+    classPackage = 'com.team2813'
+    className    = 'BuildConstants'
+    dateFormat   = 'yyyy-MM-dd HH:mm:ss z'
+    timeZone     = 'America/Los_Angeles' // Use preferred time zone
+    indent       = '  '
 }
 sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
 
@@ -63,7 +80,7 @@ deploy {
                     files = project.fileTree('src/main/deploy')
                     directory = '/home/lvuser/deploy'
                     deleteOldFiles = true // Change to true to delete files on roboRIO that no
-                                           // longer exist in deploy directory of this project
+                    // longer exist in deploy directory of this project
                 }
             }
         }
@@ -119,7 +136,11 @@ downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:ja
 // in order to make them all available at runtime. Also adding the manifest so WPILib
 // knows where to look for our Robot Class.
 jar {
-    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
     from sourceSets.main.allSource
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE

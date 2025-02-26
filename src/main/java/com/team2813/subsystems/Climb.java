@@ -19,7 +19,7 @@ import static com.team2813.Constants.*;
 * Please be kind to her and say hi.
 * Have a nice day!
 */
-public class Climb extends SubsystemBase{
+public class Climb extends SubsystemBase implements AutoCloseable {
 
     private final PIDMotor climbMotor1;
 	private DigitalInput limitSwitch;
@@ -61,6 +61,9 @@ public class Climb extends SubsystemBase{
 			climbMotor1.set(ControlMode.VOLTAGE, 0);
 		}
 	}
-   
-}
 
+    @Override
+    public void close() {
+        limitSwitch.close();
+    }
+}
