@@ -37,6 +37,7 @@ import static edu.wpi.first.units.Units.Rotations;
 public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
+    private final RobotLocalization localization;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
     
     /**
@@ -50,7 +51,8 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive(ShuffleboardTabs shuffleboard) {
+    public Drive(ShuffleboardTabs shuffleboard, RobotLocalization localization) {
+        this.localization = localization;
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -214,7 +216,7 @@ public class Drive extends SubsystemBase {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         currentPose.set(getPose());
-        RobotLocalization.updateDashboard();
+        localization.updateDashboard();
     }
 
     public void enableSlowMode(boolean enable) {

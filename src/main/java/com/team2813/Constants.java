@@ -46,13 +46,6 @@ public final class Constants {
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
 
-    public static final class StaticConfiguration {
-        private StaticConfiguration() {
-            throw new AssertionError("Not instantiable");
-        }
-        public static final boolean USE_LIMELIGHT_LOCATION = false;
-    }
-
     public static final class DriverConstants {
         private DriverConstants() {
             throw new AssertionError("Not instantiable");

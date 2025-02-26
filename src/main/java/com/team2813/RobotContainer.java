@@ -52,7 +52,8 @@ public class RobotContainer {
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
   public RobotContainer(ShuffleboardTabs shuffleboard) {
-    this.drive = new Drive(shuffleboard);
+    var localization = new RobotLocalization();
+    this.drive = new Drive(shuffleboard, localization);
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
     autoChooser = configureAuto(this.drive);
@@ -65,7 +66,7 @@ public class RobotContainer {
                     () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
-    configureBindings(autoCommands);
+    configureBindings(autoCommands, localization);
     configureAutoCommands();
   }
   
@@ -173,11 +174,6 @@ public class RobotContainer {
     );
     return AutoBuilder.buildAutoChooser();
   }
-
-  private void configureBindings() {
-    // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
-  }
   
   private static double deadband(double value, double deadband) {
     if (Math.abs(value) > deadband) {
@@ -229,7 +225,7 @@ public class RobotContainer {
     return routines;
   }
   
-  private void configureBindings(RobotCommands autoCommands) {
+  private void configureBindings(RobotCommands autoCommands, RobotLocalization localization) {
     //Driver
     SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
@@ -238,7 +234,7 @@ public class RobotContainer {
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    AUTOALIGN.onTrue(AutoBuilder.followPath(RobotLocalization.createPath(drive::getPose)));
+    AUTOALIGN.onTrue(AutoBuilder.followPath(localization.createPath(drive::getPose)));
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
     INTAKE_BUTTON.whileTrue(
             new SequentialCommandGroup(

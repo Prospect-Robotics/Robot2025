@@ -1,7 +1,5 @@
 package com.team2813.commands;
 
-import static com.team2813.Constants.StaticConfiguration.USE_LIMELIGHT_LOCATION;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,31 +8,37 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.AllPreferences;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.PathConstraints;
 
 
-public class RobotLocalization {
+public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
     private static final Limelight limelight = Limelight.getDefaultLimelight();
+    private final BooleanSupplier useLimelightLocation;
+    private final DoubleSupplier maxLimelightError;
 
-    private RobotLocalization()  {
-        throw new AssertionError("Not instantiable");
+    public RobotLocalization() {
+        useLimelightLocation = AllPreferences.useLimelightLocation();
+        maxLimelightError = AllPreferences.maxLimelightError();
     }
 
-    public static Optional<Pose2d> limelightRobotPose() {
-        if (!USE_LIMELIGHT_LOCATION) {
+    public Optional<Pose2d> limelightRobotPose() {
+        if (!useLimelightLocation.getAsBoolean()) {
             return Optional.empty();
         }
         return rawLimelightRobotPose();
     }
 
-    private static Optional<Pose2d> rawLimelightRobotPose() {
+    private Optional<Pose2d> rawLimelightRobotPose() {
         return limelight.getLocationalData().getBotposeBlue().map(Pose3d::toPose2d);
     }
 
@@ -76,7 +80,7 @@ public class RobotLocalization {
         return arrayOfPos;
     }
 
-    public static PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
+    public PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
         Pose2d currentPose = limelightRobotPose().orElseGet(drivePosSupplier);
         //Pose2d newPosition = currentPose.nearest(positions());
         Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
@@ -123,11 +127,11 @@ public class RobotLocalization {
         return path;
     }
 
-    private static final StructArrayPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructArrayTopic("Limelight pose", Pose2d.struct).publish();
-    private static final BooleanPublisher hasData = NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
+    private final StructArrayPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructArrayTopic("Limelight pose", Pose2d.struct).publish();
+    private final BooleanPublisher hasData = NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
     private static final Pose2d[] NO_POS = new Pose2d[0];
 
-    public static void updateDashboard() {
+    public void updateDashboard() {
         botpose.set(rawLimelightRobotPose().map(pos -> new Pose2d[]{pos}).orElse(NO_POS));
         hasData.accept(limelight.getJsonDump().isPresent());
     }
