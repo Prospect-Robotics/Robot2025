@@ -85,11 +85,14 @@ public class RobotLocalization {
 
     public static PathPlannerPath createPath(){
         Pose2d currentPose = getRobotPose();
-        Pose2d newPosition = findClosest();
+        //Pose2d newPosition = findClosest();
+        Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-            currentPose,
-            new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
+            //currentPose,
+            //new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
+            //new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
+            new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
             newPosition
         );
 
@@ -121,8 +124,8 @@ public class RobotLocalization {
                 waypoints,
                 constraints,
                 null,
-                //new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
-                new GoalEndState(0.0, newPosition.getRotation())
+                new GoalEndState(0.0, Rotation2d.fromDegrees(179.503))
+                //new GoalEndState(0.0, newPosition.getRotation())
         );
         return path;
     }
