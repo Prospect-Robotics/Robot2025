@@ -28,8 +28,6 @@ public class NamedCommandTest {
   
   @Test
   public void commandExists() {
-    var robotContainer = robotContainerProvider.get();
-
     assertThat(NamedCommands.hasCommand(commandName)).isTrue();
   }
 }
