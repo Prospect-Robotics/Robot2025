@@ -71,6 +71,9 @@ public class RobotContainer implements AutoCloseable {
   private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
+    
+    NamedCommands.registerCommand("LowerIntake", new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot));
+    
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
                     new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),

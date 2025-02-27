@@ -20,7 +20,7 @@ public class NamedCommandTest {
 
   @Parameters(name = "{0}")
   public static Collection<?> data() {
-    return Arrays.asList("ScoreL1", "ScoreL2", "ScoreL3", "BumpAlgaeLow", "BumpAlgaeHigh", "IntakeCoral");
+    return Arrays.asList("ScoreL1", "ScoreL2", "ScoreL3", "BumpAlgaeLow", "BumpAlgaeHigh", "IntakeCoral", "LowerIntake");
   }
   
   @Parameter
