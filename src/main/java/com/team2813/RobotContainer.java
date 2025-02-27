@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.events.EventTrigger;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
@@ -72,7 +73,15 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
     
-    NamedCommands.registerCommand("LowerIntake", new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot));
+    NamedCommands.registerCommand("PrepareL2", new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator)
+    ));
+    
+    NamedCommands.registerCommand("PrepareL3", new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator)
+    ));
     
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
@@ -142,6 +151,9 @@ public class RobotContainer implements AutoCloseable {
                     new InstantCommand(intakePivot::disable, intakePivot)
             )
     ));
+    
+    new EventTrigger("PrepareL2").onTrue(new DeferredCommand(() -> NamedCommands.getCommand("PrepareL2"), Set.of(intakePivot, elevator)));
+    new EventTrigger("PrepareL3").onTrue(new DeferredCommand(() -> NamedCommands.getCommand("PrepareL3"), Set.of(intakePivot, elevator)));
   }
 
   private static SendableChooser<Command> configureAuto(Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
