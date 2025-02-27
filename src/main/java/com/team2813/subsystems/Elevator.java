@@ -37,7 +37,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                 new MotorSubsystemConfiguration(
                         getMotor())
                         .controlMode(ControlMode.VOLTAGE)
-                        .acceptableError(10)
+                        .acceptableError(1.7)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
         shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);

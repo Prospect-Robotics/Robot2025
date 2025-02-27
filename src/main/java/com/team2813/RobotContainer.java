@@ -51,8 +51,7 @@ public class RobotContainer implements AutoCloseable {
     this.drive = new Drive(shuffleboard);
     this.elevator = new Elevator(shuffleboard);
     this.intakePivot = new IntakePivot(shuffleboard);
-    autoChooser = configureAuto(this.drive);
-
+    autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -63,18 +62,15 @@ public class RobotContainer implements AutoCloseable {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands);
-    configureAutoCommands(autoCommands);
-
   }
   
   /**
    * Configure PathPlanner named commands
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private void configureAutoCommands(RobotCommands autoCommands) {
+  private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_2 = Units.Seconds.of(2);
-    NamedCommands.registerCommand("score-coral", autoCommands.placeCoral());
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
                     new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
@@ -84,7 +80,8 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(elevator::disable, elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
 
@@ -99,7 +96,8 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
     NamedCommands.registerCommand("BumpAlgaeLow", new SequentialCommandGroup(
@@ -143,7 +141,7 @@ public class RobotContainer implements AutoCloseable {
     ));
   }
 
-  private static SendableChooser<Command> configureAuto(Drive drive) {
+  private static SendableChooser<Command> configureAuto(Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -171,6 +169,7 @@ public class RobotContainer implements AutoCloseable {
             },
             drive // Reference to this subsystem to set requirements
     );
+    configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
   }
 
@@ -224,6 +223,8 @@ public class RobotContainer implements AutoCloseable {
     PLACE_CORAL.onTrue(autoCommands.placeCoral());
     SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+    
+    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
     
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
