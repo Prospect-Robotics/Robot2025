@@ -215,11 +215,14 @@ public class Drive extends SubsystemBase {
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     StructPublisher<Pose2d> currentPose =
             NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
+    StructPublisher<Pose3d> limelightPose =
+            NetworkTableInstance.getDefault().getStructTopic("current limelight pose", Pose3d.struct).publish();
     
     @Override
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
+        Limelight.getDefaultLimelight().getLocationalData().getBotposeBlue().ifPresent(limelightPose::set);
         currentPose.set(getPose());
     }
 

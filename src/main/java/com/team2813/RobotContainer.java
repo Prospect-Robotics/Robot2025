@@ -152,7 +152,10 @@ public class RobotContainer implements AutoCloseable {
             )
     ));
     
-    new EventTrigger("PrepareL2").onTrue(new DeferredCommand(() -> NamedCommands.getCommand("PrepareL2"), Set.of(intakePivot, elevator)));
+    new EventTrigger("PrepareL2").onTrue(new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator)
+    ));
     new EventTrigger("PrepareL3").onTrue(new DeferredCommand(() -> NamedCommands.getCommand("PrepareL3"), Set.of(intakePivot, elevator)));
   }
 
