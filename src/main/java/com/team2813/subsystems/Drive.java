@@ -25,6 +25,7 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
@@ -155,13 +156,20 @@ public class Drive extends SubsystemBase {
      */
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle();
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
+    
+    private static boolean onRed() {
+        return DriverStation.getAlliance().map(alliance -> alliance == DriverStation.Alliance.Red).orElse(false);
+    }
+    
+    private boolean correctRotation = false;
 
     // Note: This is used for teleop drive.
     public void drive(double xSpeed, double ySpeed, double rotation) {
+        double multiplier = onRed() && correctRotation ? -this.multiplier : this.multiplier;
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
             .withVelocityY(ySpeed * multiplier)
-            .withRotationalRate(rotation * multiplier)
+            .withRotationalRate(rotation * this.multiplier)
             ); // Note: might not work, will need testing.
     }
     
@@ -198,9 +206,11 @@ public class Drive extends SubsystemBase {
         return drivetrain.getState().Pose;
     }
     public void resetPose() {
+        this.correctRotation = false;
         this.drivetrain.seedFieldCentric();
     }
     public void setPose(Pose2d pose) {
+        correctRotation = true;
         if (pose != null) {
             drivetrain.resetPose(pose);
         }
