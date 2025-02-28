@@ -70,6 +70,9 @@ public final class Constants {
         public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
         public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     }
+    public static enum PreferenceKey {
+        DRIVE_ADD_LIMELIGHT_MEASUREMENT, // boolean; used by com.team2813.subsystems.Drive.
+    }
     private Constants() {
         throw new AssertionError("Not instantiable");
     }
