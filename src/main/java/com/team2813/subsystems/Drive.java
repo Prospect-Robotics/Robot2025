@@ -45,7 +45,7 @@ import static edu.wpi.first.units.Units.Rotations;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
-    private static final String ADD_LIMELIGHT_MEASUREMENT_KEY = PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.name();
+    private static final String ADD_LIMELIGHT_MEASUREMENT_KEY = PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
