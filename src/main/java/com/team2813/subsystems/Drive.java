@@ -1,6 +1,7 @@
 package com.team2813.subsystems;
 
-import com.ctre.phoenix6.Utils;
+import static com.team2813.Constants.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -28,10 +29,8 @@ import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import java.util.concurrent.TimeUnit;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -233,17 +232,18 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
-        var limelightLocation = Limelight.getDefaultLimelight().getLocationalData();
-        limelightLocation.getBotposeBlue().ifPresent(pose -> {
+        var limelight = Limelight.getDefaultLimelight();
+        limelight.getLocationalData().getBotposeBlue().ifPresent(pose -> {
             limelightPose.set(pose);
-            if (addLimelightMeasurement) {
-                // Per the JavaDoc for addVisionMeasurement(), only ad vision measurements
-                // that are already within one meter or so of the current pose estimate.
+
+            if (addLimelightMeasurement && limelight.hasTarget()) {
+                // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
+                // that are already within one meter or so of the current odometry pose estimate.
                 var pos2d = pose.toPose2d();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
-                if (Math.abs(distance) < 1.0d) {
+                if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
                     // TODO(kcooney): Get the measurement time from the Limelight.
-                    double visionMeasurementTime = Utils.getCurrentTimeSeconds();
+                    double visionMeasurementTime = Timer.getFPGATimestamp();
                     drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
                 }
             }
