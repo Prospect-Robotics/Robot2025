@@ -209,13 +209,13 @@ public class Drive extends SubsystemBase {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
-    StructArrayPublisher<SwerveModuleState> expectedState =
+    private final StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
-    StructArrayPublisher<SwerveModuleState> actualState =
+    private final StructArrayPublisher<SwerveModuleState> actualState =
             NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
-    StructPublisher<Pose2d> currentPose =
+    private final StructPublisher<Pose2d> currentPose =
             NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
-    StructPublisher<Pose3d> limelightPose =
+    private final StructPublisher<Pose3d> limelightPose =
             NetworkTableInstance.getDefault().getStructTopic("current limelight pose", Pose3d.struct).publish();
     
     @Override

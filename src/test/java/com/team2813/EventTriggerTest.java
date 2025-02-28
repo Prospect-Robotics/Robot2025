@@ -17,8 +17,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 @RunWith(Parameterized.class)
 public class EventTriggerTest {
-  @Rule
-  public final RobotContainerProvider robotContainerProvider = new RobotContainerProvider();
+  private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
   
   public static class PathPlannerMap extends ExternalResource {
     private Map<String, Boolean> theMap;
@@ -51,6 +50,11 @@ public class EventTriggerTest {
   
   @Test
   public void eventExists() {
-    assertThat(pathPlannerMapProvider.getMap().containsKey(eventName)).isTrue();
+    try (var container = new RobotContainer(shuffleboard)) {
+      // The RobotContainer constructor has a side effect of registering named commands.
+      // Sadly, all the methods of NamedCommands are static, so we cannot make this
+      // dependency explicit.
+      assertThat(pathPlannerMapProvider.getMap().containsKey(eventName)).isTrue();
+    }
   }
 }
