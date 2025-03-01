@@ -282,7 +282,10 @@ public class RobotContainer implements AutoCloseable {
     ,new InstantCommand(climb::lower, climb)));
     CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
     
-    CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
+    CLIMB_UP.whileTrue(new SequentialCommandGroup(
+            new LockFunctionCommand(climb::limitSwitchPressed, climb::raise, climb),
+            new InstantCommand(climb::stop, climb)
+    ));
     CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
     
     ALGAE_BUMP.whileTrue(new SequentialCommandGroup(
