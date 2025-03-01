@@ -22,7 +22,7 @@ public class Intake extends SubsystemBase{
     private boolean isIntaking = false;
     private final PIDMotor intakeMotor;
     static final double INTAKE_SPEED = 4;
-    static final double OUTTAKE_SPEED = -4;
+    static final double OUTTAKE_SPEED = -3;
     static final double BUMP_SPEED = -4;
 
     public Intake() {
