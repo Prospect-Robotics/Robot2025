@@ -46,6 +46,10 @@ public class Intake extends SubsystemBase{
         intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
         isIntaking = false;
     }
+    public void slowOuttakeCoral() {
+        intakeMotor.set(ControlMode.VOLTAGE, 0.75 * OUTTAKE_SPEED);
+        isIntaking = false;
+    }
     public void bumpAlgae() {
         intakeMotor.set(ControlMode.VOLTAGE, BUMP_SPEED);
         isIntaking = false;

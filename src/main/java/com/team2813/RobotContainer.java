@@ -296,6 +296,9 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)
     ));
+    
+    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   public Command getAutonomousCommand() {
