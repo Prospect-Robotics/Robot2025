@@ -57,7 +57,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
+    public Drive(NetworkTableInstance networkTableInstance) {
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -138,10 +138,6 @@ public class Drive extends SubsystemBase {
                 false); // May need to change later.
         drivetrain = new SwerveDrivetrain<>(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
-        for (int i = 0; i < 4; i++) {
-            int temp = i;
-            shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-       }
         // Logging
         NetworkTable networkTable = networkTableInstance.getTable("Drive");
         expectedState = networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();

@@ -79,6 +79,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     
     @Override
     public void periodic() {
+        super.periodic();
         atPosition.set(atPosition());
     }
 }

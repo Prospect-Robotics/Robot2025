@@ -50,7 +50,7 @@ public class RobotContainer implements AutoCloseable {
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    this.drive = new Drive(shuffleboard, networkTableInstance);
+    this.drive = new Drive(networkTableInstance);
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
