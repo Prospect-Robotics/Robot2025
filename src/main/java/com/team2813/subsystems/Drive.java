@@ -12,8 +12,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.ShuffleboardTabs;
-import com.team2813.apriltag.Fiducial;
-import com.team2813.apriltag.FiducialRetriever;
+import com.team2813.lib2813.limelight.apriltag_map.Fiducial;
+import com.team2813.lib2813.limelight.apriltag_map.FiducialRetriever;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -247,7 +246,7 @@ public class Drive extends SubsystemBase {
         limelight.getLocationalData().getBotposeBlue().ifPresent(limelightPose::set);
         currentPose.set(getPose());
         Set<Integer> visibleIds = limelight.getVisibleTags();
-        List<Pose3d> poses = Arrays.stream(FiducialRetriever.getFiducials()).filter((fiducial) -> visibleIds.contains(fiducial.getId())).map(Fiducial::getPosition).toList();
+        List<Pose3d> poses = limelight.getLocatedApriltags();
         visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
     }
 
