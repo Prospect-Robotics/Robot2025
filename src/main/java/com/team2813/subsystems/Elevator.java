@@ -38,7 +38,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
                         .acceptableError(1.7)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
-        networkTable = networkTableInstance.getTable("Elevator");
+      NetworkTable networkTable = networkTableInstance.getTable("Elevator");
       atPosition = networkTable.getBooleanTopic("at position").publish();
     }
     
@@ -74,9 +74,8 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
             return position;
         }
     }
-    
-    private final NetworkTable networkTable;
-    private final BooleanPublisher atPosition;
+  
+  private final BooleanPublisher atPosition;
     
     @Override
     public void periodic() {

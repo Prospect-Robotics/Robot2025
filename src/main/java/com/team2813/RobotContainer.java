@@ -51,7 +51,7 @@ public class RobotContainer implements AutoCloseable {
   
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     this.drive = new Drive(shuffleboard, networkTableInstance);
-    this.elevator = new Elevator();
+    this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);

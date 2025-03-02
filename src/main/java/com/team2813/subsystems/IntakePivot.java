@@ -36,7 +36,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             .PID(19.875, 0,0.4)
         );
         // Logging
-        networkTable = networkTableInstance.getTable("IntakePivot");
+        NetworkTable networkTable = networkTableInstance.getTable("IntakePivot");
         intakePivotPosition = networkTable.getDoubleTopic("position").publish();
         atPosition = networkTable.getBooleanTopic("at position").publish();
     }
@@ -57,8 +57,7 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
 
         return pivotMotor;
     }
-    
-    private final NetworkTable networkTable;
+  
     private final DoublePublisher intakePivotPosition;
     private final BooleanPublisher atPosition;
 

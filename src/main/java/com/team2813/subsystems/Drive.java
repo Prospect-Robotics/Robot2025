@@ -142,8 +142,8 @@ public class Drive extends SubsystemBase {
             int temp = i;
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
        }
-        // logging
-        this.networkTable = networkTableInstance.getTable("Drive");
+        // Logging
+        NetworkTable networkTable = networkTableInstance.getTable("Drive");
         expectedState = networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
         actualState = networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
         currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
@@ -227,9 +227,7 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
-    
-    private final NetworkTable networkTable;
-    
+  
     private final StructArrayPublisher<SwerveModuleState> expectedState;
     private final StructArrayPublisher<SwerveModuleState> actualState;
     private final StructPublisher<Pose2d> currentPose;
