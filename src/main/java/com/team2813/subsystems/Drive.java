@@ -12,8 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.ShuffleboardTabs;
-import com.team2813.lib2813.limelight.apriltag_map.Fiducial;
-import com.team2813.lib2813.limelight.apriltag_map.FiducialRetriever;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,17 +20,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.IntStream;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -62,7 +57,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive(ShuffleboardTabs shuffleboard) {
+    public Drive(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -147,6 +142,14 @@ public class Drive extends SubsystemBase {
             int temp = i;
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
        }
+        // logging
+        this.networkTable = networkTableInstance.getTable("Drive");
+        expectedState = networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
+        actualState = networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
+        currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
+        limelightPose = networkTable.getStructTopic("current limelight pose", Pose3d.struct).publish();
+        visibleTargetPoses = networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
+        modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
     }
     
     private double getPosition(int moduleId) {
@@ -225,16 +228,14 @@ public class Drive extends SubsystemBase {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
     
-    private final StructArrayPublisher<SwerveModuleState> expectedState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
-    private final StructArrayPublisher<SwerveModuleState> actualState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
-    private final StructPublisher<Pose2d> currentPose =
-            NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
-    private final StructPublisher<Pose3d> limelightPose =
-            NetworkTableInstance.getDefault().getStructTopic("current limelight pose", Pose3d.struct).publish();
-    private final StructArrayPublisher<Pose3d> visibleTargetPoses =
-            NetworkTableInstance.getDefault().getStructArrayTopic("visible target poses", Pose3d.struct).publish();
+    private final NetworkTable networkTable;
+    
+    private final StructArrayPublisher<SwerveModuleState> expectedState;
+    private final StructArrayPublisher<SwerveModuleState> actualState;
+    private final StructPublisher<Pose2d> currentPose;
+    private final StructPublisher<Pose3d> limelightPose;
+    private final StructArrayPublisher<Pose3d> visibleTargetPoses;
+    private final DoubleArrayPublisher modulePositions;
     
     private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
     
@@ -245,9 +246,10 @@ public class Drive extends SubsystemBase {
         Limelight limelight = Limelight.getDefaultLimelight();
         limelight.getLocationalData().getBotposeBlue().ifPresent(limelightPose::set);
         currentPose.set(getPose());
-        Set<Integer> visibleIds = limelight.getVisibleTags();
         List<Pose3d> poses = limelight.getLocatedApriltags();
         visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
+        
+        modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
     }
 
     public void enableSlowMode(boolean enable) {

@@ -8,6 +8,9 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,7 +28,7 @@ public class Climb extends SubsystemBase implements AutoCloseable {
   private final PIDMotor climbMotor1;
   private final DigitalInput limitSwitch;
   
-  public Climb() {
+  public Climb(NetworkTableInstance networkTableInstance) {
     limitSwitch = new DigitalInput(0);
     TalonFXWrapper climbMotor1 = new TalonFXWrapper(CLIMB_1, InvertType.CLOCKWISE);
     climbMotor1.motor().setNeutralMode(NeutralModeValue.Brake);
@@ -41,6 +44,9 @@ public class Climb extends SubsystemBase implements AutoCloseable {
     );
     this.climbMotor1 = climbMotor1;
     climbMotor1.addFollower(CLIMB_2, InvertType.FOLLOW_MASTER);
+    // Logging
+    networkTable = networkTableInstance.getTable("Climb");
+    limitSwitchPressed = networkTable.getBooleanTopic("limit switch pressed").publish();
   }
   
   public void raise() {
@@ -61,8 +67,16 @@ public class Climb extends SubsystemBase implements AutoCloseable {
 		return limitSwitch.get();
 	}
   
+  private final NetworkTable networkTable;
+  private final BooleanPublisher limitSwitchPressed;
+  
   @Override
   public void close() {
     limitSwitch.close();
+  }
+  
+  @Override
+  public void periodic() {
+    limitSwitchPressed.set(limitSwitchPressed());
   }
 }

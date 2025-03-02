@@ -18,6 +18,7 @@ import com.team2813.commands.RobotCommands;
 import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -48,10 +49,10 @@ public class RobotContainer implements AutoCloseable {
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
-  public RobotContainer(ShuffleboardTabs shuffleboard) {
-    this.drive = new Drive(shuffleboard);
-    this.elevator = new Elevator(shuffleboard);
-    this.intakePivot = new IntakePivot(shuffleboard);
+  public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
+    this.drive = new Drive(shuffleboard, networkTableInstance);
+    this.elevator = new Elevator();
+    this.intakePivot = new IntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(

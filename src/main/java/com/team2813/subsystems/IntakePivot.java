@@ -8,6 +8,10 @@ import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.encoders.CancoderWrapper;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -21,7 +25,7 @@ import java.util.function.Supplier;
 */
 public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
   
-    public IntakePivot(ShuffleboardTabs shuffleboard) {
+    public IntakePivot(NetworkTableInstance networkTableInstance) {
         super(new MotorSubsystemConfiguration(
             pivotMotor(),
             new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
@@ -31,7 +35,10 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             .controlMode(ControlMode.VOLTAGE)
             .PID(19.875, 0,0.4)
         );
-        shuffleboard.getTab("Testing").addBoolean("Intakepivot pos", this::atPosition);
+        // Logging
+        networkTable = networkTableInstance.getTable("IntakePivot");
+        intakePivotPosition = networkTable.getDoubleTopic("position").publish();
+        atPosition = networkTable.getBooleanTopic("at position").publish();
     }
 
     @Deprecated
@@ -50,11 +57,16 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
 
         return pivotMotor;
     }
+    
+    private final NetworkTable networkTable;
+    private final DoublePublisher intakePivotPosition;
+    private final BooleanPublisher atPosition;
 
     @Override
     public void periodic() {
         super.periodic();
-        SmartDashboard.putNumber("Intake Pivot CANCoder Position", encoder.getPositionMeasure().in(Units.Rotations));
+        intakePivotPosition.set(getPositionMeasure().in(Units.Rotations));
+        atPosition.set(atPosition());
     }
 
     public enum Rotations implements Supplier<Angle>{
