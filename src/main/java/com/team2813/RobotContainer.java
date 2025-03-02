@@ -73,6 +73,7 @@ public class RobotContainer implements AutoCloseable {
    */
   private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
+    Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
     
     NamedCommands.registerCommand("PrepareL2", new ParallelCommandGroup(
@@ -146,7 +147,7 @@ public class RobotContainer implements AutoCloseable {
                     new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(SECONDS_2), //TODO: Wait until we have intaked a note.
+            new WaitCommand(SECONDS_1), //TODO: Wait until we have intaked a note.
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator),
