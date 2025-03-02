@@ -40,7 +40,7 @@ import static com.team2813.lib2813.util.ControlUtils.deadband;
 public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
   
-  private final Climb climb = new Climb();
+  private final Climb climb;
   private final Intake intake = new Intake();
   private final Elevator elevator;
   private final Drive drive;
@@ -53,6 +53,7 @@ public class RobotContainer implements AutoCloseable {
     this.drive = new Drive(shuffleboard, networkTableInstance);
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
+    this.climb = new Climb(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(

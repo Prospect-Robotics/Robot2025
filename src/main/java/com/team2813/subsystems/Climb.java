@@ -45,7 +45,7 @@ public class Climb extends SubsystemBase implements AutoCloseable {
     this.climbMotor1 = climbMotor1;
     climbMotor1.addFollower(CLIMB_2, InvertType.FOLLOW_MASTER);
     // Logging
-    NetworkTable networkTable = networkTableInstance.getTable("Climb");
+     NetworkTable networkTable = networkTableInstance.getTable("Climb");
     limitSwitchPressed = networkTable.getBooleanTopic("limit switch pressed").publish();
   }
   
