@@ -25,6 +25,7 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
@@ -203,6 +204,7 @@ public class Drive extends SubsystemBase {
     public void setPose(Pose2d pose) {
         if (pose != null) {
             drivetrain.resetPose(pose);
+            DriverStation.reportError("setPose() passed null! Possibly unintended behavior may occur!", false);
         }
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
