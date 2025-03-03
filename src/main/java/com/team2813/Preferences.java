@@ -14,6 +14,7 @@ import com.team2813.lib2813.preferences.DoublePreference;
  */
 public final class Preferences {
 
+  /** All boolean preferences for the robot. */
   public enum BooleanPref implements BooleanPreference {
     DRIVE_ADD_LIMELIGHT_MEASUREMENT;
 
@@ -34,6 +35,7 @@ public final class Preferences {
     }
   }
 
+  /** All double preferences for the robot. */
   public enum DoublePref implements DoublePreference {
     MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS(1.0);
 
