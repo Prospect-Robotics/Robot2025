@@ -1,6 +1,7 @@
 package com.team2813;
 
 import com.team2813.lib2813.preferences.BooleanPreference;
+import com.team2813.lib2813.preferences.DoublePreference;
 
 /**
  * Accessors for preferences for the robot.
@@ -29,6 +30,22 @@ public final class Preferences {
 
     @Override
     public boolean defaultValue() {
+      return defaultValue;
+    }
+  }
+
+  public enum DoublePref implements DoublePreference {
+    MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS(1.0);
+
+    DoublePref(double defaultValue) {
+      this.defaultValue = defaultValue;
+      initialize();
+    }
+
+    private final double defaultValue;
+
+    @Override
+    public double defaultValue() {
       return defaultValue;
     }
   }

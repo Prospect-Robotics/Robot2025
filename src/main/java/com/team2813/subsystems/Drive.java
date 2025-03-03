@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
 import static com.team2813.Preferences.BooleanPref.DRIVE_ADD_LIMELIGHT_MEASUREMENT;
+import static com.team2813.Preferences.DoublePref.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
 import static edu.wpi.first.units.Units.Rotations;
 
 /**
@@ -43,7 +44,8 @@ public class Drive extends SubsystemBase {
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
     private final boolean addLimelightMeasurement;
-    
+    private final double maxLimelightDifferenceMeters;
+
     /**
      * This measurement is <em>IN INCHES</em>
      */
@@ -55,22 +57,27 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    /** Configurable value for the {@code Drive} subsystem. */
+    /** Configurable values for the {@code Drive} subsystem. */
     public static class DriveConfiguration {
         public boolean addLimelightMeasurement;
+        public double maxLimelightDifferenceMeters = 1.0;
 
-        public static DriveConfiguration fromNetworkTables() {
+        /** Creates an instance from preference values stored in the robot's flash memory. */
+        public static DriveConfiguration fromPreferences() {
             var config = new DriveConfiguration();
             config.addLimelightMeasurement = DRIVE_ADD_LIMELIGHT_MEASUREMENT.get();
+            config.maxLimelightDifferenceMeters = MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS.get();
             return config;
         }
     }
 
     public Drive(ShuffleboardTabs shuffleboard) {
-        this(shuffleboard, DriveConfiguration.fromNetworkTables());
+        this(shuffleboard, DriveConfiguration.fromPreferences());
     }
 
     public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration configuration) {
+        addLimelightMeasurement = configuration.addLimelightMeasurement;
+        maxLimelightDifferenceMeters = configuration.maxLimelightDifferenceMeters;
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -155,8 +162,6 @@ public class Drive extends SubsystemBase {
             int temp = i;
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
         }
-
-        addLimelightMeasurement = configuration.addLimelightMeasurement;
     }
     
     private double getPosition(int moduleId) {
@@ -249,7 +254,7 @@ public class Drive extends SubsystemBase {
                 // that are already within one meter or so of the current odometry pose estimate.
                 var pos2d = pose.toPose2d();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
-                if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
+                if (Math.abs(distance) <= maxLimelightDifferenceMeters) {
                     double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
                     double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
                     drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
