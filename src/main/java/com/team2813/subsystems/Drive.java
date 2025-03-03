@@ -1,7 +1,5 @@
 package com.team2813.subsystems;
 
-import static com.team2813.Constants.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
-
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -13,7 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.team2813.Constants.PreferenceKey;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
@@ -29,16 +26,12 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
+import static com.team2813.Preferences.BooleanPref.DRIVE_ADD_LIMELIGHT_MEASUREMENT;
 import static edu.wpi.first.units.Units.Rotations;
-
-// Also add all the nescesary imports for constants and other things
-
-
 
 /**
 * This is the Drive. His name is Gary.
@@ -46,7 +39,6 @@ import static edu.wpi.first.units.Units.Rotations;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
-    private static final String ADD_LIMELIGHT_MEASUREMENT_KEY = PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
@@ -63,7 +55,22 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
+    /** Configurable value for the {@code Drive} subsystem. */
+    public static class DriveConfiguration {
+        public boolean addLimelightMeasurement;
+
+        public static DriveConfiguration fromNetworkTables() {
+            var config = new DriveConfiguration();
+            config.addLimelightMeasurement = DRIVE_ADD_LIMELIGHT_MEASUREMENT.get();
+            return config;
+        }
+    }
+
     public Drive(ShuffleboardTabs shuffleboard) {
+        this(shuffleboard, DriveConfiguration.fromNetworkTables());
+    }
+
+    public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration configuration) {
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -149,8 +156,7 @@ public class Drive extends SubsystemBase {
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
         }
 
-        Preferences.initBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
-        addLimelightMeasurement = Preferences.getBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
+        addLimelightMeasurement = configuration.addLimelightMeasurement;
     }
     
     private double getPosition(int moduleId) {
