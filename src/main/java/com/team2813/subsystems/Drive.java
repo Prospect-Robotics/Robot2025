@@ -204,7 +204,7 @@ public class Drive extends SubsystemBase {
     public void setPose(Pose2d pose) {
         if (pose != null) {
             drivetrain.resetPose(pose);
-            DriverStation.reportError("setPose() passed null! Possibly unintended behavior may occur!", false);
+            DriverStation.reportError("setPose() passed null! Possibly unintended behavior may occur!", false); // The 'false' parameter keeps this from printing the stack trace.
         }
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
