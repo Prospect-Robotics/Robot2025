@@ -4,7 +4,6 @@ import static com.team2813.Constants.ELEVATOR_1;
 import static com.team2813.Constants.ELEVATOR_2;
 import static edu.wpi.first.units.Units.Rotations;
 
-import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
@@ -12,10 +11,7 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.units.Units;
 
 import java.util.function.Supplier;
