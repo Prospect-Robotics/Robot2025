@@ -34,6 +34,11 @@ spotless {
         indentWithSpaces()
         endWithNewline()
     }
+    java {
+        removeUnusedImports()
+
+        formatAnnotations()  // fix formatting of type annotations
+    }
     groovyGradle {
         greclipse().configFile('greclipse-gradle.properties')
     }
