@@ -16,6 +16,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.Constants.PreferenceKey;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -233,7 +234,8 @@ public class Drive extends SubsystemBase {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         var limelight = Limelight.getDefaultLimelight();
-        limelight.getLocationalData().getBotposeBlue().ifPresent(pose -> {
+        LocationalData locationalData = limelight.getLocationalData();
+        locationalData.getBotposeBlue().ifPresent(pose -> {
             limelightPose.set(pose);
 
             if (addLimelightMeasurement && limelight.hasTarget()) {
@@ -242,8 +244,8 @@ public class Drive extends SubsystemBase {
                 var pos2d = pose.toPose2d();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
                 if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
-                    // TODO(kcooney): Get the measurement time from the Limelight.
-                    double visionMeasurementTime = Timer.getFPGATimestamp();
+                    double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
+                    double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
                     drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
                 }
             }
