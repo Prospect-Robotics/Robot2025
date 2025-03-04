@@ -190,18 +190,23 @@ public class Drive extends SubsystemBase {
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
 
+    /**
+     * Sets the rotation velocity of the robot
+     * @param rotationRate rotation rate in units as defined by the WPIlib unit library.
+     */
+
     public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
     
     public Pose2d getPose() {
-        //double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
-        //double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
         return drivetrain.getState().Pose;
     }
+
     public void resetPose() {
         this.drivetrain.seedFieldCentric();
     }
+    
     public void setPose(Pose2d pose) {
         if (pose != null) {
             drivetrain.resetPose(pose);
