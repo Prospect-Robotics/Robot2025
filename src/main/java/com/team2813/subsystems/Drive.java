@@ -57,8 +57,24 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    /** Configurable values for the {@code Drive} subsystem. */
+    /**
+     * Configurable values for the {@code Drive} subsystem.
+     *
+     * <p>The values in this class are mutable. Users of this class can modify
+     * the fields before passing an instance of this class to the {@code Drive}
+     * constructor (which will copy the values).
+     *
+     * <p>>Having fields vs. constructor parameters makes this class harder to
+     * use incorrectly (compared to a constructor which would take a bunch of
+     * primitive values that would have to be passed in the correct order). An
+     * alternative would be to use <a target="_parent"
+     * href="https://github.com/google/auto/blob/main/value/userguide/builders.md"
+     * >AutoValue with Builders</a> so that this class can be immutable (which
+     * would allow us to have a field of this type inside Drive instead of
+     * copying the values over).
+     */
     public static class DriveConfiguration {
+        // When adding fields here, add them as final fields to Drive as well.
         public boolean addLimelightMeasurement;
         public double maxLimelightDifferenceMeters = 1.0;
 
