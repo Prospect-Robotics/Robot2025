@@ -4,7 +4,6 @@
 
 package com.team2813;
 
-import com.team2813.BuildConstants;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DataLogManager;

@@ -1,6 +1,5 @@
 package com.team2813;
 
-import static com.google.common.truth.Truth.assertThat;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import org.junit.Test;
