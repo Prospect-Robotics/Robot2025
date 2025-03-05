@@ -1,6 +1,7 @@
 package com.team2813;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -16,7 +17,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class NamedCommandTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
   @Rule
-  private final NetworkTableResource networkTable = new NetworkTableResource();
+  public final NetworkTableResource networkTable = new NetworkTableResource();
 
   @Parameters(name = "{0}")
   public static Collection<?> data() {

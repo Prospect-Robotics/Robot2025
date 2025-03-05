@@ -2,6 +2,7 @@ package com.team2813;
 
 import com.pathplanner.lib.events.EventTrigger;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExternalResource;
 import org.junit.runner.RunWith;
@@ -18,7 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class EventTriggerTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
   @Rule
-  private final NetworkTableResource networkTable = new NetworkTableResource();
+  public final NetworkTableResource networkTable = new NetworkTableResource();
   
   public static class PathPlannerMap extends ExternalResource {
     private Map<String, Boolean> theMap;

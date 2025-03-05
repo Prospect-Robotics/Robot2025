@@ -1,6 +1,7 @@
 package com.team2813;
 
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -9,7 +10,8 @@ import org.junit.runners.JUnit4;
 public final class RobotContainerTest {
     private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
     
-    private final NetworkTableResource networkTable = new NetworkTableResource();
+    @Rule
+    public final NetworkTableResource networkTable = new NetworkTableResource();
 
     @Test
     public void constructorDoesNotRaise() {
