@@ -11,7 +11,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;

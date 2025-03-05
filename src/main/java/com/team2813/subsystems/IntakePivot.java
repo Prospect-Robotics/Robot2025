@@ -1,7 +1,6 @@
 package com.team2813.subsystems;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
@@ -14,7 +13,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import java.util.function.Supplier;
 /**
