@@ -43,8 +43,7 @@ public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
-    private final boolean addLimelightMeasurement;
-    private final double maxLimelightDifferenceMeters;
+    private final DriveConfiguration config;
 
     /**
      * This measurement is <em>IN INCHES</em>
@@ -59,15 +58,40 @@ public class Drive extends SubsystemBase {
 
     /** Configurable values for the {@code Drive} subsystem. */
     public static class DriveConfiguration {
-        public boolean addLimelightMeasurement;
-        public double maxLimelightDifferenceMeters = 1.0;
+        final boolean addLimelightMeasurement;
+        final double maxLimelightDifferenceMeters;
 
         /** Creates an instance from preference values stored in the robot's flash memory. */
         public static DriveConfiguration fromPreferences() {
-            var config = new DriveConfiguration();
-            config.addLimelightMeasurement = DRIVE_ADD_LIMELIGHT_MEASUREMENT.get();
-            config.maxLimelightDifferenceMeters = MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS.get();
-            return config;
+            return new DriveConfiguration.Builder()
+                    .addLimelightMeasurement(DRIVE_ADD_LIMELIGHT_MEASUREMENT.get())
+                    .maxLimelightDifferenceMeters(MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS.get())
+                    .build();
+        }
+
+        private DriveConfiguration(Builder builder) {
+            this.addLimelightMeasurement = builder.addLimelightMeasurement;
+            this.maxLimelightDifferenceMeters = builder.maxLimelightDifferenceMeters;
+        }
+
+        /** Builder for {@code DriveConfiguration} instances. */
+        public static class Builder {
+            private boolean addLimelightMeasurement;
+            private double maxLimelightDifferenceMeters = 1.0;
+
+            Builder addLimelightMeasurement(boolean enable) {
+                this.addLimelightMeasurement = enable;
+                return this;
+            }
+
+            Builder maxLimelightDifferenceMeters(double value) {
+                this.maxLimelightDifferenceMeters = value;
+                return this;
+            }
+
+            DriveConfiguration build() {
+                return new DriveConfiguration(this);
+            }
         }
     }
 
@@ -75,9 +99,8 @@ public class Drive extends SubsystemBase {
         this(shuffleboard, DriveConfiguration.fromPreferences());
     }
 
-    public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration configuration) {
-        addLimelightMeasurement = configuration.addLimelightMeasurement;
-        maxLimelightDifferenceMeters = configuration.maxLimelightDifferenceMeters;
+    public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration config) {
+        this.config = config;
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -249,12 +272,12 @@ public class Drive extends SubsystemBase {
         locationalData.getBotposeBlue().ifPresent(pose -> {
             limelightPose.set(pose);
 
-            if (addLimelightMeasurement && limelight.hasTarget()) {
+            if (config.addLimelightMeasurement && limelight.hasTarget()) {
                 // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
                 // that are already within one meter or so of the current odometry pose estimate.
                 var pos2d = pose.toPose2d();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
-                if (Math.abs(distance) <= maxLimelightDifferenceMeters) {
+                if (Math.abs(distance) <= config.maxLimelightDifferenceMeters) {
                     double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
                     double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
                     drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
