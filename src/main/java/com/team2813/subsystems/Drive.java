@@ -1,5 +1,7 @@
 package com.team2813.subsystems;
 
+import static com.team2813.Constants.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,8 +13,10 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.team2813.Constants.PreferenceKey;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -25,6 +29,8 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static com.team2813.Constants.*;
@@ -40,9 +46,11 @@ import static edu.wpi.first.units.Units.Rotations;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
+    private static final String ADD_LIMELIGHT_MEASUREMENT_KEY = PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    private final boolean addLimelightMeasurement;
     
     /**
      * This measurement is <em>IN INCHES</em>
@@ -139,7 +147,10 @@ public class Drive extends SubsystemBase {
         for (int i = 0; i < 4; i++) {
             int temp = i;
             shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-       }
+        }
+
+        Preferences.initBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
+        addLimelightMeasurement = Preferences.getBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
     }
     
     private double getPosition(int moduleId) {
@@ -222,7 +233,23 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
-        Limelight.getDefaultLimelight().getLocationalData().getBotposeBlue().ifPresent(limelightPose::set);
+        var limelight = Limelight.getDefaultLimelight();
+        LocationalData locationalData = limelight.getLocationalData();
+        locationalData.getBotposeBlue().ifPresent(pose -> {
+            limelightPose.set(pose);
+
+            if (addLimelightMeasurement && limelight.hasTarget()) {
+                // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
+                // that are already within one meter or so of the current odometry pose estimate.
+                var pos2d = pose.toPose2d();
+                var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
+                if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
+                    double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
+                    double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
+                    drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
+                }
+            }
+        });
         currentPose.set(getPose());
     }
 
