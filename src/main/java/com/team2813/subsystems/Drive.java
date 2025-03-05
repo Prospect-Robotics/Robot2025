@@ -64,7 +64,7 @@ public class Drive extends SubsystemBase {
      * the fields before passing an instance of this class to the {@code Drive}
      * constructor (which will copy the values).
      *
-     * <p>>Having fields vs. constructor parameters makes this class harder to
+     * <p>Having fields vs. constructor parameters makes this class harder to
      * use incorrectly (compared to a constructor which would take a bunch of
      * primitive values that would have to be passed in the correct order). An
      * alternative would be to use <a target="_parent"
