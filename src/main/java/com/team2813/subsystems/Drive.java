@@ -29,9 +29,10 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import java.util.function.LongSupplier;
+import java.util.function.Supplier;
+
 import static com.team2813.Constants.*;
-import static com.team2813.Preferences.BooleanPref.DRIVE_ADD_LIMELIGHT_MEASUREMENT;
-import static com.team2813.Preferences.DoublePref.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
 import static edu.wpi.first.units.Units.Rotations;
 
 /**
@@ -57,41 +58,21 @@ public class Drive extends SubsystemBase {
     // See above comment, do not delete past this line.
 
     /** Configurable values for the {@code Drive} subsystem. */
-    public static class DriveConfiguration {
-        final boolean addLimelightMeasurement;
-        final double maxLimelightDifferenceMeters;
+    public record DriveConfiguration(
+            boolean addLimelightMeasurement, double maxLimelightDifferenceMeters,
+            LongSupplier numAutosSupplier, Supplier<String> nameSupplier) {
 
-        /** Creates an instance from preference values stored in the robot's flash memory. */
+        /**
+         * Creates an instance from preference values stored in the robot's flash memory.
+         */
         public static DriveConfiguration fromPreferences() {
-            return new DriveConfiguration.Builder()
-                    .addLimelightMeasurement(DRIVE_ADD_LIMELIGHT_MEASUREMENT.get())
-                    .maxLimelightDifferenceMeters(MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS.get())
-                    .build();
-        }
-
-        private DriveConfiguration(Builder builder) {
-            this.addLimelightMeasurement = builder.addLimelightMeasurement;
-            this.maxLimelightDifferenceMeters = builder.maxLimelightDifferenceMeters;
-        }
-
-        /** Builder for {@code DriveConfiguration} instances. */
-        public static class Builder {
-            private boolean addLimelightMeasurement;
-            private double maxLimelightDifferenceMeters = 1.0;
-
-            Builder addLimelightMeasurement(boolean enable) {
-                this.addLimelightMeasurement = enable;
-                return this;
-            }
-
-            Builder maxLimelightDifferenceMeters(double value) {
-                this.maxLimelightDifferenceMeters = value;
-                return this;
-            }
-
-            DriveConfiguration build() {
-                return new DriveConfiguration(this);
-            }
+            var defaultConfig = new DriveConfiguration(
+                    false, // addLimelightMeasurement
+                    1.0, // maxLimelightDifferenceMeters
+                    () -> 42, // numAutosSupplier
+                    () -> "chicken" // nameSupplier
+            );
+            return PrefsV2.injectPreferences(defaultConfig);
         }
     }
 
