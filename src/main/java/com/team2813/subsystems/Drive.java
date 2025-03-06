@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.google.auto.value.AutoBuilder;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
@@ -29,8 +30,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import java.util.function.LongSupplier;
-import java.util.function.Supplier;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -59,20 +58,28 @@ public class Drive extends SubsystemBase {
 
     /** Configurable values for the {@code Drive} subsystem. */
     public record DriveConfiguration(
-            boolean addLimelightMeasurement, double maxLimelightDifferenceMeters,
-            LongSupplier numAutosSupplier, Supplier<String> nameSupplier) {
+            boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+
+        /** Creates a builder for {@code DriveConfiguration} with default values. */
+        public static Builder builder() {
+            return new AutoBuilder_Drive_DriveConfiguration_Builder()
+                    .addLimelightMeasurement(false)
+                    .maxLimelightDifferenceMeters(1.0);
+        }
 
         /**
          * Creates an instance from preference values stored in the robot's flash memory.
          */
         public static DriveConfiguration fromPreferences() {
-            var defaultConfig = new DriveConfiguration(
-                    false, // addLimelightMeasurement
-                    1.0, // maxLimelightDifferenceMeters
-                    () -> 42, // numAutosSupplier
-                    () -> "chicken" // nameSupplier
-            );
+            DriveConfiguration defaultConfig = builder().build();
             return PrefsV2.injectPreferences(defaultConfig);
+        }
+
+        @AutoBuilder
+        public interface Builder {
+            Builder addLimelightMeasurement(boolean enabled);
+            Builder maxLimelightDifferenceMeters(double value);
+            DriveConfiguration build();
         }
     }
 
