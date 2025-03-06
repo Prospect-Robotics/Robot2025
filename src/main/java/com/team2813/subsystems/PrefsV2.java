@@ -2,8 +2,12 @@ package com.team2813.subsystems;
 
 import com.team2813.lib2813.preferences.*;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.*;
 
 class PrefsV2 {
@@ -28,11 +32,21 @@ class PrefsV2 {
     }
   }
 
+  private static final Map<Type, BiFunction<RecordComponent, Object, Object>> TYPE_TO_RESOLVERS = new HashMap<>();
+
+  static {
+    SimpleBooleanPref.registerResolvers();
+    SimpleDoublePref.registerResolvers();
+    SimpleIntPref.registerResolvers();
+    SimpleLongPref.registerResolvers();
+    SimpleStringPref.registerResolvers();
+  }
+
   private static class SimpleBooleanPref extends SimplePref implements BooleanPreference {
     private final boolean defaultValue;
 
-    SimpleBooleanPref(Class<?> containingClass, String name, boolean defaultValue) {
-      super(containingClass, name);
+    SimpleBooleanPref(RecordComponent component, boolean defaultValue) {
+      super(component.getDeclaringRecord(), component.getName());
       this.defaultValue = defaultValue;
     }
 
@@ -40,13 +54,28 @@ class PrefsV2 {
     public boolean defaultValue() {
       return defaultValue;
     }
+
+    static void registerResolvers() {
+      TYPE_TO_RESOLVERS.put(Boolean.TYPE, (component, value) -> {
+        boolean defaultValue = (Boolean) value;
+        var pref = new SimpleBooleanPref(component, defaultValue);
+        pref.initialize();
+        return pref.get();
+      });
+      TYPE_TO_RESOLVERS.put(BooleanSupplier.class, (component, value) -> {
+        boolean defaultValue = ((BooleanSupplier) value).getAsBoolean();
+        var pref = new SimpleBooleanPref(component, defaultValue);
+        pref.initialize();
+        return pref.asSupplier();
+      });
+    }
   }
 
   private static class SimpleDoublePref extends SimplePref implements DoublePreference {
     private final double defaultValue;
 
-    SimpleDoublePref(Class<?> containingClass, String name, double defaultValue) {
-      super(containingClass, name);
+    SimpleDoublePref(RecordComponent component, double defaultValue) {
+      super(component.getDeclaringRecord(), component.getName());
       this.defaultValue = defaultValue;
     }
 
@@ -54,13 +83,28 @@ class PrefsV2 {
     public double defaultValue() {
       return defaultValue;
     }
+
+    static void registerResolvers() {
+      TYPE_TO_RESOLVERS.put(Double.TYPE, (component, value) -> {
+        double defaultValue = (Double) value;
+        var pref = new SimpleDoublePref(component, defaultValue);
+        pref.initialize();
+        return pref.get();
+      });
+      TYPE_TO_RESOLVERS.put(DoubleSupplier.class, (component, value) -> {
+        double defaultValue = ((DoubleSupplier) value).getAsDouble();
+        var pref = new SimpleDoublePref(component, defaultValue);
+        pref.initialize();
+        return pref.asSupplier();
+      });
+    }
   }
 
   private static class SimpleIntPref extends SimplePref implements IntPreference {
     private final int defaultValue;
 
-    SimpleIntPref(Class<?> containingClass, String name, int defaultValue) {
-      super(containingClass, name);
+    SimpleIntPref(RecordComponent component, int defaultValue) {
+      super(component.getDeclaringRecord(), component.getName());
       this.defaultValue = defaultValue;
     }
 
@@ -68,13 +112,28 @@ class PrefsV2 {
     public int defaultValue() {
       return defaultValue;
     }
+
+    static void registerResolvers() {
+      TYPE_TO_RESOLVERS.put(Integer.TYPE, (component, value) -> {
+        int defaultValue = (Integer) value;
+        var pref = new SimpleIntPref(component, defaultValue);
+        pref.initialize();
+        return pref.get();
+      });
+      TYPE_TO_RESOLVERS.put(IntSupplier.class, (component, value) -> {
+        int defaultValue = ((IntSupplier) value).getAsInt();
+        var pref = new SimpleIntPref(component, defaultValue);
+        pref.initialize();
+        return pref.asSupplier();
+      });
+    }
   }
 
   private static class SimpleLongPref extends SimplePref implements LongPreference {
     private final long defaultValue;
 
-    SimpleLongPref(Class<?> containingClass, String name, long defaultValue) {
-      super(containingClass, name);
+    SimpleLongPref(RecordComponent component, long defaultValue) {
+      super(component.getDeclaringRecord(), component.getName());
       this.defaultValue = defaultValue;
     }
 
@@ -82,19 +141,56 @@ class PrefsV2 {
     public long defaultValue() {
       return defaultValue;
     }
+
+    static void registerResolvers() {
+      TYPE_TO_RESOLVERS.put(Long.TYPE, (component, value) -> {
+        long defaultValue = (Long) value;
+        var pref = new SimpleLongPref(component, defaultValue);
+        pref.initialize();
+        return pref.get();
+      });
+      TYPE_TO_RESOLVERS.put(LongSupplier.class, (component, value) -> {
+        long defaultValue = ((LongSupplier) value).getAsLong();
+        var pref = new SimpleLongPref(component, defaultValue);
+        pref.initialize();
+        return pref.asSupplier();
+      });
+    }
   }
 
   private static class SimpleStringPref extends SimplePref implements StringPreference {
     private final String defaultValue;
 
-    SimpleStringPref(Class<?> containingClass, String name, String defaultValue) {
-      super(containingClass, name);
+    SimpleStringPref(RecordComponent component, String defaultValue) {
+      super(component.getDeclaringRecord(), component.getName());
       this.defaultValue = defaultValue;
     }
 
     @Override
     public String defaultValue() {
       return defaultValue;
+    }
+
+    static void registerResolvers() {
+      TYPE_TO_RESOLVERS.put(String.class, (component, value) -> {
+        String defaultValue = (String) value;
+        var pref = new SimpleStringPref(component, defaultValue);
+        pref.initialize();
+        return pref.get();
+      });
+      TYPE_TO_RESOLVERS.put(Supplier.class, (component, value) -> {
+        Type supplierType = ((ParameterizedType) component.getGenericType()).getActualTypeArguments()[0];
+        if (!supplierType.equals(String.class)) {
+          throw new IllegalArgumentException(String.format("Unsupported type for '%s': %s", component.getName(), component.getGenericType()));
+        }
+        Object defaultValue = ((Supplier<?>) value).get();
+        if (defaultValue == null) {
+          throw new IllegalArgumentException(String.format("Default value for '%s' cannot be null", component.getName()));
+        }
+        var pref = new SimpleStringPref(component, (String) defaultValue);
+        pref.initialize();
+        return pref.asSupplier();
+      });
     }
   }
 
@@ -132,68 +228,15 @@ class PrefsV2 {
       int i = 0;
       for (var component : Drive.DriveConfiguration.class.getRecordComponents()) {
         String name = component.getName();
-        var defaultValueField = clazz.getDeclaredField(name);
+        Field defaultValueField = clazz.getDeclaredField(name);
         defaultValueField.setAccessible(true);
         Class<?> type = component.getType();
         types[i] = type;
 
-        if (type.equals(String.class)) {
-          String defaultValue = (String) defaultValueField.get(configWithDefaults);
-          var pref = new SimpleStringPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.get();
-        } else if (type.equals(Supplier.class)) { // Supplier<String>
-          Type supplierType = ((ParameterizedType) component.getGenericType()).getActualTypeArguments()[0];
-          if (!supplierType.equals(String.class)) {
-            throw new IllegalArgumentException(String.format("Unsupported type for '%s': %s", name, component.getGenericType()));
-          }
-          Object defaultValue = ((Supplier<?>) defaultValueField.get(configWithDefaults)).get();
-          if (defaultValue == null) {
-            throw new IllegalArgumentException(String.format("Default value for '%s' cannot be null", name));
-          }
-          var pref = new SimpleStringPref(clazz, name, (String) defaultValue);
-          pref.initialize();
-          params[i] = pref.asSupplier();
-        } else if (type.equals(Boolean.TYPE)) {
-          boolean defaultValue = (Boolean) defaultValueField.get(configWithDefaults);
-          var pref = new SimpleBooleanPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.get();
-        } else if (type.equals(BooleanSupplier.class)) {
-          boolean defaultValue = ((BooleanSupplier) defaultValueField.get(configWithDefaults)).getAsBoolean();
-          var pref = new SimpleBooleanPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.asSupplier();
-        } else if (type.equals(Integer.TYPE)) {
-          int defaultValue = (Integer) defaultValueField.get(configWithDefaults);
-          var pref = new SimpleIntPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.get();
-        } else if (type.equals(IntSupplier.class)) {
-          int defaultValue = ((IntSupplier) defaultValueField.get(configWithDefaults)).getAsInt();
-          var pref = new SimpleIntPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.asSupplier();
-        } else if (type.equals(Long.TYPE)) {
-          long defaultValue = (Long) defaultValueField.get(configWithDefaults);
-          var pref = new SimpleLongPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.get();
-        } else if (type.equals(LongSupplier.class)) {
-          long defaultValue = ((LongSupplier) defaultValueField.get(configWithDefaults)).getAsLong();
-          var pref = new SimpleLongPref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.asSupplier();
-        } else if (type.equals(Double.TYPE)) {
-          double defaultValue = (Double) defaultValueField.get(configWithDefaults);
-          var pref = new SimpleDoublePref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.get();
-        } else if (type.equals(DoubleSupplier.class)) {
-          double defaultValue = ((DoubleSupplier) defaultValueField.get(configWithDefaults)).getAsDouble();
-          var pref = new SimpleDoublePref(clazz, name, defaultValue);
-          pref.initialize();
-          params[i] = pref.asSupplier();
+        var resolver = TYPE_TO_RESOLVERS.get(type);
+        if (resolver != null) {
+          Object defaultValue = defaultValueField.get(configWithDefaults);
+          params[i] = resolver.apply(component, defaultValue);
         } else {
           throw new IllegalArgumentException(String.format("Unsupported type for '%s': %s", name, type));
         }
