@@ -60,6 +60,12 @@ public class Drive extends SubsystemBase {
     public record DriveConfiguration(
             boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
 
+        public DriveConfiguration {
+            if (maxLimelightDifferenceMeters <= 0) {
+                throw new IllegalArgumentException("maxLimelightDifferenceMeters must be positive");
+            }
+        }
+
         /** Creates a builder for {@code DriveConfiguration} with default values. */
         public static Builder builder() {
             return new AutoBuilder_Drive_DriveConfiguration_Builder()
