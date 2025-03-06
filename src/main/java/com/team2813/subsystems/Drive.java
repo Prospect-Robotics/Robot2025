@@ -32,6 +32,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
+import java.util.function.LongSupplier;
+
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
 
@@ -59,7 +61,8 @@ public class Drive extends SubsystemBase {
 
     /** Configurable values for the {@code Drive} subsystem. */
     public record DriveConfiguration(
-            boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+            boolean addLimelightMeasurement, double maxLimelightDifferenceMeters,
+            LongSupplier limitSupplier) {
 
         public DriveConfiguration {
             if (maxLimelightDifferenceMeters <= 0) {
@@ -71,7 +74,8 @@ public class Drive extends SubsystemBase {
         public static Builder builder() {
             return new AutoBuilder_Drive_DriveConfiguration_Builder()
                     .addLimelightMeasurement(false)
-                    .maxLimelightDifferenceMeters(1.0);
+                    .maxLimelightDifferenceMeters(1.0)
+                    .limitSupplier(() -> 42);
         }
 
         /**
@@ -86,6 +90,7 @@ public class Drive extends SubsystemBase {
         public interface Builder {
             Builder addLimelightMeasurement(boolean enabled);
             Builder maxLimelightDifferenceMeters(double value);
+            Builder limitSupplier(LongSupplier value);
             DriveConfiguration build();
         }
     }
@@ -96,6 +101,9 @@ public class Drive extends SubsystemBase {
 
     public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration config) {
         this.config = config;
+        if (config.limitSupplier.getAsLong() != 42) {
+            throw new RuntimeException();
+        }
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
