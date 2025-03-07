@@ -58,7 +58,12 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    /** Configurable values for the {@code Drive} subsystem. */
+    /**
+     * Configurable values for the {@code Drive} subsystem
+     *
+     * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI,
+     * and will have keys starting with {@code "subsystems.Drive.DriveConfiguration."}.
+     */
     public record DriveConfiguration(
             boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
 
