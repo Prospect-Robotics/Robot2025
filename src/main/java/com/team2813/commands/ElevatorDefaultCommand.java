@@ -5,14 +5,16 @@ import com.team2813.subsystems.Elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 
-public class ElevatorDefaultCommand extends Command{ 
-    private final Elevator elevator;
+public class ElevatorDefaultCommand extends Command {
+  private final Elevator elevator;
   private final DoubleSupplier movement;
-    public ElevatorDefaultCommand(Elevator elevator, DoubleSupplier movement) {
+
+  public ElevatorDefaultCommand(Elevator elevator, DoubleSupplier movement) {
     this.elevator = elevator;
     this.movement = movement;
     addRequirements(elevator);
   }
+
   public void execute() {
     double val = movement.getAsDouble();
     if (Math.abs(val) > 0.1) {

@@ -4,7 +4,6 @@ import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class FakeShuffleboardTabs implements ShuffleboardTabs {
