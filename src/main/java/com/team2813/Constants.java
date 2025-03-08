@@ -45,6 +45,7 @@ public final class Constants {
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
 
+    public static double MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS = 1.0;
 
     public static final class DriverConstants {
         private DriverConstants() {
@@ -61,15 +62,32 @@ public final class Constants {
             throw new AssertionError("Not instantiable");
         }
         public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
-        public static Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
-        public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
-        public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.cross();
-        public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.triangle();
-        public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
-        public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
+        public static final Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
+        public static final Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
+        public static final Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.cross();
+        public static final Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.triangle();
+        public static final Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
+        public static final Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
         public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
-        public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
-        public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
+        public static final Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
+        public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
+    }
+
+    /**
+     * Keys for {@code Preference} values used by the robot.
+     *
+     * <p>Preferences are stored in the robot's flash memory, and can be
+     * updated in SmartDashboard/Shuffleboard.
+     *
+     * @see <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/robot-preferences.html"
+     * target="_top">Setting Robot Preferences</a>
+     */
+    public static enum PreferenceKey {
+        DRIVE_ADD_LIMELIGHT_MEASUREMENT; // boolean; used by com.team2813.subsystems.Drive.
+
+        public String key() {
+            return this.name();
+        }
     }
     private Constants() {
         throw new AssertionError("Not instantiable");
