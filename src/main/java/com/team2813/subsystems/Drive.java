@@ -248,7 +248,6 @@ public class Drive extends SubsystemBase {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
         Limelight limelight = Limelight.getDefaultLimelight();
-        limelight.getLocationalData().getBotposeBlue().ifPresent(limelightPose::set);
         LocationalData locationalData = limelight.getLocationalData();
         locationalData.getBotposeBlue().ifPresent(pose -> {
             limelightPose.set(pose);
@@ -266,7 +265,7 @@ public class Drive extends SubsystemBase {
             }
         });
         currentPose.set(getPose());
-        List<Pose3d> poses = limelight.getLocatedApriltags();
+        List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
         visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
         
         modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
