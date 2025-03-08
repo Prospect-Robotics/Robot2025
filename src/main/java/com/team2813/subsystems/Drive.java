@@ -44,8 +44,6 @@ public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
-    private static int logCounter = 10; // Changes how many times DS will print out a warning for null pose, to prevent a log flood. We may need to change the styling so its more java-like.
-    
     /**
      * This measurement is <em>IN INCHES</em>
      */
@@ -195,7 +193,7 @@ public class Drive extends SubsystemBase {
      * @param rotationRate rotation rate in units as defined by the WPIlib unit library.
      */
 
-    public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
+    public void setRotationVelocity(AngularVelocity rotationRate) {
         drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
     }
     
@@ -210,9 +208,8 @@ public class Drive extends SubsystemBase {
     public void setPose(Pose2d pose) {
         if (pose != null) {
             drivetrain.resetPose(pose);
-        } else if (logCounter >= 0) {
+        } else {
             DriverStation.reportError("setPose() passed null! Possibly unintended behavior may occur!", false); // The 'false' parameter keeps this from printing the stack trace.
-            logCounter--; // Here to prevent the log from being flooded;
         }
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
