@@ -1,6 +1,7 @@
 package com.team2813;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,6 +16,8 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(Parameterized.class)
 public class NamedCommandTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
+  @Rule
+  public final NetworkTableResource networkTable = new NetworkTableResource();
 
   @Parameters(name = "{0}")
   public static Collection<?> data() {
@@ -26,7 +29,7 @@ public class NamedCommandTest {
   
   @Test
   public void commandExists() {
-    try (var container = new RobotContainer(shuffleboard)) {
+    try (var container = new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {
       // The RobotContainer constructor has a side effect of registering named commands.
       // Sadly, all the methods of NamedCommands are static, so we cannot make this
       // dependency explicit.
