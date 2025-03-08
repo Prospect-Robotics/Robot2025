@@ -5,9 +5,15 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "top-0100-mirrored"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "IntakeCoral"
+            "name": "ScoreL2"
           }
         }
       ]
