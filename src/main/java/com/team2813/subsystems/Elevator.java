@@ -74,7 +74,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         }
     }
   
-  private final BooleanPublisher atPosition;
+    private final BooleanPublisher atPosition;
     
     @Override
     public void periodic() {
