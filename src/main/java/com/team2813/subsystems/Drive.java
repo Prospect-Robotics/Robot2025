@@ -15,7 +15,7 @@ import com.google.auto.value.AutoBuilder;
 import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
-import com.team2813.lib2813.preferences.PreferenceInjector;
+import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -85,7 +85,7 @@ public class Drive extends SubsystemBase {
          */
         public static DriveConfiguration fromPreferences() {
             DriveConfiguration defaultConfig = builder().build();
-            return PreferenceInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+            return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
         }
 
         @AutoBuilder
