@@ -35,7 +35,13 @@ spotless {
         endWithNewline()
     }
     java {
+        targetExclude('build/build_constants_autogen/**/*.*')
+        importOrder() // Use the default importOrder configuration (can override)
         removeUnusedImports()
+
+        // Use Google Java Format
+        // - aosp() causes it to use a four-space indent
+        googleJavaFormat('1.24.0').reflowLongStrings()
 
         formatAnnotations()  // fix formatting of type annotations
     }
