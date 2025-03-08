@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New New New Path"
+            "pathName": "left-lc2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]

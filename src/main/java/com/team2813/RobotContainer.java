@@ -18,6 +18,7 @@ import com.team2813.commands.RobotCommands;
 import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -39,7 +40,7 @@ import static com.team2813.lib2813.util.ControlUtils.deadband;
 public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
   
-  private final Climb climb = new Climb();
+  private final Climb climb;
   private final Intake intake = new Intake();
   private final Elevator elevator;
   private final Drive drive;
@@ -48,10 +49,11 @@ public class RobotContainer implements AutoCloseable {
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
-  public RobotContainer(ShuffleboardTabs shuffleboard) {
-    this.drive = new Drive(shuffleboard);
-    this.elevator = new Elevator(shuffleboard);
-    this.intakePivot = new IntakePivot(shuffleboard);
+  public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
+    this.drive = new Drive(networkTableInstance);
+    this.elevator = new Elevator(networkTableInstance);
+    this.intakePivot = new IntakePivot(networkTableInstance);
+    this.climb = new Climb(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
@@ -71,6 +73,7 @@ public class RobotContainer implements AutoCloseable {
    */
   private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
+    Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
     
     NamedCommands.registerCommand("PrepareL2", new ParallelCommandGroup(
@@ -144,7 +147,7 @@ public class RobotContainer implements AutoCloseable {
                     new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(SECONDS_1), //TODO: Wait until we have intaked a note.
+            new WaitCommand(Units.Seconds.of(1.25)), //TODO: Wait until we have intaked a note.
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator),
@@ -282,7 +285,10 @@ public class RobotContainer implements AutoCloseable {
     ,new InstantCommand(climb::lower, climb)));
     CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
     
-    CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
+    CLIMB_UP.whileTrue(new SequentialCommandGroup(
+            new LockFunctionCommand(climb::limitSwitchPressed, climb::raise, climb),
+            new InstantCommand(climb::stop, climb)
+    ));
     CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
     
     ALGAE_BUMP.whileTrue(new SequentialCommandGroup(
@@ -293,6 +299,9 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)
     ));
+    
+    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   public Command getAutonomousCommand() {

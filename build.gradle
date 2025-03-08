@@ -35,7 +35,13 @@ spotless {
         endWithNewline()
     }
     java {
+        targetExclude('build/build_constants_autogen/**/*.*')
+        importOrder() // Use the default importOrder configuration (can override)
         removeUnusedImports()
+
+        // Use Google Java Format
+        // - aosp() causes it to use a four-space indent
+        googleJavaFormat('1.24.0').reflowLongStrings()
 
         formatAnnotations()  // fix formatting of type annotations
     }
@@ -126,7 +132,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.14.2'
-    testImplementation "com.google.truth:truth:1.4.4"
+    testImplementation 'com.google.truth:truth:1.4.4'
 
     implementation 'com.team2813:lib2813'
     implementation 'com.team2813:limelight'

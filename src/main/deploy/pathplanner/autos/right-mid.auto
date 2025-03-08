@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "auto-test2"
+            "pathName": "bottom-0100-mirrored"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]

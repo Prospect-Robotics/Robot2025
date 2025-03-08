@@ -7,13 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "mid-a2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BumpAlgaeLow"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "New New Path"
+            "pathName": "a1-rc1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL3"
           }
         }
       ]

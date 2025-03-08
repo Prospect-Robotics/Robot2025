@@ -12,7 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
-import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
@@ -23,15 +22,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -96,13 +95,13 @@ public class Drive extends SubsystemBase {
         }
     }
 
-    public Drive(ShuffleboardTabs shuffleboard) {
-        this(shuffleboard, DriveConfiguration.fromPreferences());
+    public Drive(NetworkTableInstance networkTableInstance) {
+        this(networkTableInstance, DriveConfiguration.fromPreferences());
     }
 
-    public Drive(ShuffleboardTabs shuffleboard, DriveConfiguration config) {
+    public Drive(NetworkTableInstance networkTableInstance, DriveConfiguration config) {
         this.config = config;
-        
+
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
         double BLSteerOffset = -0.367919921875;
@@ -182,10 +181,15 @@ public class Drive extends SubsystemBase {
                 false); // May need to change later.
         drivetrain = new SwerveDrivetrain<>(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
-        for (int i = 0; i < 4; i++) {
-            int temp = i;
-            shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-        }
+
+        // Logging
+        NetworkTable networkTable = networkTableInstance.getTable("Drive");
+        expectedState = networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
+        actualState = networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
+        currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
+        limelightPose = networkTable.getStructTopic("current limelight pose", Pose3d.struct).publish();
+        visibleTargetPoses = networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
+        modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
     }
     
     private double getPosition(int moduleId) {
@@ -202,12 +206,19 @@ public class Drive extends SubsystemBase {
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle();
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
+    private static boolean onRed() {
+        return DriverStation.getAlliance().map(alliance -> alliance == DriverStation.Alliance.Red).orElse(false);
+    }
+
+    private boolean correctRotation = false;
+
     // Note: This is used for teleop drive.
     public void drive(double xSpeed, double ySpeed, double rotation) {
+        double multiplier = onRed() && correctRotation ? -this.multiplier : this.multiplier;
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
             .withVelocityY(ySpeed * multiplier)
-            .withRotationalRate(rotation * multiplier)
+            .withRotationalRate(rotation * this.multiplier)
             ); // Note: might not work, will need testing.
     }
     
@@ -244,9 +255,11 @@ public class Drive extends SubsystemBase {
         return drivetrain.getState().Pose;
     }
     public void resetPose() {
+        this.correctRotation = false;
         this.drivetrain.seedFieldCentric();
     }
     public void setPose(Pose2d pose) {
+        correctRotation = true;
         if (pose != null) {
             drivetrain.resetPose(pose);
         }
@@ -254,21 +267,21 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
-    
-    private final StructArrayPublisher<SwerveModuleState> expectedState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
-    private final StructArrayPublisher<SwerveModuleState> actualState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
-    private final StructPublisher<Pose2d> currentPose =
-            NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
-    private final StructPublisher<Pose3d> limelightPose =
-            NetworkTableInstance.getDefault().getStructTopic("current limelight pose", Pose3d.struct).publish();
+
+    private final StructArrayPublisher<SwerveModuleState> expectedState;
+    private final StructArrayPublisher<SwerveModuleState> actualState;
+    private final StructPublisher<Pose2d> currentPose;
+    private final StructPublisher<Pose3d> limelightPose;
+    private final StructArrayPublisher<Pose3d> visibleTargetPoses;
+    private final DoubleArrayPublisher modulePositions;
+
+    private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
     
     @Override
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
-        var limelight = Limelight.getDefaultLimelight();
+        Limelight limelight = Limelight.getDefaultLimelight();
         LocationalData locationalData = limelight.getLocationalData();
         locationalData.getBotposeBlue().ifPresent(pose -> {
             limelightPose.set(pose);
@@ -286,6 +299,10 @@ public class Drive extends SubsystemBase {
             }
         });
         currentPose.set(getPose());
+        List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
+        visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
+
+        modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
     }
 
     public void enableSlowMode(boolean enable) {
