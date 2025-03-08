@@ -13,77 +13,75 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
-
 import java.util.function.Supplier;
+
 /**
-* This is the Intake Pivot. Her name is Sophie.
-* Please be kind to her and say hi.
-* Have a nice day!
-*/
+ * This is the Intake Pivot. Her name is Sophie. Please be kind to her and say hi. Have a nice day!
+ */
 public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
-  
-    public IntakePivot(NetworkTableInstance networkTableInstance) {
-        super(new MotorSubsystemConfiguration(
-            pivotMotor(),
-            new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
+
+  public IntakePivot(NetworkTableInstance networkTableInstance) {
+    super(
+        new MotorSubsystemConfiguration(
+                pivotMotor(), new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
             .acceptableError(0.03)
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)
-            .PID(19.875, 0,0.4)
-        );
-        // Logging
-        NetworkTable networkTable = networkTableInstance.getTable("IntakePivot");
-        intakePivotPosition = networkTable.getDoubleTopic("position").publish();
-        atPosition = networkTable.getBooleanTopic("at position").publish();
+            .PID(19.875, 0, 0.4));
+    // Logging
+    NetworkTable networkTable = networkTableInstance.getTable("IntakePivot");
+    intakePivotPosition = networkTable.getDoubleTopic("position").publish();
+    atPosition = networkTable.getBooleanTopic("at position").publish();
+  }
+
+  @Deprecated
+  public void resetPosition() {
+    encoder.setPosition(Rotations.HARD_STOP.get());
+  }
+
+  @Override
+  protected void useOutput(double output, double setPoint) {
+    super.useOutput(output, setPoint);
+  }
+
+  private static PIDMotor pivotMotor() {
+    TalonFXWrapper pivotMotor =
+        new TalonFXWrapper(com.team2813.Constants.INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
+    pivotMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    return pivotMotor;
+  }
+
+  private final DoublePublisher intakePivotPosition;
+  private final BooleanPublisher atPosition;
+
+  @Override
+  public void periodic() {
+    super.periodic();
+    intakePivotPosition.set(getPositionMeasure().in(Units.Rotations));
+    atPosition.set(atPosition());
+  }
+
+  public enum Rotations implements Supplier<Angle> {
+    // 0.754883
+    // 0.695801
+    // 0.448721
+    // 0.695801
+    OUTTAKE(Units.Rotations.of(0.723389)), // TODO: NEEDS TUNING
+    INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDSTUNING
+    ALGAE_BUMP(Units.Rotations.of(1.108418)),
+    HARD_STOP(Units.Rotations.of(0.438721)); // TODO: NEEDS TUNING
+
+    Rotations(Angle pos) {
+      this.pos = pos;
     }
 
-    @Deprecated
-    public void resetPosition() {
-        encoder.setPosition(Rotations.HARD_STOP.get());
-    }
+    private final Angle pos;
 
     @Override
-    protected void useOutput(double output, double setPoint) {
-        super.useOutput(output, setPoint);
+    public Angle get() {
+      return pos;
     }
-
-    private static PIDMotor pivotMotor() {
-        TalonFXWrapper pivotMotor = new TalonFXWrapper(com.team2813.Constants.INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
-        pivotMotor.setNeutralMode(NeutralModeValue.Brake);
-
-        return pivotMotor;
-    }
-  
-    private final DoublePublisher intakePivotPosition;
-    private final BooleanPublisher atPosition;
-
-    @Override
-    public void periodic() {
-        super.periodic();
-        intakePivotPosition.set(getPositionMeasure().in(Units.Rotations));
-        atPosition.set(atPosition());
-    }
-
-    public enum Rotations implements Supplier<Angle>{
-        //0.754883
-        //0.695801
-        //0.448721
-        //0.695801
-        OUTTAKE(Units.Rotations.of(0.723389)), // TODO: NEEDS TUNING
-        INTAKE(Units.Rotations.of(0.448721)), // TODO: NEEDSTUNING
-        ALGAE_BUMP(Units.Rotations.of(1.108418)),
-        HARD_STOP(Units.Rotations.of(0.438721)); // TODO: NEEDS TUNING
-
-        Rotations(Angle pos) {
-            this.pos = pos;
-        }
-
-        private final Angle pos;
-
-        @Override
-        public Angle get() {
-            return pos;
-        }
-    }
+  }
 }
