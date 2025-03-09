@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://team2813.com/schema/preferences/draft/2025-03/preferences.schema.json",
+  "title": "Preferences",
+  "description": "Represents WPILib Preferences",
+  "type": "object",
+  "properties": {
+    "preferences": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "stringValue": { "$ref": "#/$defs/stringPreference" }
+              },
+              "required": ["stringValue"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "intValue": { "$ref": "#/$defs/integerPreference" }
+              },
+              "required": ["intValue"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "longValue": { "$ref": "#/$defs/integerPreference" }
+              },
+              "required": ["longValue"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "floatValue": { "$ref": "#/$defs/floatPreference" }
+              },
+              "required": ["floatValue"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "doubleValue": { "$ref": "#/$defs/booleanPreference" }
+              },
+              "required": ["doubleValue"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "description": {"type": "string"},
+                "booleanValue":  { "$ref": "#/$defs/floatPreference" }
+              },
+              "required": ["booleanValue"],
+              "additionalProperties": false
+            }
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+
+    "$defs": {
+      "integerPreference": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "integer"
+          }
+        },
+        "required": ["defaultValue"],
+        "additionalProperties": false
+      },
+      "floatPreference": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "number"
+          }
+        },
+        "required": ["defaultValue"],
+        "additionalProperties": false
+      },
+      "stringPreference": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "string"
+          }
+        },
+        "required": ["defaultValue"],
+        "additionalProperties": false
+      },
+      "booleanPreference": {
+        "type": "object",
+        "properties": {
+          "defaultValue": {
+            "type": "boolean"
+          }
+        },
+        "required": ["defaultValue"],
+        "additionalProperties": false
+      }
+    }
+  }
+}

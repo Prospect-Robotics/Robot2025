@@ -7,8 +7,7 @@ plugins {
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'
     id 'idea'
-    // Spotless code forma
-    // tter.
+    // Spotless code formatter.
     id 'com.diffplug.spotless' version '6.25.0'
     // Custom plugins
     id 'com.team2813.gradle.genPreferences'

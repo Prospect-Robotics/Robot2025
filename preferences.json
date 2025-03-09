@@ -1,0 +1,26 @@
+{
+  "$schema": "src/main/json/schema/preferences-schema.json",
+  "preferences": {
+    "name": {
+      "description": "The name of the team",
+      "stringValue": {
+        "defaultValue": "Gear Heads"
+      }
+    },
+    "team": {
+      "longValue": {
+        "defaultValue": 2813
+      }
+    },
+    "speed": {
+      "doubleValue": {
+        "defaultValue": 3.14
+      }
+    },
+    "enabled": {
+      "booleanValue": {
+        "defaultValue": false
+      }
+    }
+  }
+}
