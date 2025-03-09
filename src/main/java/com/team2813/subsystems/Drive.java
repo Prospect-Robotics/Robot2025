@@ -1,6 +1,8 @@
 package com.team2813.subsystems;
 
 import static com.team2813.Constants.*;
+import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
+import static com.team2813.lib2813.util.ControlUtils.deadband;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -15,6 +17,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
+import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
@@ -29,14 +32,13 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
 import java.util.stream.IntStream;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase {
-  public static final double MAX_VELOCITY = 6;
-  public static final double MAX_ROTATION = Math.PI * 2;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
 
@@ -57,7 +59,10 @@ public class Drive extends SubsystemBase {
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
-      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+      boolean addLimelightMeasurement,
+      double maxLimelightDifferenceMeters,
+      double maxVelocity,
+      double maxRotation) {
 
     public DriveConfiguration {
       if (maxLimelightDifferenceMeters <= 0) {
@@ -69,6 +74,8 @@ public class Drive extends SubsystemBase {
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(false)
+          .maxVelocity(6)
+          .maxRotation(Math.PI * 2)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -81,6 +88,10 @@ public class Drive extends SubsystemBase {
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
+
+      Builder maxVelocity(double velocity);
+
+      Builder maxRotation(double rotation);
 
       Builder maxLimelightDifferenceMeters(double value);
 
@@ -213,6 +224,20 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+  }
+
+  public Command defaultDriveCommand() {
+    return new DefaultDriveCommand(
+        this,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRotation);
+  }
+
+  private static double modifyAxis(double value) {
+    value = deadband(value, 0.1);
+    value = Math.copySign(value * value, value);
+    return value;
   }
 
   private double getPosition(int moduleId) {
