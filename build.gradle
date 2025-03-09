@@ -7,8 +7,11 @@ plugins {
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'
     id 'idea'
-    // Spotless code formatter.
+    // Spotless code forma
+    // tter.
     id 'com.diffplug.spotless' version '6.25.0'
+    // Custom plugins
+    id 'com.team2813.gradle.genPreferences'
 }
 
 // Download the source code for dependencies and the javadoc (in IntelliJ IDEA).
@@ -68,6 +71,9 @@ gversion {
     indent       = '  '
 }
 sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
+
+genPreferences {
+}
 
 def ROBOT_MAIN_CLASS = 'com.team2813.Main'
 

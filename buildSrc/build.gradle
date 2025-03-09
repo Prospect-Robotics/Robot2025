@@ -1,0 +1,20 @@
+plugins {
+    id 'java-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        create('GenPreferences') {
+            id = 'com.team2813.gradle.genPreferences'
+            implementationClass = 'com.team2813.gradle.GenPreferences'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.squareup:javapoet:1.12.1'
+}
