@@ -22,7 +22,6 @@ import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
@@ -44,7 +43,6 @@ public class Drive extends SubsystemBase {
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
 
-  private static final Translation2d poseOffset = new Translation2d(8.310213, 4.157313);
   private double multiplier = 1;
 
   static double frontDist = 0.330200;
@@ -283,13 +281,16 @@ public class Drive extends SubsystemBase {
     drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
   }
 
-  public void setRotationVelocity(AngularVelocity rotationRate) { // Uses WPIlib units library.
+  /**
+   * Sets the rotation velocity of the robot
+   *
+   * @param rotationRate rotation rate in units as defined by the WPIlib unit library.
+   */
+  public void setRotationVelocity(AngularVelocity rotationRate) {
     drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
   }
 
   public Pose2d getPose() {
-    // double x = this.drivetrain.getState().Pose.getX() + Drive.poseOffset.getX();
-    // double y = this.drivetrain.getState().Pose.getY() + Drive.poseOffset.getY();
     return drivetrain.getState().Pose;
   }
 
@@ -302,6 +303,10 @@ public class Drive extends SubsystemBase {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
+    } else {
+      DriverStation.reportError(
+          "setPose() passed null! Possibly unintended behavior may occur!",
+          false); // The 'false' parameter keeps this from printing the stack trace.
     }
   }
 
