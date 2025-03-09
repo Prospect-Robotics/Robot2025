@@ -1,5 +1,9 @@
 package com.team2813.subsystems;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.PIDMotor;
 import org.junit.Test;
@@ -7,15 +11,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Answers;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
-
 @RunWith(JUnit4.class)
 public final class IntakeTest {
   final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
 
-  static abstract class FakePIDMotor implements PIDMotor {
+  abstract static class FakePIDMotor implements PIDMotor {
     double dutyCycle = 0.0f;
 
     @Override
@@ -81,24 +81,24 @@ public final class IntakeTest {
     assertThat(intake.intaking()).isFalse();
     assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
   }
-  
+
   @Test
   public void bumpAlgae() {
     Intake intake = new Intake(fakeMotor);
-    
+
     intake.bumpAlgae();
-    
+
     assertThat(intake.intaking()).isFalse();
     assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(Intake.BUMP_SPEED);
   }
-  
+
   @Test
   public void stopAfterBumpingAlgae() {
     Intake intake = new Intake(fakeMotor);
     intake.bumpAlgae();
-    
+
     intake.stopIntakeMotor();
-    
+
     assertThat(intake.intaking()).isFalse();
     assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
   }

@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "auto-test2"
+            "pathName": "left-lc2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]
