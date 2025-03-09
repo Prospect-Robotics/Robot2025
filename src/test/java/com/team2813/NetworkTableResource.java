@@ -7,7 +7,7 @@ public final class NetworkTableResource extends ExternalResource {
   private NetworkTableInstance networkTableInstance;
 
   @Override
-  protected void before() throws Throwable {
+  protected void before() {
     networkTableInstance = NetworkTableInstance.create();
   }
 

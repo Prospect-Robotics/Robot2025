@@ -14,7 +14,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.team2813.Constants.*;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
@@ -49,8 +48,8 @@ public class Drive extends SubsystemBase {
 
   private double multiplier = 1;
 
-  static double frontDist = 0.330200;
-  static double leftDist = 0.330200;
+  static final double FRONT_DIST = 0.330200;
+  static final double LEFT_DIST = 0.330200;
 
   // See above comment, do not delete past this line.
 
@@ -111,8 +110,8 @@ public class Drive extends SubsystemBase {
                 FRONT_LEFT_DRIVE_ID,
                 FRONT_LEFT_ENCODER_ID,
                 FLSteerOffset,
-                frontDist,
-                leftDist,
+                FRONT_DIST,
+                LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -123,8 +122,8 @@ public class Drive extends SubsystemBase {
                 FRONT_RIGHT_DRIVE_ID,
                 FRONT_RIGHT_ENCODER_ID,
                 FRSteerOffset,
-                frontDist,
-                -leftDist,
+                FRONT_DIST,
+                -LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -135,8 +134,8 @@ public class Drive extends SubsystemBase {
                 BACK_LEFT_DRIVE_ID,
                 BACK_LEFT_ENCODER_ID,
                 BLSteerOffset,
-                -frontDist,
-                leftDist,
+                -FRONT_DIST,
+                LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -147,8 +146,8 @@ public class Drive extends SubsystemBase {
                 BACK_RIGHT_DRIVE_ID,
                 BACK_RIGHT_ENCODER_ID,
                 BRSteerOffset,
-                -frontDist,
-                -leftDist,
+                -FRONT_DIST,
+                -LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -298,7 +297,7 @@ public class Drive extends SubsystemBase {
             pose -> {
               limelightPose.set(pose);
 
-              if (addLimelightMeasurement && limelight.hasTarget()) {
+              if (addLimelightMeasurement && locationalData.hasTarget()) {
                 // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
                 // that are already within one meter or so of the current odometry pose estimate.
                 var pos2d = pose.toPose2d();

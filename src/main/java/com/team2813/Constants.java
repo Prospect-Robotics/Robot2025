@@ -47,7 +47,7 @@ public final class Constants {
   public static final int ALGAE_WHEEL = 22;
   public static final int ALGAE_ENCODER = 23;
 
-  public static double MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS = 1.0;
+  public static final double MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS = 1.0;
 
   public static final class DriverConstants {
     private DriverConstants() {
@@ -73,7 +73,7 @@ public final class Constants {
     public static final Trigger PREP_L3_CORAL = OPERATOR_CONTROLLER.triangle();
     public static final Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
     public static final Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
-    public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
+    public static final Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
     public static final Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
     public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
   }
@@ -88,7 +88,7 @@ public final class Constants {
    *     href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/robot-preferences.html"
    *     target="_top">Setting Robot Preferences</a>
    */
-  public static enum PreferenceKey {
+  public enum PreferenceKey {
     DRIVE_ADD_LIMELIGHT_MEASUREMENT; // boolean; used by com.team2813.subsystems.Drive.
 
     public String key() {

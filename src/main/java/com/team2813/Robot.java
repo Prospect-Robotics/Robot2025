@@ -109,5 +109,4 @@ public class Robot extends TimedRobot {
       Shuffleboard.selectTab(title);
     }
   }
-  ;
 }
