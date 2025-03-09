@@ -4,6 +4,8 @@ import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import java.util.function.BooleanSupplier;
+
 public final class Constants {
 
     // Drive train CAN IDs
@@ -71,7 +73,11 @@ public final class Constants {
         public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
         public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
         public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
-        public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
+        public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle().and(AllPreferences.useAutoAlignWaypoints());
+        public static Trigger AUTO_ALIGN_PATHFIND = OPERATOR_CONTROLLER.circle().and(not(AllPreferences.useAutoAlignWaypoints()));
+        private static BooleanSupplier not(BooleanSupplier supplier) {
+            return () -> !supplier.getAsBoolean();
+        }
     }
     private Constants() {
         throw new AssertionError("Not instantiable");

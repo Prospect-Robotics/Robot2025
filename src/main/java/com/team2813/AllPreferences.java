@@ -16,6 +16,10 @@ public class AllPreferences {
   public static BooleanSupplier useLimelightLocation() {
     return booleanPref(Key.USE_LIMELIGHT_LOCATION, false);
   }
+  
+  public static BooleanSupplier useAutoAlignWaypoints() {
+    return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true0);
+  }
 
   private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
     String name = key.name();
@@ -35,6 +39,7 @@ public class AllPreferences {
 
   private enum Key {
     USE_LIMELIGHT_LOCATION,
+    USE_AUTO_ALIGN_WAYPOINTS,
   }
 
   private AllPreferences() {

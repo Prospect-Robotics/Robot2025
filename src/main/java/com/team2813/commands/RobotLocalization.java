@@ -1,5 +1,6 @@
 package com.team2813.commands;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,6 +14,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,9 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import org.json.simple.parser.ParseException;
 
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
@@ -134,6 +139,19 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
                 //new GoalEndState(0.0, newPosition.getRotation())
         );
         return path;
+    }
+    
+    public Command createPathfindCommand() {
+        String pathName = "aaaalign";
+        PathPlannerPath path;
+        try {
+            path = PathPlannerPath.fromPathFile(pathName);
+        } catch (IOException | ParseException e) {
+            return Commands.print(String.format("An error occured when reading the path file \"%s\": ", e.getMessage()));
+        }
+        
+        PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+        return AutoBuilder.pathfindThenFollowPath(path, constraints);
     }
 
     private final StructArrayPublisher<Pose2d> botpose = NetworkTableInstance.getDefault().getStructArrayTopic("Limelight pose", Pose2d.struct).publish();
