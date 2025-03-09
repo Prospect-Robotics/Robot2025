@@ -87,16 +87,18 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
 
     public PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
 
-        Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
+        //Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
+        Pose2d currentPose = drivePosSupplier.get();
+        System.out.println("currentPose: " + currentPose);
         //Pose2d newPosition = currentPose.nearest(positions());
         Pose2d newPosition = new Pose2d(3.126, 4.196, Rotation2d.fromDegrees(0));
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-            //currentPose,
+            currentPose,
             //new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
             //new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
             //new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
-            currentPose,
+            //currentPose,
             newPosition
         );
 
