@@ -86,15 +86,17 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     }
 
     public PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
+
         Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
         //Pose2d newPosition = currentPose.nearest(positions());
-        Pose2d newPosition = new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(0));
+        Pose2d newPosition = new Pose2d(3.126, 4.196, Rotation2d.fromDegrees(0));
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
             //currentPose,
             //new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
             //new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
-            new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
+            //new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
+            currentPose,
             newPosition
         );
 
@@ -126,7 +128,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
                 waypoints,
                 constraints,
                 null,
-                new GoalEndState(0.0, Rotation2d.fromDegrees(179.503))
+                new GoalEndState(0.0, Rotation2d.fromDegrees(0))
                 //new GoalEndState(0.0, newPosition.getRotation())
         );
         return path;

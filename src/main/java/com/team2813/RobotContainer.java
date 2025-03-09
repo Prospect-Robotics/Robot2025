@@ -16,7 +16,8 @@ import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
 import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.commands.RobotLocalization;
-import com.team2813.subsystems.Drive;
+import com.team2813.lib2813.limelight.Limelight;
+import edu.wpi.first.math.geometry.Pose3d;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.units.Units;
@@ -25,9 +26,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.json.simple.parser.ParseException;
 
@@ -232,6 +230,7 @@ public class RobotContainer {
     PLACE_CORAL.onTrue(autoCommands.placeCoral());
     SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+    SETPOSE.onTrue(new InstantCommand(() -> Limelight.getDefaultLimelight().getLocationalData().getBotposeBlue().map(Pose3d::toPose2d).ifPresent(drive::setPose)));
     
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     AUTOALIGN.onTrue(AutoBuilder.followPath(localization.createPath(drive::getPose)));
