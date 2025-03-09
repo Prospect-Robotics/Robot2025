@@ -16,9 +16,9 @@ final class Requests {
           .withOverrideBrakeDurNeutral(false)
           .withLimitForwardMotion(false)
           .withLimitReverseMotion(false);
-  public static VoltageOut VOLTAGE_OUT = new VoltageOut(0);
-  public static TorqueCurrentFOC TORQUE_CURRENT_FOC = new TorqueCurrentFOC(0);
-  public static Function<Voltage, Double> CONVERT_VOLTAGE = (v) -> v.in(Units.Volts);
+  public static final VoltageOut VOLTAGE_OUT = new VoltageOut(0);
+  public static final TorqueCurrentFOC TORQUE_CURRENT_FOC = new TorqueCurrentFOC(0);
+  public static final Function<Voltage, Double> CONVERT_VOLTAGE = (v) -> v.in(Units.Volts);
 
   private Requests() {
     throw new AssertionError("Not instantiable!");

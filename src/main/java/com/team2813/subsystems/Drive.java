@@ -75,8 +75,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private double multiplier = 1;
   private double lastVisionEstimateTime = -1;
 
-  static double frontDist = 0.330200;
-  static double leftDist = 0.330200;
+  static final double FRONT_DIST = 0.330200;
+  static final double LEFT_DIST = 0.330200;
 
   /**
    * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
@@ -243,8 +243,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FRONT_LEFT_DRIVE_ID,
                 FRONT_LEFT_ENCODER_ID,
                 FLSteerOffset,
-                frontDist,
-                leftDist,
+                FRONT_DIST,
+                LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -255,8 +255,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FRONT_RIGHT_DRIVE_ID,
                 FRONT_RIGHT_ENCODER_ID,
                 FRSteerOffset,
-                frontDist,
-                -leftDist,
+                FRONT_DIST,
+                -LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -267,8 +267,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BACK_LEFT_DRIVE_ID,
                 BACK_LEFT_ENCODER_ID,
                 BLSteerOffset,
-                -frontDist,
-                leftDist,
+                -FRONT_DIST,
+                LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
@@ -279,8 +279,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BACK_RIGHT_DRIVE_ID,
                 BACK_RIGHT_ENCODER_ID,
                 BRSteerOffset,
-                -frontDist,
-                -leftDist,
+                -FRONT_DIST,
+                -LEFT_DIST,
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
