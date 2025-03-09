@@ -12,6 +12,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.ShuffleboardTabs;
+import com.team2813.commands.RobotLocalization;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,17 +24,10 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.team2813.commands.RobotLocalization;
-import com.team2813.commands.RobotLocalization.*;
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
-
-// Also add all the nescesary imports for constants and other things
-
-
 
 /**
 * This is the Drive. His name is Gary.
@@ -43,6 +37,7 @@ import static edu.wpi.first.units.Units.Rotations;
 public class Drive extends SubsystemBase {
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
+    private final RobotLocalization localization;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
     
     /**
@@ -56,7 +51,8 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive(ShuffleboardTabs shuffleboard) {
+    public Drive(ShuffleboardTabs shuffleboard, RobotLocalization localization) {
+        this.localization = localization;
         
         double FLSteerOffset = 0.22021484375;
         double FRSteerOffset = -0.085693359375;
@@ -207,6 +203,9 @@ public class Drive extends SubsystemBase {
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
     }
+    public void addVisionMeasurement(RobotLocalization.Location location) {
+        drivetrain.addVisionMeasurement(location.pos(), location.timestampSeconds());
+    }
     
     StructArrayPublisher<SwerveModuleState> expectedState =
             NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
@@ -219,10 +218,9 @@ public class Drive extends SubsystemBase {
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
-        //currentPose.set(getPose());
-        //RobotLocalization.getRobotPose();
-        currentPose.set(RobotLocalization.getRobotPose());
-        RobotLocalization.updateDashboard();
+        currentPose.set(getPose());
+        localization.limelightLocation().ifPresent(this::addVisionMeasurement);
+        localization.updateDashboard();
     }
 
     public void enableSlowMode(boolean enable) {
