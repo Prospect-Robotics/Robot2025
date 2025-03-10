@@ -18,7 +18,7 @@ public class AllPreferences {
   }
   
   public static BooleanSupplier useAutoAlignWaypoints() {
-    return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true0);
+    return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true);
   }
 
   private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
