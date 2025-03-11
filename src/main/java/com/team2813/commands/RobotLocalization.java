@@ -66,7 +66,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     arrayOfPos.add(new Pose2d(5.8, 3.857, Rotation2d.fromDegrees(180))); // 4r *
 
     arrayOfPos.add(new Pose2d(5.286, 3.017, Rotation2d.fromDegrees(120))); // 5l*
-    arrayOfPos.add(new Pose2d(4.988, 2.838, Rotation2d.fromDegrees(120))); //5r *
+    arrayOfPos.add(new Pose2d(4.988, 2.838, Rotation2d.fromDegrees(120))); // 5r *
 
     arrayOfPos.add(new Pose2d(3.699, 3.004, Rotation2d.fromDegrees(60))); // 6l *
     arrayOfPos.add(new Pose2d(3.981, 2.840, Rotation2d.fromDegrees(60))); // 6r*
