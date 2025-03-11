@@ -233,7 +233,7 @@ public class RobotContainer {
     SETPOSE.onTrue(new InstantCommand(() -> Limelight.getDefaultLimelight().getLocationalData().getBotposeBlue().map(Pose3d::toPose2d).ifPresent(drive::setPose)));
     
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
-    AUTOALIGN.onTrue(AutoBuilder.followPath(localization.createPath(drive::getPose)));
+    AUTOALIGN.onTrue(new DeferredCommand(() -> AutoBuilder.followPath(localization.createPath(drive::getPose)), Set.of(drive)));
     AUTO_ALIGN_PATHFIND.onTrue(new DeferredCommand(localization::createPathfindCommand, Set.of(drive)));
     
     SYSID_RUN.whileTrue(new DeferredCommand(sysIdRoutineSelector::getSelected, sysIdRoutineSelector.getRequirements()));
