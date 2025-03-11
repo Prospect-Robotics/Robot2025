@@ -17,7 +17,9 @@ public final class SwerveSysidRequest implements SwerveRequest {
   }
 
   @Override
-  public StatusCode apply(SwerveDrivetrain.SwerveControlParameters parameters, SwerveModule<?, ?, ?>... modulesToApply) {
+  public StatusCode apply(
+      SwerveDrivetrain.SwerveControlParameters parameters,
+      SwerveModule<?, ?, ?>... modulesToApply) {
     for (var module : modulesToApply) {
       motorType.performControl(module, requestType.fromVoltage(curVoltage));
     }
