@@ -4,11 +4,11 @@
 
 package com.team2813;
 
-import com.team2813.BuildConstants;
 
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.cameraserver.CameraServer;
 
 public class Robot extends TimedRobot {
   private final static StringPublisher m_buildConstantsGitShaPublisher = NetworkTableInstance.getDefault()
@@ -25,7 +26,7 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
-    m_robotContainer = new RobotContainer(new RealShuffleboardTabs());
+    m_robotContainer = new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
   }
   
   @Override
@@ -41,6 +42,8 @@ public class Robot extends TimedRobot {
     if (eventName == null || eventName.isBlank()) {
       SignalLogger.start();
     }
+
+  CameraServer.startAutomaticCapture();
   }
   @Override
   public void robotPeriodic() {

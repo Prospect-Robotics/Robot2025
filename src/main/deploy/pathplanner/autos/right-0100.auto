@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New Path"
+            "pathName": "top-0100-mirrored"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "New New Path"
+            "name": "ScoreL2"
           }
         }
       ]

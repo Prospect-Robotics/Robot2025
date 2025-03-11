@@ -1,25 +1,22 @@
 package com.team2813.subsystems;
 
-import static com.team2813.Constants.ELEVATOR_1;
-import static com.team2813.Constants.ELEVATOR_2;
-import static edu.wpi.first.units.Units.Rotations;
-
-import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.team2813.ShuffleboardTabs;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
 
 import java.util.function.Supplier;
-import edu.wpi.first.networktables.*;
+
+import static com.team2813.Constants.ELEVATOR_1;
+import static com.team2813.Constants.ELEVATOR_2;
+import static edu.wpi.first.units.Units.Rotations;
 /**
 * This is the Elevator. His name is Pablo.
 * Please be kind to him and say hi.
@@ -32,15 +29,16 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     // AND TESTED AS IT WAS JUST COPIED FROM FENDER BENDER WITH MINIMUM CHANGES."
     // HERE BE DRAGONS.
     // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper taped to the wall, rather than raid a blood donation clinic."
-    public Elevator(ShuffleboardTabs shuffleboard) {
+    public Elevator(NetworkTableInstance networkTableInstance) {
         super(
                 new MotorSubsystemConfiguration(
                         getMotor())
                         .controlMode(ControlMode.VOLTAGE)
-                        .acceptableError(0.5)
+                        .acceptableError(1.7)
                         .PID(0.201524,0,0.0004)
                         .rotationUnit(Units.Radians));
-        shuffleboard.getTab("Testing").addBoolean("Elevator pos", this::atPosition);
+      NetworkTable networkTable = networkTableInstance.getTable("Elevator");
+      atPosition = networkTable.getBooleanTopic("at position").publish();
     }
     
     private static TalonFXWrapper getMotor() {
@@ -56,7 +54,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         if (output > 0) {
             output += 0.40798;
         }
-        super.useOutput(MathUtil.clamp(output, -8, 8), setpoint);
+        super.useOutput(MathUtil.clamp(output, -6, 6), setpoint);
     }
 
     public enum Position implements Supplier<Angle> {
@@ -74,6 +72,14 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         public Angle get() {
             return position;
         }
+    }
+  
+    private final BooleanPublisher atPosition;
+    
+    @Override
+    public void periodic() {
+        super.periodic();
+        atPosition.set(atPosition());
     }
 }
 

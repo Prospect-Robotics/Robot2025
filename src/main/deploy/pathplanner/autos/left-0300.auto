@@ -7,37 +7,61 @@
         {
           "type": "path",
           "data": {
-            "pathName": "left-a2"
+            "pathName": "left-lc2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "BumpAlgaeHigh"
+            "name": "ScoreL2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "a2-rc2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "rc2-top_coral"
+            "pathName": "lc2-top_coral"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top_coral-lc4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "lc4-top_coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top_coral-rc4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]

@@ -39,6 +39,18 @@
           "data": {
             "name": "IntakeCoral"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top_coral-lc4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
+          }
         }
       ]
     }

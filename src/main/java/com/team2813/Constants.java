@@ -1,6 +1,5 @@
 package com.team2813;
 
-import com.team2813.subsystems.Drive;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -48,6 +47,8 @@ public final class Constants {
     public static final int ALGAE_WHEEL = 22;
     public static final int ALGAE_ENCODER = 23;
 
+    public static double MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS = 1.0;
+
     public static final class DriverConstants {
         private DriverConstants() {
             throw new AssertionError("Not instantiable");
@@ -70,13 +71,31 @@ public final class Constants {
         public static Trigger PREP_L2_CORAL =  OPERATOR_CONTROLLER.cross();
         public static Trigger PREP_L3_CORAL =  OPERATOR_CONTROLLER.triangle();
         public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
-        public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2();
+        public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
         public static Trigger CLIMB_DOWN =  OPERATOR_CONTROLLER.povDown();
         public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
         public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle().and(AllPreferences.useAutoAlignWaypoints());
         public static Trigger AUTO_ALIGN_PATHFIND = OPERATOR_CONTROLLER.circle().and(not(AllPreferences.useAutoAlignWaypoints()));
+      public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
         private static BooleanSupplier not(BooleanSupplier supplier) {
             return () -> !supplier.getAsBoolean();
+        }
+    }
+
+    /**
+     * Keys for {@code Preference} values used by the robot.
+     *
+     * <p>Preferences are stored in the robot's flash memory, and can be
+     * updated in SmartDashboard/Shuffleboard.
+     *
+     * @see <a href="https://docs.wpilib.org/en/stable/docs/software/basic-programming/robot-preferences.html"
+     * target="_top">Setting Robot Preferences</a>
+     */
+    public static enum PreferenceKey {
+        DRIVE_ADD_LIMELIGHT_MEASUREMENT; // boolean; used by com.team2813.subsystems.Drive.
+
+        public String key() {
+            return this.name();
         }
     }
     private Constants() {

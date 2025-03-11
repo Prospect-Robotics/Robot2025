@@ -1,5 +1,7 @@
 package com.team2813.subsystems;
 
+import static com.team2813.Constants.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -11,20 +13,27 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.team2813.ShuffleboardTabs;
+import com.team2813.Constants.PreferenceKey;
+import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
@@ -35,10 +44,12 @@ import static edu.wpi.first.units.Units.Rotations;
 * Have a nice day!
 */
 public class Drive extends SubsystemBase {
+    private static final String ADD_LIMELIGHT_MEASUREMENT_KEY = PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
     public static final double MAX_VELOCITY = 6;
     public static final double MAX_ROTATION = Math.PI * 2;
     private final RobotLocalization localization;
     private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+    private final boolean addLimelightMeasurement;
     
     /**
      * This measurement is <em>IN INCHES</em>
@@ -51,7 +62,7 @@ public class Drive extends SubsystemBase {
     static double leftDist = 0.330200;
     // See above comment, do not delete past this line.
 
-    public Drive(ShuffleboardTabs shuffleboard, RobotLocalization localization) {
+    public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
         this.localization = localization;
         
         double FLSteerOffset = 0.22021484375;
@@ -133,10 +144,16 @@ public class Drive extends SubsystemBase {
                 false); // May need to change later.
         drivetrain = new SwerveDrivetrain<>(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, frontLeft, frontRight, backLeft, backRight);
-        for (int i = 0; i < 4; i++) {
-            int temp = i;
-            shuffleboard.getTab("swerve").addDouble(String.format("Module [%d] position", i), () -> getPosition(temp));
-       }
+
+        Preferences.initBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
+        addLimelightMeasurement = Preferences.getBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
+        // Logging
+        NetworkTable networkTable = networkTableInstance.getTable("Drive");
+        expectedState = networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
+        actualState = networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
+        currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
+        visibleTargetPoses = networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
+        modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
     }
     
     private double getPosition(int moduleId) {
@@ -152,13 +169,20 @@ public class Drive extends SubsystemBase {
      */
     private final FieldCentricFacingAngle fieldCentricFacingAngleApplier = new FieldCentricFacingAngle();
     private final FieldCentric fieldCentricApplier = new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
+    
+    private static boolean onRed() {
+        return DriverStation.getAlliance().map(alliance -> alliance == DriverStation.Alliance.Red).orElse(false);
+    }
+    
+    private boolean correctRotation = false;
 
     // Note: This is used for teleop drive.
     public void drive(double xSpeed, double ySpeed, double rotation) {
+        double multiplier = onRed() && correctRotation ? -this.multiplier : this.multiplier;
         drivetrain.setControl(fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
             .withVelocityY(ySpeed * multiplier)
-            .withRotationalRate(rotation)
+            .withRotationalRate(rotation * this.multiplier)
             ); // Note: might not work, will need testing.
     }
     
@@ -195,10 +219,14 @@ public class Drive extends SubsystemBase {
         return drivetrain.getState().Pose;
     }
     public void resetPose() {
+        this.correctRotation = false;
         this.drivetrain.seedFieldCentric();
     }
     public void setPose(Pose2d pose) {
-        drivetrain.resetPose(pose);
+        correctRotation = true;
+        if (pose != null) {
+            drivetrain.resetPose(pose);
+        }
     }
     public ChassisSpeeds getRobotRelativeSpeeds() {
         return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
@@ -206,21 +234,41 @@ public class Drive extends SubsystemBase {
     public void addVisionMeasurement(RobotLocalization.Location location) {
         drivetrain.addVisionMeasurement(location.pos(), location.timestampSeconds());
     }
+  
+    private final StructArrayPublisher<SwerveModuleState> expectedState;
+    private final StructArrayPublisher<SwerveModuleState> actualState;
+    private final StructPublisher<Pose2d> currentPose;
+    private final StructArrayPublisher<Pose3d> visibleTargetPoses;
+    private final DoubleArrayPublisher modulePositions;
     
-    StructArrayPublisher<SwerveModuleState> expectedState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
-    StructArrayPublisher<SwerveModuleState> actualState =
-            NetworkTableInstance.getDefault().getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
-    StructPublisher<Pose2d> currentPose =
-            NetworkTableInstance.getDefault().getStructTopic("current pose", Pose2d.struct).publish();
+    private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
     
     @Override
     public void periodic() {
         expectedState.set(drivetrain.getState().ModuleTargets);
         actualState.set(drivetrain.getState().ModuleStates);
+        Limelight limelight = Limelight.getDefaultLimelight();
+        LocationalData locationalData = limelight.getLocationalData();
+        locationalData.getBotposeBlue().ifPresent(pose -> {
+            if (addLimelightMeasurement && limelight.hasTarget()) {
+                // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
+                // that are already within one meter or so of the current odometry pose estimate.
+                var pos2d = pose.toPose2d();
+                var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
+                if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
+                    double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
+                    double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
+                    drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
+                }
+            }
+        });
         currentPose.set(getPose());
         localization.limelightLocation().ifPresent(this::addVisionMeasurement);
         localization.updateDashboard();
+        List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
+        visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
+        
+        modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
     }
 
     public void enableSlowMode(boolean enable) {

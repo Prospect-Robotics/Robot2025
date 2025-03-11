@@ -10,6 +10,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.events.EventTrigger;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
@@ -20,6 +21,7 @@ import com.team2813.lib2813.limelight.Limelight;
 import edu.wpi.first.math.geometry.Pose3d;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,11 +38,12 @@ import java.util.Set;
 
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
+import static com.team2813.lib2813.util.ControlUtils.deadband;
 
-public class RobotContainer {
+public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
   
-  private final Climb climb = new Climb();
+  private final Climb climb;
   private final Intake intake = new Intake();
   private final Elevator elevator;
   private final Drive drive;
@@ -49,12 +52,13 @@ public class RobotContainer {
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
   
-  public RobotContainer(ShuffleboardTabs shuffleboard) {
+  public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     var localization = new RobotLocalization();
-    this.drive = new Drive(shuffleboard, localization);
-    this.elevator = new Elevator(shuffleboard);
-    this.intakePivot = new IntakePivot(shuffleboard);
-    autoChooser = configureAuto(this.drive);
+    this.drive = new Drive(networkTableInstance, localization);
+    this.elevator = new Elevator(networkTableInstance);
+    this.intakePivot = new IntakePivot(networkTableInstance);
+    this.climb = new Climb(networkTableInstance);
+    autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
             new DefaultDriveCommand(
@@ -65,16 +69,27 @@ public class RobotContainer {
     sysIdRoutineSelector = new SysIdRoutineSelector(new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands, localization);
-    configureAutoCommands();
   }
   
   /**
    * Configure PathPlanner named commands
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private void configureAutoCommands() {
+  private static void configureAutoCommands(Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
+    Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
+    
+    NamedCommands.registerCommand("PrepareL2", new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator)
+    ));
+    
+    NamedCommands.registerCommand("PrepareL3", new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator)
+    ));
+    
     NamedCommands.registerCommand("ScoreL2", new SequentialCommandGroup(
             new ParallelCommandGroup(
                     new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(SECONDS_2),
@@ -84,9 +99,11 @@ public class RobotContainer {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(elevator::disable, elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
+
     //TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an actual command)
     NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
     NamedCommands.registerCommand("ScoreL3", new SequentialCommandGroup(
@@ -98,7 +115,8 @@ public class RobotContainer {
             new WaitCommand(SECONDS_1), //TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
-                    new InstantCommand(elevator::disable, elevator)
+                    new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                    new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot)
             )
     ));
     NamedCommands.registerCommand("BumpAlgaeLow", new SequentialCommandGroup(
@@ -133,16 +151,22 @@ public class RobotContainer {
                     new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(SECONDS_2)
             ),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(SECONDS_1), //TODO: Wait until we have intaked a note.
+            new WaitCommand(Units.Seconds.of(1.25)), //TODO: Wait until we have intaked a note.
             new ParallelCommandGroup(
                     new InstantCommand(intake::stopIntakeMotor, intake),
                     new InstantCommand(elevator::disable, elevator),
                     new InstantCommand(intakePivot::disable, intakePivot)
             )
     ));
+    
+    new EventTrigger("PrepareL2").onTrue(new ParallelCommandGroup(
+            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+            new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator)
+    ));
+    new EventTrigger("PrepareL3").onTrue(new DeferredCommand(() -> NamedCommands.getCommand("PrepareL3"), Set.of(intakePivot, elevator)));
   }
 
-  private static SendableChooser<Command> configureAuto(Drive drive) {
+  private static SendableChooser<Command> configureAuto(Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -170,19 +194,8 @@ public class RobotContainer {
             },
             drive // Reference to this subsystem to set requirements
     );
+    configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
-  }
-  
-  private static double deadband(double value, double deadband) {
-    if (Math.abs(value) > deadband) {
-      if (value > 0) {
-        return (value - deadband) / (1 - deadband);
-      } else {
-        return (value + deadband) / (1 - deadband);
-      }
-    } else {
-      return 0;
-    }
   }
   
   private static double modifyAxis(double value) {
@@ -232,6 +245,8 @@ public class RobotContainer {
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     SETPOSE.onTrue(new InstantCommand(() -> Limelight.getDefaultLimelight().getLocationalData().getBotposeBlue().map(Pose3d::toPose2d).ifPresent(drive::setPose)));
     
+    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
+    
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so assume we control all of them
     AUTOALIGN.onTrue(new DeferredCommand(() -> AutoBuilder.followPath(localization.createPath(drive::getPose)), Set.of(drive)));
     AUTO_ALIGN_PATHFIND.onTrue(new DeferredCommand(localization::createPathfindCommand, Set.of(drive)));
@@ -241,14 +256,11 @@ public class RobotContainer {
             new SequentialCommandGroup(
                     new ParallelCommandGroup(
                             new LockFunctionCommand(elevator::atPosition, () -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator).withTimeout(Units.Seconds.of(2)),
-                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(Units.Seconds.of(2))
+                            new LockFunctionCommand(intakePivot::atPosition, () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot).withTimeout(Units.Seconds.of(0.5))
                     ),
                     new InstantCommand(intake::intakeCoral, intake)
             )
     );
-
-    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
-
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
     
     OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));
@@ -276,7 +288,10 @@ public class RobotContainer {
     ,new InstantCommand(climb::lower, climb)));
     CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
     
-    CLIMB_UP.onTrue(new InstantCommand(climb::raise, climb));
+    CLIMB_UP.whileTrue(new SequentialCommandGroup(
+            new LockFunctionCommand(climb::limitSwitchPressed, climb::raise, climb),
+            new InstantCommand(climb::stop, climb)
+    ));
     CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
     
     ALGAE_BUMP.whileTrue(new SequentialCommandGroup(
@@ -287,10 +302,17 @@ public class RobotContainer {
             new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)
     ));
+    
+    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
-}
 
+  @Override
+  public void close() {
+    climb.close();
+  }
+}

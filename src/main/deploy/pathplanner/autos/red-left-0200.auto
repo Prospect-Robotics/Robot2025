@@ -7,25 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "mid-a2"
+            "pathName": "left-lc2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "BumpAlgaeLow"
+            "name": "ScoreL2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "a1-rc1"
+            "pathName": "lc2-top_coral"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL3"
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "red-top_coral-lc4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
           }
         }
       ]
