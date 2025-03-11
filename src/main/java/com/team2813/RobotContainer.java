@@ -335,10 +335,7 @@ public class RobotContainer implements AutoCloseable {
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
     AUTOALIGN.onTrue(
-        new DeferredCommand(
-            () -> AutoBuilder.followPath(localization.createPath(drive::getPose)), Set.of(drive)));
-    AUTO_ALIGN_PATHFIND.onTrue(
-        new DeferredCommand(localization::createPathfindCommand, Set.of(drive)));
+        new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(

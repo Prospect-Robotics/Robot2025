@@ -87,7 +87,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  public PathPlannerPath createPath(Supplier<Pose2d> drivePosSupplier) {
+  private Command createPath(Supplier<Pose2d> drivePosSupplier) {
 
     // Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
     Pose2d currentPose = drivePosSupplier.get();
@@ -133,10 +133,18 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
             waypoints, constraints, null, new GoalEndState(0.0, Rotation2d.fromDegrees(0))
             // new GoalEndState(0.0, newPosition.getRotation())
             );
-    return path;
+    return AutoBuilder.followPath(path);
   }
 
-  public Command createPathfindCommand() {
+  public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
+    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+      return createPath(drivePosSupplier);
+    } else {
+      return createPathfindCommand();
+    }
+  }
+
+  private Command createPathfindCommand() {
     String pathName = "aaaalign";
     PathPlannerPath path;
     try {

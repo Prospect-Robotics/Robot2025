@@ -2,7 +2,6 @@ package com.team2813;
 
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import java.util.function.BooleanSupplier;
 
 public final class Constants {
 
@@ -76,17 +75,10 @@ public final class Constants {
     public static Trigger PREP_L3_CORAL = OPERATOR_CONTROLLER.triangle();
     public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
     public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
+    public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
     public static Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
     public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
-    public static Trigger AUTOALIGN =
-        OPERATOR_CONTROLLER.circle().and(AllPreferences.useAutoAlignWaypoints());
-    public static Trigger AUTO_ALIGN_PATHFIND =
-        OPERATOR_CONTROLLER.circle().and(not(AllPreferences.useAutoAlignWaypoints()));
-    public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
-
-    private static BooleanSupplier not(BooleanSupplier supplier) {
-      return () -> !supplier.getAsBoolean();
-    }
+    public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
   }
 
   /**
