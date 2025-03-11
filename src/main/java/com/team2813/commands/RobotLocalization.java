@@ -71,18 +71,23 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private static List<Pose2d> positions() {
     List<Pose2d> arrayOfPos = new ArrayList<>();
 
-    arrayOfPos.add(new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503))); // *
-    arrayOfPos.add(new Pose2d(2.828, 3.866, Rotation2d.fromDegrees(179.503))); // 1r *
-    arrayOfPos.add(new Pose2d(3.784, 5.527, Rotation2d.fromDegrees(121.217))); // 2l *
-    arrayOfPos.add(new Pose2d(3.497, 5.367, Rotation2d.fromDegrees(121.624))); // 2r *
-    arrayOfPos.add(new Pose2d(5.147, 5.550, Rotation2d.fromDegrees(61.367))); // 3l *
-    arrayOfPos.add(new Pose2d(5.456, 5.377, Rotation2d.fromDegrees(60.198))); // 3r*
-    arrayOfPos.add(new Pose2d(6.148, 4.181, Rotation2d.fromDegrees(-0.564))); // 4l *
-    arrayOfPos.add(new Pose2d(6.143, 3.857, Rotation2d.fromDegrees(-0.564))); // 4r*
-    arrayOfPos.add(new Pose2d(5.448, 2.662, Rotation2d.fromDegrees(-60.854))); // 5l*
-    arrayOfPos.add(new Pose2d(5.166, 2.499, Rotation2d.fromDegrees(-60.854))); // 5r *
-    arrayOfPos.add(new Pose2d(3.825, 2.492, Rotation2d.fromDegrees(-121.125))); // 6l *
-    arrayOfPos.add(new Pose2d(3.503, 2.682, Rotation2d.fromDegrees(-121.125))); // 6r*
+    arrayOfPos.add(new Pose2d(3.194, 4.189, Rotation2d.fromDegrees(0))); // *
+    arrayOfPos.add(new Pose2d(3.223, 3.852, Rotation2d.fromDegrees(0))); // 1r *
+
+    arrayOfPos.add(new Pose2d(3.988, 5.215, Rotation2d.fromDegrees(-60))); // 2l *
+    arrayOfPos.add(new Pose2d(3.704, 5.051, Rotation2d.fromDegrees(-60))); // 2r *
+
+    arrayOfPos.add(new Pose2d(5.283, 5.042, Rotation2d.fromDegrees(-120))); // 3l *
+    arrayOfPos.add(new Pose2d(4.994, 5.225, Rotation2d.fromDegrees(-120))); // 3r*
+
+    arrayOfPos.add(new Pose2d(5.8, 3.857, Rotation2d.fromDegrees(180))); // 4l *
+    arrayOfPos.add(new Pose2d(5.8, 4.186, Rotation2d.fromDegrees(180))); // 4r*
+
+    arrayOfPos.add(new Pose2d(4.988, 2.838, Rotation2d.fromDegrees(120))); // 5l*
+    arrayOfPos.add(new Pose2d(5.286, 3.017, Rotation2d.fromDegrees(120))); // 5r *
+
+    arrayOfPos.add(new Pose2d(3.699, 3.004, Rotation2d.fromDegrees(60))); // 6l *
+    arrayOfPos.add(new Pose2d(3.981, 2.840, Rotation2d.fromDegrees(60))); // 6r*
 
     return arrayOfPos;
   }
