@@ -330,7 +330,6 @@ public class RobotContainer implements AutoCloseable {
                     .getBotposeBlue()
                     .map(Pose3d::toPose2d)
                     .ifPresent(drive::setPose)));
-
     RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
