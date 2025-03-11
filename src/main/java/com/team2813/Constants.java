@@ -60,6 +60,9 @@ public final class Constants {
     public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     public static final Trigger RESET_POSE = DRIVER_CONTROLLER.triangle();
 
+    public static Trigger AUTO_ALIGN_LEFT = DRIVER_CONTROLLER.L2();
+    public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.R2();
+
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
   }
 

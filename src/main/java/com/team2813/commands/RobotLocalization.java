@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
@@ -49,25 +50,6 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
         .map(pos -> new Location(pos, System.currentTimeMillis()));
   }
 
-  /*private static ArrayList<Pose2d> positions() {
-      Pose2d one = new Pose2d(2.826,4.008,new Rotation2d(0));
-      Pose2d two = new Pose2d(3.666,5.46,new Rotation2d(0));
-      Pose2d three = new Pose2d(5.245,5.487,new Rotation2d(0));
-      Pose2d four = new Pose2d(6.147,3.995,new Rotation2d(0));
-      Pose2d five = new Pose2d(5.343,2.595,new Rotation2d(0));
-      Pose2d six = new Pose2d(3.699,2.563,new Rotation2d(0));
-
-      ArrayList<Pose2d> arrayOfPos = new ArrayList<Pose2d>();
-      arrayOfPos.add(one);
-      arrayOfPos.add(two);
-      arrayOfPos.add(three);
-      arrayOfPos.add(four);
-      arrayOfPos.add(five);
-      arrayOfPos.add(six);
-
-      return arrayOfPos;
-  }*/
-
   private static List<Pose2d> positions() {
     List<Pose2d> arrayOfPos = new ArrayList<>();
 
@@ -92,50 +74,42 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  private Command createPath(Supplier<Pose2d> drivePosSupplier) {
+  private static List<Pose2d> leftPositions() {
+    List<Pose2d> positions = positions();
+    int size = positions.size();
+    List<Pose2d> arrayOfPos = new ArrayList<>(size / 2);
+    for (int i = 0; i < size; i += 2) {
+      arrayOfPos.add(positions.get(i));
+    }
+    return arrayOfPos;
+  }
 
-    // Pose2d currentPose = limelightLocation().map(Location::pos).orElseGet(drivePosSupplier);
+  private static List<Pose2d> rightPositions() {
+    List<Pose2d> positions = positions();
+    int size = positions.size();
+    List<Pose2d> arrayOfPos = new ArrayList<>(size / 2);
+    for (int i = 1; i < size; i += 2) {
+      arrayOfPos.add(positions.get(i));
+    }
+    return arrayOfPos;
+  }
+
+  private final StructPublisher<Pose2d> lastPose =
+      NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
+
+  private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
     Pose2d currentPose = drivePosSupplier.get();
     System.out.println("currentPose: " + currentPose);
-    // Pose2d newPosition = currentPose.nearest(positions());
-    Pose2d newPosition = new Pose2d(3.126, 4.196, Rotation2d.fromDegrees(0));
+    Pose2d newPosition = currentPose.nearest(positions);
+    lastPose.set(newPosition);
 
-    List<Waypoint> waypoints =
-        PathPlannerPath.waypointsFromPoses(
-            currentPose,
-            // new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
-            // new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
-            // new Pose2d(currentPose.getX(), currentPose.getY(), Rotation2d.fromDegrees(0)),
-            // currentPose,
-            newPosition);
-
-    /*List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-        currentPose,
-        new Pose2d(currentPose.getX(), currentPose.getY(), currentPose.getRotation()),
-        new Pose2d(2.826, 4.196, Rotation2d.fromDegrees(179.503)) //*
-        //new Pose2d(2.828, 3.866, Rotation2d.fromDegrees(179.503) //1r *
-
-        //new Pose2d(3.784, 5.527, Rotation2d.fromDegrees(121.217)) //2l *
-        //new Pose2d(3.497, 5.367, Rotation2d.fromDegrees(121.624)) //2r *
-
-        //new Pose2d(5.147, 5.550, Rotation2d.fromDegrees(61.367)) //3l *
-        //new Pose2d(5.456, 5.377, Rotation2d.fromDegrees(60.198)) //3r*
-
-        //new Pose2d(6.148, 4.181, Rotation2d.fromDegrees(-0.564)) //4l *
-        //new Pose2d(6.143, 3.857, Rotation2d.fromDegrees(-0.564)) //4r*
-
-        //new Pose2d(5.448, 2.662, Rotation2d.fromDegrees(-60.854)) //5l*
-        //new Pose2d(5.166, 2.499, Rotation2d.fromDegrees(-60.854)) //5r *
-
-        //new Pose2d(3.825, 2.492, Rotation2d.fromDegrees(-121.125)) //6l *
-        //new Pose2d(3.503, 2.682, Rotation2d.fromDegrees(-121.125)) //6r*
-    );*/
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
 
     PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
 
     PathPlannerPath path =
         new PathPlannerPath(
-            waypoints, constraints, null, new GoalEndState(0.0, Rotation2d.fromDegrees(0))
+            waypoints, constraints, null, new GoalEndState(0.0, newPosition.getRotation())
             // new GoalEndState(0.0, newPosition.getRotation())
             );
     return AutoBuilder.followPath(path);
@@ -143,13 +117,32 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
 
   public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
     if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
-      return createPath(drivePosSupplier);
+      return createPath(drivePosSupplier, positions());
     } else {
       return createPathfindCommand();
     }
   }
 
+  public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
+    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+      return createPath(drivePosSupplier, leftPositions());
+    } else {
+      // TODO: be able to use left ones only
+      return createPathfindCommand();
+    }
+  }
+
+  public Command getRightAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
+    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+      return createPath(drivePosSupplier, rightPositions());
+    } else {
+      // TODO: be able to use right ones only
+      return createPathfindCommand();
+    }
+  }
+
   private Command createPathfindCommand() {
+    // TODO: use more than this command
     String pathName = "aaaalign";
     PathPlannerPath path;
     try {

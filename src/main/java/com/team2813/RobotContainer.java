@@ -336,6 +336,12 @@ public class RobotContainer implements AutoCloseable {
     // assume we control all of them
     AUTOALIGN.onTrue(
         new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
+    AUTO_ALIGN_LEFT.onTrue(
+        new DeferredCommand(
+            () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)));
+    AUTO_ALIGN_RIGHT.onTrue(
+        new DeferredCommand(
+            () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
