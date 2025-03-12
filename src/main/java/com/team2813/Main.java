@@ -4,12 +4,12 @@
 
 package com.team2813;
 
-import edu.wpi.first.wpilibj.RobotBase;
+import com.team2813.lib2813.util.RobotFactory;
 
 public final class Main {
   private Main() {}
 
   public static void main(String[] args) throws Exception {
-    RobotBase.startRobot(Robot::new);
+    RobotFactory.startRobot(Robot::new);
   }
 }

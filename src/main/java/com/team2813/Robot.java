@@ -5,28 +5,26 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.team2813.lib2813.util.ShuffleboardTabs;
+import com.team2813.lib2813.util.RobotFactory;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-public class Robot extends TimedRobot {
+class Robot extends TimedRobot {
   private static final StringPublisher m_buildConstantsGitShaPublisher =
       NetworkTableInstance.getDefault().getStringTopic("/BuildConstants/GitSha").publish();
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
-  public Robot() {
-    m_robotContainer =
-        new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
+  Robot(RobotFactory.Inputs inputs) {
+    // TODO: Add NetworkTableInstance t oRobotFactory.Inputs
+    m_robotContainer = new RobotContainer(inputs.shuffleboard(), NetworkTableInstance.getDefault());
   }
 
   @Override
@@ -98,17 +96,4 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {}
-
-  private static class RealShuffleboardTabs implements ShuffleboardTabs {
-    @Override
-    public ShuffleboardTab getTab(String title) {
-      return Shuffleboard.getTab(title);
-    }
-
-    @Override
-    public void selectTab(String title) {
-      Shuffleboard.selectTab(title);
-    }
-  }
-  ;
 }
