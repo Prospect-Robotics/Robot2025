@@ -1,6 +1,6 @@
 package com.team2813.sysid;
 
-import com.team2813.ShuffleboardTabs;
+import com.team2813.lib2813.util.ShuffleboardTabs;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
