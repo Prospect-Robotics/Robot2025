@@ -5,6 +5,7 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.team2813.lib2813.util.ShuffleboardTabs;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;

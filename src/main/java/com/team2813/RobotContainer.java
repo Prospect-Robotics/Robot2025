@@ -20,6 +20,7 @@ import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
+import com.team2813.lib2813.util.ShuffleboardTabs;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.networktables.NetworkTableInstance;

@@ -2,11 +2,12 @@ package com.team2813;
 
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
+import com.team2813.lib2813.util.ShuffleboardTabs;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class FakeShuffleboardTabs implements ShuffleboardTabs {
+public final class FakeShuffleboardTabs implements ShuffleboardTabs {
   private static final AtomicInteger nextValue = new AtomicInteger(1);
   private final String prefix;
 
