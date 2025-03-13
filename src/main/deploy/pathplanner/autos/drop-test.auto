@@ -9,11 +9,17 @@
           "data": {
             "name": "ScoreL2"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "lc4-top_coral"
+          }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
