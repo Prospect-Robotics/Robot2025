@@ -66,7 +66,7 @@ You must be connected to the robot's network in order to deploy (robot wifi, eth
 > [!NOTE]
 > This command is only tested under Linux and Mac, and will fail on Windows due to the Windows ping command not pinging infinitely.
 
-In order to use this, you need to run it, and you will eventuall get a successful ping from 10.28.13.2 (roboRIO's ip address).
+In order to use this, you need to run it, and you will eventually get a successful ping from 10.28.13.2 (roboRIO's ip address).
 After that, you can press CTRL+C to cancel the ping, and start the deploy process.
 If the deploy was successful, the terminal will be cleared, and if it fails, it will not be cleared, so you can see the error message.
 
