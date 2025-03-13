@@ -2,6 +2,11 @@
 
 This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
+## Pre-Clone Setup
+
+If you haven't cloned with HTTPS or SSH before, you need to set them up first.
+See the documentation for the [HTTPS setup](https://github.com/git-ecosystem/git-credential-manager/tree/release), and the [SSH Setup](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
+
 ## Cloning the Repository
 
 There are two different ways to clone the robot code in order to work on it.
@@ -29,41 +34,7 @@ git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.gi
 > If you plan to work on school wifi, you may want to consider using https.
 > This does not apply with the Coder setup, as the machine that it is running on does not have the ssh port blocked, so you will be able to work with GitHub regardless of location, as long as you have internet access.
 
-#### Setting up a SSH key
-
-In order to be able to authenticate, you need to create a ssh key, and add the public fingerprint to GitHub.
-If you already have a ssh key, you can skip this step.
-To generate the key, you can run
-```
-ssh-keygen -t rsa -b 4090
-```
-and follow the prompts.
-You can also create a different type of ssh key, or use the default number of bits.
-See the [ssh-keygen man page](https://linux.die.net/man/1/ssh-keygen) for more information.
-
-Then, you need to copy the contents of the public fingerprint (in the directory ~/.ssh by default).
-The default name is `id_rsa`, so the command to copy it would be
-```
-# linux
-cat ~/.ssh/id_rsa.pub | xclip -selection clipboard
-# mac
-cat ~/.ssh/id_rsa.pub | pbcopy
-# windows
-type ~\.ssh\id_rsa.pub | clip
-```
-> [!CAUTION]
-> Do not give the contents of your private key to anyone!
-> The file should have the same name as the public key, but without the .pub
-
-Then, in GitHub settings, you can add an ssh key, and add your new key, and then authentication should work!
-You can verfy it by running the following command, which should tell you your GitHub username if you are successfully authenticated.
-```
-ssh -T git@github.com
-```
-
-#### SSH Clone
-
-For the clone and submodule setup, you can run the following commands
+For the clone and submodule setup, you can run the following commands:
 
 > [!NOTE]
 > Anything after a hashtag (#) is a comment, and does not need to be put in.
@@ -87,11 +58,12 @@ To deploy from the command line you can run the following command while in the d
 # windows
 .\gradlew.bat deploy
 ```
+You must be connected to the robot's network in order to deploy (robot wifi, ethernet, or a USB-B cable).
 
 ### Command line one-liner
 
 > [!NOTE]
-> This command is only tested under Linux and Mac, and will likely fail on Windows due to different functionality of the ping command.
+> This command is only tested under Linux and Mac, and will fail on Windows due to the Windows ping command not pinging infinitely.
 
 In order to use this, you need to run it, and you will eventuall get a successful ping from 10.28.13.2 (roboRIO's ip address).
 After that, you can press CTRL+C to cancel the ping, and start the deploy process.
