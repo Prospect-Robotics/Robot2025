@@ -10,16 +10,19 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
-public class Intake extends SubsystemBase {
+public class Intake extends SubsystemBase implements AutoCloseable {
 
   private boolean isIntaking = false;
   private final PIDMotor intakeMotor;
   static final double INTAKE_SPEED = 4;
   static final double OUTTAKE_SPEED = -3;
   static final double BUMP_SPEED = -4;
+
+  private final DigitalInput beamBreak = new DigitalInput(1);
 
   public Intake() {
     this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
@@ -65,5 +68,14 @@ public class Intake extends SubsystemBase {
 
   boolean intaking() {
     return isIntaking;
+  }
+
+  public boolean hasNote() {
+    return beamBreak.get();
+  }
+
+  @Override
+  public void close() {
+    beamBreak.close();
   }
 }
