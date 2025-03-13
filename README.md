@@ -2,11 +2,6 @@
 
 This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
-## Pre-Clone Setup
-
-If you haven't cloned with HTTPS or SSH before, you need to set them up first.
-See the documentation for the [HTTPS setup](https://github.com/git-ecosystem/git-credential-manager/tree/release), and the [SSH Setup](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
-
 ## Cloning the Repository
 
 There are two different ways to clone the robot code in order to work on it.
@@ -14,6 +9,12 @@ The only difference between the two is what protocol is used to communicate with
 The reccomended method is HTTPS (Hypertext Transfer Protocol Secure), which will work on school wifi.
 The alternative is SSH (Secure Shell Protocol), which will not work on school wifi.
 You only need to follow the instructions for cloning with one protocol
+
+### Pre-Clone Setup
+
+If you haven't cloned with HTTPS or SSH before, you need to set them up first.
+See the documentation for the [HTTPS setup](https://github.com/git-ecosystem/git-credential-manager/tree/release), and the [SSH Setup](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
+
 
 ### Cloning with HTTPS
 
