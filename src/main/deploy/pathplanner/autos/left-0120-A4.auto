@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "left-lc2"
+            "pathName": "left-lc4"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "lc2-top_coral"
+            "pathName": "lc4-top_coral"
           }
         },
         {
@@ -31,13 +31,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "red-top_coral-lc4"
+            "pathName": "top_coral-lc4"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "ScoreL3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "lc4-top_coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "top_coral-rc4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL3"
           }
         }
       ]

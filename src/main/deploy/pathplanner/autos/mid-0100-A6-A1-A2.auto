@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "left-lc2"
+            "pathName": "mid-rc6"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "lc2-a2"
+            "pathName": "rc6-a6"
           }
         },
         {
@@ -31,25 +31,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "a2-top_coral"
+            "pathName": "a6-a1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "IntakeCoral"
+            "name": "BumpAlgaeLow"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "top_coral-lc2"
+            "pathName": "a1-a2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL3"
+            "name": "BumpAlgaeHigh"
           }
         }
       ]

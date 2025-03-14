@@ -78,6 +78,8 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
+    Time DROP_CORAL = Units.Seconds.of(0.25);
+    Time INTAKE_TIME = Units.Seconds.of(0.25);
 
     NamedCommands.registerCommand(
         "PrepareL2",
@@ -108,7 +110,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(SECONDS_1), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -133,7 +135,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(SECONDS_1), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
@@ -197,7 +199,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(Units.Seconds.of(1.25)), // TODO: Wait until we have intaked a note.
+            new WaitCommand(INTAKE_TIME), // TODO: Wait until we have intaked a note.
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
