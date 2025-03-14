@@ -6,7 +6,7 @@ This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
 There are two different ways to clone the robot code in order to work on it.
 The only difference between the two is what protocol is used to communicate with GitHub.
-The reccomended method is HTTPS (Hypertext Transfer Protocol Secure), which will work on school wifi.
+The recommended method is HTTPS (Hypertext Transfer Protocol Secure), which will work on school WiFi.
 The alternative is SSH (Secure Shell Protocol), which will not work on school wifi.
 You only need to follow the instructions for cloning with one protocol
 
@@ -18,7 +18,7 @@ See the documentation for the [HTTPS setup](https://github.com/git-ecosystem/git
 
 ### Cloning with HTTPS
 
-In order to clone the repository, with the `lib2813` submodule cloned as well.
+In order to clone the repository, with the `lib2813` submodule cloned as well, run:
 
 ```
 git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.git
@@ -31,9 +31,9 @@ git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.gi
 ### Cloning with SSH
 
 > [!CAUTION]
-> Currently, a ssh robot code setup will not be able to access GitHub on school wifi due to the ssh port being used.
-> If you plan to work on school wifi, you may want to consider using https.
-> This does not apply with the Coder setup, as the machine that it is running on does not have the ssh port blocked, so you will be able to work with GitHub regardless of location, as long as you have internet access.
+> Currently, a SSH robot code setup will not be able to access GitHub on school wifi due to the SSH port being used.
+> If you plan to work on school wifi, you may want to consider cloning with HTTPS.
+> This does not apply with the Coder setup, as the machine that it is running on does not have the SSH port blocked, so you will be able to work with GitHub regardless of location, as long as you have internet access.
 
 For the clone and submodule setup, you can run the following commands:
 
