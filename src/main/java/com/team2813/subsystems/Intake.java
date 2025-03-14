@@ -10,6 +10,9 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,11 +27,11 @@ public class Intake extends SubsystemBase implements AutoCloseable {
 
   private final DigitalInput beamBreak = new DigitalInput(1);
 
-  public Intake() {
-    this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
+  public Intake(NetworkTableInstance networkTableInstance) {
+    this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE), networkTableInstance);
   }
 
-  Intake(PIDMotor motor) {
+  Intake(PIDMotor motor, NetworkTableInstance networkTableInstance) {
     this.intakeMotor = motor;
     if (motor instanceof TalonFXWrapper wrapper) {
       TalonFXConfigurator config = wrapper.motor().getConfigurator();
@@ -39,6 +42,8 @@ public class Intake extends SubsystemBase implements AutoCloseable {
               config.apply(
                   new VoltageConfigs().withPeakForwardVoltage(12).withPeakReverseVoltage(12)));
     }
+    NetworkTable networkTable = networkTableInstance.getTable("Intake");
+    hasCoralPublisher = networkTable.getBooleanTopic("Has Coral").publish();
   }
 
   public void intakeCoral() {
@@ -70,8 +75,15 @@ public class Intake extends SubsystemBase implements AutoCloseable {
     return isIntaking;
   }
 
-  public boolean hasNote() {
+  public boolean hasCoral() {
     return beamBreak.get();
+  }
+
+  private final BooleanPublisher hasCoralPublisher;
+
+  @Override
+  public void periodic() {
+    hasCoralPublisher.accept(hasCoral());
   }
 
   @Override
