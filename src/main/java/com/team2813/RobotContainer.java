@@ -24,9 +24,14 @@ import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -327,8 +332,9 @@ public class RobotContainer implements AutoCloseable {
             () ->
                 Limelight.getDefaultLimelight()
                     .getLocationalData()
-                    .getBotposeBlue()
+                    .getBotpose()
                     .map(Pose3d::toPose2d)
+                    .map(RobotContainer::toBotposeBlue)
                     .ifPresent(drive::setPose)));
     RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
 
@@ -423,6 +429,12 @@ public class RobotContainer implements AutoCloseable {
 
     SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
     SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+  }
+
+  private static final Pose2d botposeBlueOrig = new Pose2d(Units.Meters.of(-8.7736), Units.Meters.of(-4.0257), new Rotation2d());
+
+  private static Pose2d toBotposeBlue(Pose2d orig) {
+    return orig.relativeTo(botposeBlueOrig);
   }
 
   public Command getAutonomousCommand() {
