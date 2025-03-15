@@ -35,7 +35,7 @@ spotless {
         endWithNewline()
     }
     java {
-        targetExclude('build/build_constants_autogen/**/*.*')
+        targetExclude('build/generated/**/*.*')
         importOrder() // Use the default importOrder configuration (can override)
         removeUnusedImports()
 
@@ -50,12 +50,14 @@ spotless {
     }
 }
 
-// Generates a BuildConstats file.
+// Generates a BuildConstants file.
 // https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html
 project.compileJava.dependsOn(createVersionFile)
-def BUILD_CONSTANTS_AUTOGEN_PATH = 'build/build_constants_autogen/'
+def BUILD_CONSTANTS_AUTOGEN_PATH = 'build/generated/sources/build_constants/'
 gversion {
-    // Build outside src/main/ so that it can be ignored by git
+    // Build inside build/ (so that it will be ignored by git due to .gitignore)
+    // and inside build/generated/ (so that it will be ignored by our Spotless
+    // rules).
     srcDir       = BUILD_CONSTANTS_AUTOGEN_PATH
     classPackage = 'com.team2813'
     className    = 'BuildConstants'
@@ -132,7 +134,7 @@ dependencies {
     testImplementation 'com.google.truth:truth:1.4.4'
 
     implementation 'com.team2813:lib2813'
-    implementation 'com.team2813:limelight'
+    implementation "com.team2813:limelight"
 }
 
 test {
@@ -142,7 +144,8 @@ test {
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
-downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
+downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":lib:jar")
+downloadDepsPreemptively.dependsOn gradle.includedBuild("lib2813").task(":limelight:jar")
 downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':limelight:jar')
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')

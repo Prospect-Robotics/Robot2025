@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "right-rc6"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ScoreL2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "lc4-top_coral"
           }
         }
       ]

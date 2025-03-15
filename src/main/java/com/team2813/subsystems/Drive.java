@@ -15,6 +15,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.team2813.Constants.*;
+import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
@@ -41,6 +42,7 @@ public class Drive extends SubsystemBase {
       PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
   public static final double MAX_VELOCITY = 6;
   public static final double MAX_ROTATION = Math.PI * 2;
+  private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final boolean addLimelightMeasurement;
 
@@ -54,7 +56,8 @@ public class Drive extends SubsystemBase {
 
   // See above comment, do not delete past this line.
 
-  public Drive(NetworkTableInstance networkTableInstance) {
+  public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+    this.localization = localization;
 
     double FLSteerOffset = 0.22021484375;
     double FRSteerOffset = -0.085693359375;
@@ -63,14 +66,14 @@ public class Drive extends SubsystemBase {
 
     Slot0Configs steerGains =
         new Slot0Configs()
-            .withKP(46.619)
+            .withKP(50)
             .withKI(0)
             .withKD(3.0889) // Tune this.
-            .withKS(0.20951)
-            .withKV(2.4288)
-            .withKA(0.11804); // Tune this.
+            .withKS(0.21041)
+            .withKV(2.68)
+            .withKA(0.084645); // Tune this.
 
-    // l: 0 h: 2.5
+    // l: 0 h: 10
     Slot0Configs driveGains =
         new Slot0Configs()
             .withKP(2.5)
@@ -100,8 +103,8 @@ public class Drive extends SubsystemBase {
                     ClosedLoopOutputType
                         .TorqueCurrentFOC) // Tune this. (Important to tune values below)
                 .withSteerMotorClosedLoopOutput(ClosedLoopOutputType.Voltage) // Tune this.
-                .withSpeedAt12Volts(5) // Tune this.
-                .withFeedbackSource(SteerFeedbackType.RemoteCANcoder) // Tune this.
+                .withSpeedAt12Volts(6) // Tune this.
+                .withFeedbackSource(SteerFeedbackType.FusedCANcoder) // Tune this.
                 .withCouplingGearRatio(3.5);
 
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
@@ -172,7 +175,6 @@ public class Drive extends SubsystemBase {
     actualState =
         networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
-    limelightPose = networkTable.getStructTopic("current limelight pose", Pose3d.struct).publish();
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
@@ -277,10 +279,13 @@ public class Drive extends SubsystemBase {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
+  public void addVisionMeasurement(RobotLocalization.Location location) {
+    drivetrain.addVisionMeasurement(location.pos(), location.timestampSeconds());
+  }
+
   private final StructArrayPublisher<SwerveModuleState> expectedState;
   private final StructArrayPublisher<SwerveModuleState> actualState;
   private final StructPublisher<Pose2d> currentPose;
-  private final StructPublisher<Pose3d> limelightPose;
   private final StructArrayPublisher<Pose3d> visibleTargetPoses;
   private final DoubleArrayPublisher modulePositions;
 
@@ -296,8 +301,6 @@ public class Drive extends SubsystemBase {
         .getBotposeBlue()
         .ifPresent(
             pose -> {
-              limelightPose.set(pose);
-
               if (addLimelightMeasurement && limelight.hasTarget()) {
                 // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
                 // that are already within one meter or so of the current odometry pose estimate.
@@ -311,6 +314,8 @@ public class Drive extends SubsystemBase {
               }
             });
     currentPose.set(getPose());
+    localization.limelightLocation().ifPresent(this::addVisionMeasurement);
+    localization.updateDashboard();
     List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 

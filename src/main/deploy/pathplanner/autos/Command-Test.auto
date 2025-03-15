@@ -5,15 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "right-rc6"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "IntakeCoral"
           }
         }
       ]
