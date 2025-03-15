@@ -433,7 +433,7 @@ public class RobotContainer implements AutoCloseable {
 
   private static final Pose2d botposeBlueOrig = new Pose2d(Units.Meters.of(-8.7736), Units.Meters.of(-4.0257), new Rotation2d());
 
-  private static Pose2d toBotposeBlue(Pose2d orig) {
+  public static Pose2d toBotposeBlue(Pose2d orig) {
     return orig.relativeTo(botposeBlueOrig);
   }
 

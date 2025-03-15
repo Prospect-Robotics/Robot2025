@@ -6,6 +6,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 import com.team2813.AllPreferences;
+import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.Limelight;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -14,6 +15,7 @@ import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
@@ -45,8 +47,9 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     // TODO: Update lib2813 limelight code to include the time in LocationalData.
     return limelight
         .getLocationalData()
-        .getBotposeBlue()
+        .getBotpose()
         .map(Pose3d::toPose2d)
+        .map(RobotContainer::toBotposeBlue)
         .map(pos -> new Location(pos, System.currentTimeMillis()));
   }
 
