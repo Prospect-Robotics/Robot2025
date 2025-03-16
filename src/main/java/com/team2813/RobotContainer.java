@@ -342,11 +342,19 @@ public class RobotContainer implements AutoCloseable {
     AUTOALIGN.onTrue(
         new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
     AUTO_ALIGN_LEFT.onTrue(
-        new DeferredCommand(
-            () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)));
+        new SequentialCommandGroup(
+            new DeferredCommand(
+                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.25),
+            new InstantCommand(intake::stopIntakeMotor, intake)));
     AUTO_ALIGN_RIGHT.onTrue(
-        new DeferredCommand(
-            () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)));
+        new SequentialCommandGroup(
+            new DeferredCommand(
+                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.25),
+            new InstantCommand(intake::stopIntakeMotor, intake)));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
@@ -426,8 +434,10 @@ public class RobotContainer implements AutoCloseable {
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)));
 
-    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::intakeCoral, intake));
     SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    // SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    // SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   private static final Pose2d botposeBlueOrig =

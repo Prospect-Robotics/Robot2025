@@ -8,6 +8,7 @@ import com.pathplanner.lib.path.Waypoint;
 import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.subsystems.Drive;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -68,8 +69,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     arrayOfPos.add(new Pose2d(5.8, 3.857, Rotation2d.fromDegrees(180))); // 4r *
 
     arrayOfPos.add(new Pose2d(4.988, 2.838, Rotation2d.fromDegrees(120))); // 5l*
-    arrayOfPos.add(new Pose2d(5.286, 3.017, Rotation2d.fromDegrees(120)));  // 5r *
-    
+    arrayOfPos.add(new Pose2d(5.286, 3.017, Rotation2d.fromDegrees(120))); // 5r *
 
     arrayOfPos.add(new Pose2d(3.699, 3.004, Rotation2d.fromDegrees(60))); // 6l *
     arrayOfPos.add(new Pose2d(3.981, 2.840, Rotation2d.fromDegrees(60))); // 6r*
@@ -101,9 +101,24 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
   private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
+
     Pose2d currentPose = drivePosSupplier.get();
-    System.out.println("currentPose: " + currentPose);
-    Pose2d newPosition = currentPose.nearest(positions);
+    Pose2d newPosition;
+    if (Drive.onRed()) {
+      Pose2d mirroredPose =
+          new Pose2d(
+              17.55 - currentPose.getX(),
+              8.052 - currentPose.getY(),
+              currentPose.getRotation().plus(new Rotation2d(Math.PI)));
+      newPosition = mirroredPose.nearest(positions);
+      newPosition =
+          new Pose2d(
+              17.55 - newPosition.getX(),
+              8.052 - newPosition.getY(),
+              newPosition.getRotation().plus(new Rotation2d(Math.PI)));
+    } else {
+      newPosition = currentPose.nearest(positions);
+    }
     lastPose.set(newPosition);
 
     List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);

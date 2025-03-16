@@ -4,6 +4,7 @@ import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -178,6 +179,12 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+
+    for (int i = 0; i < 4; i++){
+      drivetrain.getModule(i).getDriveMotor()
+      .getConfigurator().apply(new CurrentLimitsConfigs().withSupplyCurrentLimit(40)
+      .withSupplyCurrentLimitEnable(true));
+    }
   }
 
   private double getPosition(int moduleId) {
@@ -202,7 +209,7 @@ public class Drive extends SubsystemBase {
   private final FieldCentric fieldCentricApplier =
       new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
-  private static boolean onRed() {
+  public static boolean onRed() {
     return DriverStation.getAlliance()
         .map(alliance -> alliance == DriverStation.Alliance.Red)
         .orElse(false);
