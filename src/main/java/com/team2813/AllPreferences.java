@@ -20,6 +20,10 @@ public class AllPreferences {
     return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true);
   }
 
+  public static BooleanSupplier usePhotonVisionLocation() {
+    return booleanPref(Key.USE_PHOTON_VISION_LOCATION, false);
+  }
+
   private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
     String name = key.name();
     if (!Preferences.containsKey(name)) {
@@ -39,6 +43,7 @@ public class AllPreferences {
   private enum Key {
     USE_LIMELIGHT_LOCATION,
     USE_AUTO_ALIGN_WAYPOINTS,
+    USE_PHOTON_VISION_LOCATION,
   }
 
   private AllPreferences() {

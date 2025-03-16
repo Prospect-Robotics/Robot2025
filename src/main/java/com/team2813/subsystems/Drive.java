@@ -3,6 +3,7 @@ package com.team2813.subsystems;
 import static com.team2813.Constants.*;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -14,6 +15,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.team2813.AllPreferences;
 import com.team2813.Constants.*;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.Limelight;
@@ -37,7 +39,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
 import java.util.stream.IntStream;
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 
 // Also add all the nescesary imports for constants and other things
@@ -65,7 +66,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
     this.localization = localization;
-    estimator = new MultiPhotonPoseEstimator.Builder(networkTableInstance, AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded), PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+    estimator =
+        new MultiPhotonPoseEstimator.Builder(
+                networkTableInstance,
+                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
+                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", new Transform3d())
             .addCamera("professor-inkling", new Transform3d())
@@ -323,6 +328,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                   double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
                   drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
                 }
+              }
+              if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+                estimator.update(
+                    (estimate) ->
+                        drivetrain.addVisionMeasurement(
+                            estimate.estimatedPose.toPose2d(),
+                            Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
               }
             });
     currentPose.set(getPose());
