@@ -329,14 +329,14 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                   drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
                 }
               }
-              if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
-                estimator.update(
-                    (estimate) ->
-                        drivetrain.addVisionMeasurement(
-                            estimate.estimatedPose.toPose2d(),
-                            Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
-              }
             });
+    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+      estimator.update(
+              (estimate) ->
+                      drivetrain.addVisionMeasurement(
+                              estimate.estimatedPose.toPose2d(),
+                              Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
+    }
     currentPose.set(getPose());
     localization.limelightLocation().ifPresent(this::addVisionMeasurement);
     localization.updateDashboard();
