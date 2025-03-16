@@ -19,9 +19,13 @@ import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
+import com.team2813.vision.MultiPhotonPoseEstimator;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
@@ -33,11 +37,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
 import java.util.stream.IntStream;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
 
 // Also add all the nescesary imports for constants and other things
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
-public class Drive extends SubsystemBase {
+public class Drive extends SubsystemBase implements AutoCloseable {
   private static final String ADD_LIMELIGHT_MEASUREMENT_KEY =
       PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
   public static final double MAX_VELOCITY = 6;
@@ -45,6 +51,7 @@ public class Drive extends SubsystemBase {
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final boolean addLimelightMeasurement;
+  private final MultiPhotonPoseEstimator estimator;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -58,6 +65,11 @@ public class Drive extends SubsystemBase {
 
   public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
     this.localization = localization;
+    estimator = new MultiPhotonPoseEstimator.Builder(networkTableInstance, AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded), PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+            // should have named our batteries after Octonauts characters >:(
+            .addCamera("capt-barnacles", new Transform3d())
+            .addCamera("professor-inkling", new Transform3d())
+            .build();
 
     double FLSteerOffset = 0.22021484375;
     double FRSteerOffset = -0.085693359375;
@@ -324,5 +336,11 @@ public class Drive extends SubsystemBase {
 
   public void enableSlowMode(boolean enable) {
     multiplier = enable ? 0.3 : 1;
+  }
+
+  @Override
+  public void close() {
+    drivetrain.close();
+    estimator.close();
   }
 }

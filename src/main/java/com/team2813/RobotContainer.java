@@ -444,5 +444,6 @@ public class RobotContainer implements AutoCloseable {
   @Override
   public void close() {
     climb.close();
+    drive.close();
   }
 }
