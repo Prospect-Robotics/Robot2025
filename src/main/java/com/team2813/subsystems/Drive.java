@@ -35,8 +35,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 // Also add all the nescesary imports for constants and other things
 
@@ -311,8 +317,7 @@ public class Drive extends SubsystemBase {
                 Pose2d pos2d = estimate.pose();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
                 if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
-                  Matrix<N3, N1> stdDevs = getVisionStdDevs()
-                  drivetrain.addVisionMeasurement(pos2d, estimate.timestampSeconds(), stdDevs);
+                  drivetrain.addVisionMeasurement(pos2d, estimate.timestampSeconds(), getVisionStdDevs());
                 }
               }
             });
@@ -326,7 +331,22 @@ public class Drive extends SubsystemBase {
   }
   
   private Matrix<N3, N1> getVisionStdDevs() {
-    return new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
+    ChassisSpeeds chassisSpeeds = drivetrain.getKinematics().toChassisSpeeds(drivetrain.getState().ModuleStates);
+    LocationalData locationalData = Limelight.getDefaultLimelight().getLocationalData();
+    Set<Integer> tags = locationalData.getVisibleTags();
+    // {x, y, heading}
+    double[] rotVariance = new double[] { chassisSpeeds.omegaRadiansPerSecond * 0.1, chassisSpeeds.omegaRadiansPerSecond * 0.1, chassisSpeeds.omegaRadiansPerSecond * 0.1 };
+    double tagTrust = Math.pow(tags.size(), -3);
+    double[] numTagVariance = new double[] { tagTrust, tagTrust, tagTrust };
+    
+    // Calculate Standard Deviation
+    double[][] allVariances = new double[][] { rotVariance, numTagVariance };
+    double[] stdDevs = new double[3];
+    for (int i = 0; i < 3; i++) {
+      int j = i;
+      stdDevs[i] = Math.sqrt(Stream.of(allVariances).mapToDouble(arr -> arr[j] * arr[j]).sum() / allVariances.length);
+    }
+    return new Matrix<>(Nat.N3(), Nat.N1(), stdDevs);
   }
 
   public void enableSlowMode(boolean enable) {
