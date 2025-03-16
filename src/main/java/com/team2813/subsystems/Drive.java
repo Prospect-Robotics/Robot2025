@@ -298,18 +298,16 @@ public class Drive extends SubsystemBase {
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
     locationalData
-        .getBotposeBlue()
+        .getBotPoseEstimateBlue()
         .ifPresent(
-            pose -> {
+            estimate -> {
               if (addLimelightMeasurement && limelight.hasTarget()) {
                 // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
                 // that are already within one meter or so of the current odometry pose estimate.
-                var pos2d = pose.toPose2d();
+                Pose2d pos2d = estimate.pose();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
                 if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
-                  double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
-                  double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
-                  drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
+                  drivetrain.addVisionMeasurement(pos2d, estimate.timestampSeconds());
                 }
               }
             });
