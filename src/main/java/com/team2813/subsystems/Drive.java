@@ -19,11 +19,15 @@ import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -307,7 +311,8 @@ public class Drive extends SubsystemBase {
                 Pose2d pos2d = estimate.pose();
                 var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
                 if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
-                  drivetrain.addVisionMeasurement(pos2d, estimate.timestampSeconds());
+                  Matrix<N3, N1> stdDevs = getVisionStdDevs()
+                  drivetrain.addVisionMeasurement(pos2d, estimate.timestampSeconds(), stdDevs);
                 }
               }
             });
@@ -318,6 +323,10 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
+  }
+  
+  private Matrix<N3, N1> getVisionStdDevs() {
+    return new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
   }
 
   public void enableSlowMode(boolean enable) {
