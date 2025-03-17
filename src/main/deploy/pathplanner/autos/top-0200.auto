@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "left-lc2"
+            "pathName": "s1corall2"
           }
         },
         {
@@ -19,19 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "lc2-a2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "BumpAlgaeHigh"
+            "pathName": "Align with Reef A2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "a2-top_coral"
+            "pathName": "Go to Coral Station"
           }
         },
         {
@@ -43,13 +37,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top_coral-lc2"
+            "pathName": "Go to A4 from Coral Station"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL3"
+            "name": "ScoreL2"
           }
         }
       ]

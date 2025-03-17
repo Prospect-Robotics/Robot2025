@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.799914383561644,
+        "x": 7.612192622957783,
         "y": 4.030993852456222
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.7736301202819735,
-        "y": 4.279608287885552
+        "x": 6.560317278012354,
+        "y": 4.117846487893757
       },
       "isLocked": false,
-      "linkedName": "a1"
+      "linkedName": "M-Start"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 4.193566319798299
       },
       "prevControl": {
-        "x": 5.809247805498368,
-        "y": 3.947075351152458
+        "x": 6.465781830339749,
+        "y": 4.133745571074986
       },
       "nextControl": null,
       "isLocked": false,
@@ -41,7 +41,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0.0,
+    "velocity": 0,
     "rotation": 180.0
   },
   "reversed": false,
