@@ -123,8 +123,10 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
-    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an actual command)
-    // TODO: Since we are adding a dedicated L1 scorer, we should consider updating this to be an actual command.
+    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an
+    // actual command)
+    // TODO: Since we are adding a dedicated L1 scorer, we should consider updating this to be an
+    // actual command.
     NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
 
     NamedCommands.registerCommand(
