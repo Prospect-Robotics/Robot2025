@@ -4,8 +4,6 @@ import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.*;
