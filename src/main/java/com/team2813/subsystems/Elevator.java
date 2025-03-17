@@ -56,9 +56,8 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   public enum Position implements Supplier<Angle> {
-    BOTTOM(-0.241211),
-    TEST(10),
-    TOP(25.463379);
+    BOTTOM(-0.285742),
+    TOP(25.355566);
 
     private final Angle position;
 
