@@ -104,14 +104,14 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPose =
+  private final StructPublisher<Pose2d> lastPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
   private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
     Pose2d currentPose = drivePosSupplier.get();
     System.out.println("currentPose: " + currentPose);
     Pose2d newPosition = currentPose.nearest(positions);
-    lastPose.set(newPosition);
+    lastPosePublisher.set(newPosition);
 
     List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
 
