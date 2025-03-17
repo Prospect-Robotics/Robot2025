@@ -123,9 +123,10 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
-    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an
-    // actual command)
+    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an actual command)
+    // TODO: Since we are adding a dedicated L1 scorer, we should consider updating this to be an actual command.
     NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
+
     NamedCommands.registerCommand(
         "ScoreL3",
         new SequentialCommandGroup(
@@ -147,6 +148,7 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
+
     NamedCommands.registerCommand(
         "BumpAlgaeLow",
         new SequentialCommandGroup(
@@ -170,6 +172,7 @@ public class RobotContainer implements AutoCloseable {
                     () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
                     elevator),
                 new InstantCommand(intakePivot::disable, intakePivot))));
+
     NamedCommands.registerCommand(
         "BumpAlgaeHigh",
         new SequentialCommandGroup(
@@ -190,6 +193,7 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
                 new InstantCommand(intakePivot::disable, intakePivot))));
+
     NamedCommands.registerCommand(
         "IntakeCoral",
         new SequentialCommandGroup(
