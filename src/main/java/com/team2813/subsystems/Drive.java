@@ -40,8 +40,6 @@ import java.util.stream.IntStream;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase {
-  public static final double MAX_VELOCITY = 6;
-  public static final double MAX_ROTATION = Math.PI * 2;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
@@ -103,14 +101,16 @@ public class Drive extends SubsystemBase {
     }
   }
 
-  public Drive(NetworkTableInstance networkTableInstance) {
-    this(networkTableInstance, DriveConfiguration.fromPreferences());
+  public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
   }
 
-  public Drive(NetworkTableInstance networkTableInstance, DriveConfiguration config) {
-    this.config = config;
-  public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+  public Drive(
+      NetworkTableInstance networkTableInstance,
+      RobotLocalization localization,
+      DriveConfiguration config) {
     this.localization = localization;
+    this.config = config;
 
     double FLSteerOffset = 0.22021484375;
     double FRSteerOffset = -0.085693359375;
@@ -229,9 +229,11 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+
+    setDefaultCommand(createDefaultCommand());
   }
 
-  public Command defaultDriveCommand() {
+  private Command createDefaultCommand() {
     return new DefaultDriveCommand(
         this,
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity,

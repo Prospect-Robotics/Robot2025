@@ -59,7 +59,6 @@ public class RobotContainer implements AutoCloseable {
     this.climb = new Climb(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
-    drive.setDefaultCommand(drive.defaultDriveCommand());
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
