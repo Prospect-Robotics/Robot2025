@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -27,6 +28,7 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
+  private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final BooleanSupplier useLimelightLocation;
 
@@ -36,7 +38,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
 
   public Optional<BotPoseEstimate> limelightLocation(Supplier<Pose2d> odometryPoseSupplier) {
     Optional<BotPoseEstimate> optionalEstimate = rawLocation();
-    botPosePublisher.set(optionalEstimate.map(BotPoseEstimate::pose).orElse(Pose2d.kZero));
+    botPosePublisher.set(
+        rawLocation().map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
 
     return optionalEstimate.filter(
         estimate -> {
@@ -163,8 +166,10 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final StructPublisher<Pose2d> botPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("Limelight pose", Pose2d.struct).publish();
+  private final StructArrayPublisher<Pose2d> botPosePublisher =
+      NetworkTableInstance.getDefault()
+          .getStructArrayTopic("Limelight pose", Pose2d.struct)
+          .publish();
   private final BooleanPublisher hasDataPublisher =
       NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
 
