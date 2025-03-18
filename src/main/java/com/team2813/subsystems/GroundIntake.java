@@ -37,7 +37,7 @@ public class GroundIntake extends SubsystemBase {
   /**
    * Makes intake wheels spin in the intake direction.
    *
-   * <p>Sets <code>isActive</code> to <code>true</code>.
+   * <p>Sets {@link #isActive} to {@code true}.
    */
   public void intakeCoral() { // FIXME: Maybe add a check that the wheels are not stalled.
     groundIntakeMotor.set(ControlMode.DUTY_CYCLE, INTAKE_SPEED);
