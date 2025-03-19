@@ -343,6 +343,14 @@ public class RobotContainer implements AutoCloseable {
         new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
     AUTO_ALIGN_LEFT.onTrue(
         new SequentialCommandGroup(
+            new InstantCommand(
+            () ->
+                Limelight.getDefaultLimelight()
+                    .getLocationalData()
+                    .getBotpose()
+                    .map(Pose3d::toPose2d)
+                    .map(RobotContainer::toBotposeBlue)
+                    .ifPresent(drive::setPose)),
             new DeferredCommand(
                 () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
             new InstantCommand(intake::outakeCoral, intake),
@@ -350,6 +358,14 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(intake::stopIntakeMotor, intake)));
     AUTO_ALIGN_RIGHT.onTrue(
         new SequentialCommandGroup(
+            new InstantCommand(
+            () ->
+                Limelight.getDefaultLimelight()
+                    .getLocationalData()
+                    .getBotpose()
+                    .map(Pose3d::toPose2d)
+                    .map(RobotContainer::toBotposeBlue)
+                    .ifPresent(drive::setPose)),
             new DeferredCommand(
                 () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
             new InstantCommand(intake::outakeCoral, intake),
