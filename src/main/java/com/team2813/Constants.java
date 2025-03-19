@@ -71,7 +71,8 @@ public final class Constants {
 
     public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
     public static final Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
-    public static final Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1().or(DriverConstants.PLACE_CORAL);
+    public static final Trigger OUTTAKE_BUTTON =
+        OPERATOR_CONTROLLER.L1().or(DriverConstants.PLACE_CORAL);
     public static final Trigger PREP_L2_CORAL = OPERATOR_CONTROLLER.cross();
     public static final Trigger PREP_L3_CORAL = OPERATOR_CONTROLLER.triangle();
     public static final Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
