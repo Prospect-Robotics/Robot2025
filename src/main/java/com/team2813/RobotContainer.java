@@ -49,6 +49,8 @@ public class RobotContainer implements AutoCloseable {
   private final Elevator elevator;
   private final Drive drive;
   private final IntakePivot intakePivot;
+  private final GroundIntake groundIntake = new GroundIntake();
+  private final GroundIntakePivot groundIntakePivot;
 
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
@@ -59,6 +61,7 @@ public class RobotContainer implements AutoCloseable {
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
+    this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
@@ -329,7 +332,6 @@ public class RobotContainer implements AutoCloseable {
     // Driver
     SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
-    PLACE_CORAL.onTrue(autoCommands.placeCoral());
     SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
     SETPOSE.onTrue(
@@ -373,8 +375,14 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(intake::intakeCoral, intake)));
     INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
 
-    OUTTAKE_BUTTON.onTrue(new InstantCommand(intake::outakeCoral, intake));
-    OUTTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    OUTTAKE_BUTTON.onTrue(new ParallelCommandGroup(
+            new InstantCommand(intake::outakeCoral, intake),
+            new InstantCommand(groundIntake::outtakeCoral, groundIntake)
+    ));
+    OUTTAKE_BUTTON.onFalse(new ParallelCommandGroup(
+            new InstantCommand(intake::stopIntakeMotor, intake),
+            new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake)
+    ));
 
     PREP_L2_CORAL.onTrue(
         new ParallelCommandGroup(
