@@ -24,9 +24,9 @@ public class GroundIntake extends SubsystemBase {
   private static final double INTAKE_SPEED = 0.6; // TODO: Tweak speed
   private static final double OUTTAKE_SPEED = -0.6; // TODO: Tweak speed
 
-  private final AngularVelocity stallSpeed =
+  private static final AngularVelocity STALL_SPEED =
       RotationsPerSecond.of(
-          0.1); // TODO: Tweak the stall speed, currently at 1 rotation per 10 sec.
+        0.1); // TODO: Tweak the stall speed, currently at 1 rotation per 10 sec.
 
   public GroundIntake() { // TODO: Ensure this constructor is actually functional.
     groundIntakeMotor =
@@ -66,13 +66,16 @@ public class GroundIntake extends SubsystemBase {
 
   /**
    * Checks to see if the intake has stalled.
-   *
+   * 
+   * @deprecated Broken; this will likely immediately return true, as soon as the intake command is issued.
    * @return <code>true</code> if the intake wheels have stalled, otherwise, returns <code>false
    *     </code>.
    */
+
+  @Deprecated
   public boolean isStalled() {
     AngularVelocity currentVelocity = groundIntakeMotor.getVelocityMeasure();
-    boolean isNotMoving = stallSpeed.gt(currentVelocity);
+    boolean isNotMoving = STALL_SPEED.gt(currentVelocity);
     return isActive && isNotMoving;
   }
 }
