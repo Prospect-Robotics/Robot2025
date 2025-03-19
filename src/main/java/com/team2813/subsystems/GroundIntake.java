@@ -11,7 +11,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * The Ground intake for the 2025 Robot, This is for intaking coral on the ground and depositing it
+ * The Ground intake for the 2025 Robot. This is for intaking coral on the ground and depositing it
  * in L1.
  *
  * @author spderman333
