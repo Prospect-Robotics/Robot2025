@@ -45,14 +45,6 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
     return wrapper;
   }
 
-  @Override
-  protected void useOutput(
-      double output,
-      double
-          setPoint) { // NOTE: setPoint seems to do nothing in MotorSubsystem.java, I could be wrong
-    // though
-    super.useOutput(output, setPoint);
-  }
 
   private static PIDMotor pivotMotor() {
     TalonFXWrapper pivotMotor =
