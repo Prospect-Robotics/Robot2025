@@ -27,7 +27,7 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
 
   public GroundIntakePivot(NetworkTableInstance networkTableInstance) {
     super(
-        new MotorSubsystemConfiguration(getMotor())
+        new MotorSubsystemConfiguration(pivotMotor())
             .controlMode(ControlMode.VOLTAGE)
             .PID(0, 0, 0) // TODO: Configure the PID. Maybe I should try this on my own.
             .rotationUnit(Radians)
@@ -39,17 +39,9 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
     atPosition = networkTable.getBooleanTopic("at position").publish();
   }
 
-  private static TalonFXWrapper getMotor() {
-    TalonFXWrapper wrapper = new TalonFXWrapper(GROUND_INTAKE_PIVOT, InvertType.CLOCKWISE); // +x = Up, -x = Down.
-    wrapper.setNeutralMode(NeutralModeValue.Brake);
-
-    return wrapper;
-  }
-
-
   private static PIDMotor pivotMotor() {
     TalonFXWrapper pivotMotor =
-        new TalonFXWrapper(com.team2813.Constants.INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
+        new TalonFXWrapper(com.team2813.Constants.GROUND_INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
     return pivotMotor;
