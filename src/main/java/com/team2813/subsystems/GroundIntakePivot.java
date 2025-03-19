@@ -21,8 +21,8 @@ import java.util.function.Supplier;
 
 public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Positions> {
 
-  private final DoublePublisher groundIntakePivot;
-  private final BooleanPublisher atPosition;
+  private final DoublePublisher groundIntakePivotPublisher;
+  private final BooleanPublisher atPositionPublisher;
 
   public GroundIntakePivot(NetworkTableInstance networkTableInstance) {
     super(
@@ -34,8 +34,8 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
         );
 
     NetworkTable networkTable = networkTableInstance.getTable("GroundIntakePivot");
-    groundIntakePivot = networkTable.getDoubleTopic("position").publish();
-    atPosition = networkTable.getBooleanTopic("at position").publish();
+    groundIntakePivotPublisher = networkTable.getDoubleTopic("position").publish();
+    atPositionPublisher = networkTable.getBooleanTopic("at position").publish();
   }
 
   private static PIDMotor pivotMotor() {
@@ -50,8 +50,8 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
   @Override
   public void periodic() {
     super.periodic();
-    groundIntakePivot.set(getPositionMeasure().in(Units.Rotations));
-    atPosition.set(atPosition());
+    groundIntakePivotPublisher.set(getPositionMeasure().in(Units.Rotations));
+    atPositionPublisher.set(atPosition());
   }
 
   public enum Positions implements Supplier<Angle> {
