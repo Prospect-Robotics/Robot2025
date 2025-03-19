@@ -1,6 +1,5 @@
 package com.team2813.subsystems;
 
-import static com.team2813.Constants.GROUND_INTAKE_PIVOT;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
@@ -41,7 +40,8 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
 
   private static PIDMotor pivotMotor() {
     TalonFXWrapper pivotMotor =
-        new TalonFXWrapper(com.team2813.Constants.GROUND_INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
+        new TalonFXWrapper(
+            com.team2813.Constants.GROUND_INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
     return pivotMotor;

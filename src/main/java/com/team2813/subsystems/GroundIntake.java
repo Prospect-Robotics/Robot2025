@@ -26,7 +26,7 @@ public class GroundIntake extends SubsystemBase {
 
   private static final AngularVelocity STALL_SPEED =
       RotationsPerSecond.of(
-        0.1); // TODO: Tweak the stall speed, currently at 1 rotation per 10 sec.
+          0.1); // TODO: Tweak the stall speed, currently at 1 rotation per 10 sec.
 
   public GroundIntake() { // TODO: Ensure this constructor is actually functional.
     groundIntakeMotor =
@@ -34,25 +34,19 @@ public class GroundIntake extends SubsystemBase {
             GROUND_INTAKE_WHEEL, InvertType.CLOCKWISE); // +rotation = intake, -rotation = outtake.
   }
 
-  /**
-   * Makes intake wheels spin in the intake direction.
-   */
+  /** Makes intake wheels spin in the intake direction. */
   public void intakeCoral() { // FIXME: Maybe add a check that the wheels are not stalled.
     groundIntakeMotor.set(ControlMode.DUTY_CYCLE, INTAKE_SPEED);
     isActive = true;
   }
 
-  /**
-   * Makes intake wheels spin in the outtake direction.
-   */
+  /** Makes intake wheels spin in the outtake direction. */
   public void outtakeCoral() {
     groundIntakeMotor.set(ControlMode.DUTY_CYCLE, OUTTAKE_SPEED);
     isActive = true;
   }
 
-  /**
-   * Stops the intake wheels entirely.
-   */
+  /** Stops the intake wheels entirely. */
   public void stopGroundIntakeMotor() {
     groundIntakeMotor.set(ControlMode.DUTY_CYCLE, 0);
     isActive = false;
@@ -60,12 +54,12 @@ public class GroundIntake extends SubsystemBase {
 
   /**
    * Checks to see if the intake has stalled.
-   * 
-   * @deprecated Broken; this will likely immediately return true, as soon as the intake command is issued.
+   *
+   * @deprecated Broken; this will likely immediately return true, as soon as the intake command is
+   *     issued.
    * @return <code>true</code> if the intake wheels have stalled, otherwise, returns <code>false
    *     </code>.
    */
-
   @Deprecated
   public boolean isStalled() {
     AngularVelocity currentVelocity = groundIntakeMotor.getVelocityMeasure();

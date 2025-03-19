@@ -63,8 +63,10 @@ public final class Constants {
 
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
 
-    public static final Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.share(); // Note: Change these buttons if needed
-    public static final Trigger GROUND_CORAL_OUTTAKE = DRIVER_CONTROLLER.options(); // This too, it is just a placeholder for now.
+    public static final Trigger GROUND_CORAL_INTAKE =
+        DRIVER_CONTROLLER.share(); // Note: Change these buttons if needed
+    public static final Trigger GROUND_CORAL_OUTTAKE =
+        DRIVER_CONTROLLER.options(); // This too, it is just a placeholder for now.
   }
 
   public static final class OperatorConstants {
