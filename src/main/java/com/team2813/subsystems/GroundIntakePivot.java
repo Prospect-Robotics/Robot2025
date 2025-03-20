@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
@@ -31,11 +30,11 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
     super(
         new MotorSubsystemConfiguration(pivotMotor())
             .controlMode(ControlMode.VOLTAGE)
-                // [0.175, 0.2)
+            // [0.175, 0.2)
             .PID(0.15, 0, 1e-5)
             .rotationUnit(Radians)
             .acceptableError(1.1)
-        );
+            .startingPosition(Positions.TOP));
 
     NetworkTable networkTable = networkTableInstance.getTable("GroundIntakePivot");
     groundIntakePivotPublisher = networkTable.getDoubleTopic("position").publish();
@@ -48,7 +47,8 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
             com.team2813.Constants.GROUND_INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
     TalonFXConfigurator config = pivotMotor.motor().getConfigurator();
-    config.apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
+    config.apply(
+        new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
 
     return pivotMotor;
   }
@@ -63,7 +63,7 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
   public enum Positions implements Supplier<Angle> {
     BOTTOM(-6.497070), // FIXME: SET THESE UP TO THE PROPER POSITIONS.
     TEST(-5),
-    TOP(0.287109); // FIXME: TEST THIS!
+    TOP(0.773438); // FIXME: TEST THIS!
 
     private final Angle position;
 
