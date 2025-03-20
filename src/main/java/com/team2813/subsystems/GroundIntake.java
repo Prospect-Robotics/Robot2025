@@ -21,8 +21,8 @@ public class GroundIntake extends SubsystemBase {
 
   private boolean isActive = false;
 
-  private static final double INTAKE_SPEED = 0.6; // TODO: Tweak speed
-  private static final double OUTTAKE_SPEED = -0.6; // TODO: Tweak speed
+  private static final double INTAKE_SPEED = 4; // TODO: Tweak speed
+  private static final double OUTTAKE_SPEED = -4; // TODO: Tweak speed
 
   private static final AngularVelocity STALL_SPEED =
       RotationsPerSecond.of(
@@ -36,13 +36,13 @@ public class GroundIntake extends SubsystemBase {
 
   /** Makes intake wheels spin in the intake direction. */
   public void intakeCoral() { // FIXME: Maybe add a check that the wheels are not stalled.
-    groundIntakeMotor.set(ControlMode.DUTY_CYCLE, INTAKE_SPEED);
+    groundIntakeMotor.set(ControlMode.VOLTAGE, INTAKE_SPEED);
     isActive = true;
   }
 
   /** Makes intake wheels spin in the outtake direction. */
   public void outtakeCoral() {
-    groundIntakeMotor.set(ControlMode.DUTY_CYCLE, OUTTAKE_SPEED);
+    groundIntakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
     isActive = true;
   }
 
