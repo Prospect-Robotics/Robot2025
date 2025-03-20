@@ -76,7 +76,7 @@ public class Intake extends SubsystemBase implements AutoCloseable {
   }
 
   public boolean hasCoral() {
-    return beamBreak.get();
+    return !beamBreak.get();
   }
 
   private final BooleanPublisher hasCoralPublisher;
