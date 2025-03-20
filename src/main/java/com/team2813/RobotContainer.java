@@ -117,7 +117,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitUntilCommand(intake::hasCoral).withTimeout(DROP_CORAL),
+            new WaitCommand(DROP_CORAL)
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -142,7 +142,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitUntilCommand(intake::hasCoral).withTimeout(DROP_CORAL),
+            new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
@@ -206,7 +206,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(INTAKE_TIME), // TODO: Wait until we have intaked a note.
+            new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
