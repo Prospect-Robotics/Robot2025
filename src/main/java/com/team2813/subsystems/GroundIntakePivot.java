@@ -17,6 +17,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import java.util.function.Supplier;
 
 // TODO: TUNE ALL THE THINGS!!1! AND ALSO SET UP THE POSITIONS ENUM PROPERLY.
@@ -58,12 +60,16 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
     super.periodic();
     groundIntakePivotPublisher.set(getPositionMeasure().in(Units.Rotations));
     atPositionPublisher.set(atPosition());
+    if (DriverStation.isEnabled()) {
+      enable();
+    } else {
+      disable();
+    }
   }
 
   public enum Positions implements Supplier<Angle> {
     BOTTOM(-6.497070), // FIXME: SET THESE UP TO THE PROPER POSITIONS.
-    TEST(-5),
-    TOP(0.773438); // FIXME: TEST THIS!
+    TOP(-0.773438); // FIXME: TEST THIS!
 
     private final Angle position;
 
