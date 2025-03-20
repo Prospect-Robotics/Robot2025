@@ -81,7 +81,6 @@ public final class Constants {
     public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     public static final Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
     public static final Trigger GROUND_CORAL_INTAKE = OPERATOR_CONTROLLER.R2();
-    public static final Trigger TEST_PIVOT = OPERATOR_CONTROLLER.square();
   }
 
   /**
