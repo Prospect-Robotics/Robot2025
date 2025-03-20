@@ -61,9 +61,9 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
   }
 
   public enum Positions implements Supplier<Angle> {
-    BOTTOM(-9.5), // FIXME: SET THESE UP TO THE PROPER POSITIONS.
+    BOTTOM(-6.497070), // FIXME: SET THESE UP TO THE PROPER POSITIONS.
     TEST(-5),
-    TOP(0.9); // FIXME: SET THESE UP TO THE PROPER POSITIONS.
+    TOP(0.287109); // FIXME: TEST THIS!
 
     private final Angle position;
 
