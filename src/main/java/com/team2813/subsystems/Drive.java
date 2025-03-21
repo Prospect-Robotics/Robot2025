@@ -40,6 +40,8 @@ import java.util.stream.IntStream;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase {
+  private static final double MAX_VELOCITY = 6;
+  private static final double MAX_ROTATION = Math.PI * 2;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
@@ -61,10 +63,7 @@ public class Drive extends SubsystemBase {
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
-      boolean addLimelightMeasurement,
-      double maxLimelightDifferenceMeters,
-      double maxVelocity,
-      double maxRotation) {
+      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
 
     public DriveConfiguration {
       if (maxLimelightDifferenceMeters <= 0) {
@@ -76,8 +75,6 @@ public class Drive extends SubsystemBase {
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(false)
-          .maxVelocity(6)
-          .maxRotation(Math.PI * 2)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -90,10 +87,6 @@ public class Drive extends SubsystemBase {
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
-
-      Builder maxVelocity(double velocity);
-
-      Builder maxRotation(double rotation);
 
       Builder maxLimelightDifferenceMeters(double value);
 
@@ -236,9 +229,9 @@ public class Drive extends SubsystemBase {
   private Command createDefaultCommand() {
     return new DefaultDriveCommand(
         this,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRotation);
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * MAX_VELOCITY,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * MAX_VELOCITY,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * MAX_ROTATION);
   }
 
   private static double modifyAxis(double value) {
