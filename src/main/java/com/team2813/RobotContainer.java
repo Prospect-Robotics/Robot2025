@@ -86,7 +86,7 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
     Time DROP_CORAL = Units.Seconds.of(0.25);
-    Time INTAKE_TIME = Units.Seconds.of(0.25);
+    Time INTAKE_TIME = Units.Seconds.of(3);
 
     NamedCommands.registerCommand(
         "PrepareL2",
