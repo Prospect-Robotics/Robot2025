@@ -58,6 +58,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
+  
+  private static final Transform3d captBarnaclesTransform = new Transform3d(0.303869598, -0.0561231288, 0.1790237974, new Rotation3d(0.2756437583, 0.0872664626,0.0872664626));
+  private static final Transform3d professorInklingTransform = new Transform3d(0.2959495986, -0.164117655, 0.1758144058, new Rotation3d(0.5235987756, 0.3553590713, 0.3930658103));
 
   // See above comment, do not delete past this line.
 
@@ -69,8 +72,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
-            .addCamera("capt-barnacles", new Transform3d(0.303869598, -0.0561231288, 0.1790237974, new Rotation3d(0.2756437583, 0.0872664626,0.0872664626)))
-            .addCamera("professor-inkling", new Transform3d(0.2959495986, -0.164117655, 0.1758144058, new Rotation3d(0.5235987756, 0.3553590713, 0.3930658103)))
+            .addCamera("capt-barnacles", captBarnaclesTransform)
+            .addCamera("professor-inkling", professorInklingTransform)
             .build();
 
     double FLSteerOffset = 0.22021484375;
