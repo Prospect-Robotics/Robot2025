@@ -358,18 +358,22 @@ public class Drive extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // If the limelight has a position, send it to the drive.
+    Limelight limelight = Limelight.getDefaultLimelight();
+    LocationalData locationalData = limelight.getLocationalData();
+    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+
+    // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     currentPose.set(getPose());
 
-    Limelight limelight = Limelight.getDefaultLimelight();
-    LocationalData locationalData = limelight.getLocationalData();
-    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
-    localization.updateDashboard();
     List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
+
+    localization.updateDashboard();
   }
 
   public void enableSlowMode(boolean enable) {
