@@ -69,8 +69,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
-            .addCamera("capt-barnacles", new Transform3d(-12.003744, 2.655315, -6.928744, new Rotation3d(0.275644, 0.087266,0.087266)))
-            .addCamera("professor-inkling", new Transform3d(-11.757707, 6.040576, -6.740756, new Rotation3d(1.243595, 1.548237, 1.203502)))
+            .addCamera("capt-barnacles", new Transform3d(0.303869598, -0.0561231288, 0.1790237974, new Rotation3d(0.2756437583, 0.0872664626,0.0872664626)))
+            .addCamera("professor-inkling", new Transform3d(0.2959495986, -0.164117655, 0.1758144058, new Rotation3d(0.5235987756, 0.3553590713, 0.3930658103)))
             .build();
 
     double FLSteerOffset = 0.22021484375;
@@ -327,7 +327,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 }
               }
             });
-    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+    if (AllPreferences.usePhotonVisionLocation().getAsBoolean() || true) {
       estimator.update(
               (estimate) ->
                       drivetrain.addVisionMeasurement(
