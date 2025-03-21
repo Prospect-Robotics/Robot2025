@@ -99,6 +99,8 @@ public abstract class GenPreferences implements Plugin<Project> {
         initializeMethod.endControlFlow();
         builder.addMethod(initializeMethod.build());
 
+        builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
+
         return JavaFile.builder("com.team2813", builder.build()).build();
     }
 
