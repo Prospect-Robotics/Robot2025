@@ -21,6 +21,7 @@ import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
 import com.team2813.commands.RobotLocalization;
+import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
@@ -436,6 +437,10 @@ public class RobotContainer implements AutoCloseable {
 
   public static Pose2d toBotposeBlue(Pose2d orig) {
     return orig.relativeTo(botposeBlueOrig);
+  }
+
+  public static BotPoseEstimate toBotposeBlue(BotPoseEstimate estimate) {
+    return new BotPoseEstimate(toBotposeBlue(estimate.pose()), estimate.timestampSeconds());
   }
 
   public Command getAutonomousCommand() {
