@@ -14,8 +14,8 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
-import com.team2813.Constants.*;
 import com.team2813.commands.RobotLocalization;
+import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.sysid.SwerveSysidRequest;
@@ -29,7 +29,6 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -50,6 +49,7 @@ public class Drive extends SubsystemBase {
   private static final double WHEEL_RADIUS_IN = 1.875;
 
   private double multiplier = 1;
+  private double lastVisionEstimateTime = -1;
 
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
@@ -279,8 +279,12 @@ public class Drive extends SubsystemBase {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
-  public void addVisionMeasurement(RobotLocalization.Location location) {
-    drivetrain.addVisionMeasurement(location.pos(), location.timestampSeconds());
+  public void addVisionMeasurement(BotPoseEstimate estimate) {
+    double estimateTimestamp = estimate.timestampSeconds();
+    if (estimateTimestamp > lastVisionEstimateTime) {
+      drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp);
+      lastVisionEstimateTime = estimateTimestamp;
+    }
   }
 
   private final StructArrayPublisher<SwerveModuleState> expectedState;
@@ -295,27 +299,11 @@ public class Drive extends SubsystemBase {
   public void periodic() {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
+    currentPose.set(getPose());
+    localization.limelightLocation(this::getPose).ifPresent(this::addVisionMeasurement);
+    localization.updateDashboard();
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
-    locationalData
-        .getBotposeBlue()
-        .ifPresent(
-            pose -> {
-              if (addLimelightMeasurement && limelight.hasTarget()) {
-                // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
-                // that are already within one meter or so of the current odometry pose estimate.
-                var pos2d = pose.toPose2d();
-                var distance = getPose().getTranslation().getDistance(pos2d.getTranslation());
-                if (Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS) {
-                  double latencySecs = locationalData.lastMSDelay().orElse(100) / 1000;
-                  double visionMeasurementTime = Timer.getFPGATimestamp() - latencySecs;
-                  drivetrain.addVisionMeasurement(pos2d, visionMeasurementTime);
-                }
-              }
-            });
-    currentPose.set(getPose());
-    localization.limelightLocation().ifPresent(this::addVisionMeasurement);
-    localization.updateDashboard();
     List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 
