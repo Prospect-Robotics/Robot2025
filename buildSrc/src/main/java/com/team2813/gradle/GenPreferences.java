@@ -101,7 +101,7 @@ public abstract class GenPreferences implements Plugin<Project> {
 
         builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
-        return JavaFile.builder("com.team2813", builder.build()).build();
+        return JavaFile.builder("com.team2813", builder.build()).indent("  ").build();
     }
 
     interface GenPreferencesExtension {
