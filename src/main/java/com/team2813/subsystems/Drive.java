@@ -24,10 +24,7 @@ import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
@@ -72,8 +69,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
-            .addCamera("capt-barnacles", new Transform3d())
-            .addCamera("professor-inkling", new Transform3d())
+            .addCamera("capt-barnacles", new Transform3d(-12.003744, 2.655315, -6.928744, new Rotation3d(0.275644, 0.087266,0.087266)))
+            .addCamera("professor-inkling", new Transform3d(-11.757707, 6.040576, -6.740756, new Rotation3d(1.243595, 1.548237, 1.203502)))
             .build();
 
     double FLSteerOffset = 0.22021484375;
