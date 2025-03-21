@@ -1,43 +1,104 @@
 package com.team2813.gradle;
 
-import javax.lang.model.element.Modifier;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.squareup.javapoet.*;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.JavaFile;
 import org.gradle.api.file.RegularFileProperty;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import javax.lang.model.element.Modifier;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class GenPreferences implements Plugin<Project> {
+    private static final Gson gson = new Gson();
 
     @Override
     public void apply(Project project) {
         var extension = project.getExtensions().create("genPreferences", GenPreferencesExtension.class);
-        extension.getJson().convention(project.getLayout().getProjectDirectory().file("preferences.json"));
+        extension.getJson().convention(project.getLayout().getProjectDirectory().file("networktables.json"));
         project.afterEvaluate(p -> generateSources(p, extension));
     }
 
     // See https://discuss.gradle.org/t/how-to-use-javapoet-generate-java-file/42674/1
     private void generateSources(Project project, GenPreferencesExtension extensions) {
         File file = extensions.getJson().getAsFile().get(); // project.file("preferences.json");
-        if (!file.exists()) {
-            throw new RuntimeException("File not exist: " + file);
+        JavaFile javaFile = generateJavaFileFromJson(project, file);
+
+        File outputFile = new File(project.getProjectDir(), "build/generated/sources/gen_preferences");
+        if (!outputFile.exists()) {
+            outputFile.mkdirs();
         }
-        TypeSpec.Builder builder = TypeSpec.classBuilder("MyPreferences")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL);
-        JavaFile javaFile = JavaFile.builder("com.team2813", builder.build()).build();
-        File createFile = new File(project.getProjectDir(), "build/generated/sources/gen_preferences");
-        if (!createFile.exists()) {
-            createFile.mkdirs();
-        }
+
         try {
-            javaFile.writeTo(createFile);
+            javaFile.writeTo(outputFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private JavaFile generateJavaFileFromJson(Project project, File file) {
+        if (!file.exists()) {
+            throw new RuntimeException("Input file does not exist: " + file);
+        }
+        NetworkTableEntry[] entries;
+        try (var reader = new FileReader(file, UTF_8)) {
+            entries = gson.fromJson(reader, NetworkTableEntry[].class);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read input file: " + file.getPath(), e);
+        } catch (JsonParseException e) {
+            throw new RuntimeException("Could not parse input file: " + file.getPath(), e);
+        }
+
+        ClassName preferencesClass = ClassName.get("edu.wpi.first.wpilibj", "Preferences");
+
+        TypeSpec.Builder builder = TypeSpec.classBuilder("RobotPreferences")
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addJavadoc(CodeBlock.builder()
+                        .add("Provides access to preferences which are configured via a JSON file.\n\n")
+                        .add("<p>Generated from {@code ./$L} by GenPreferences.",
+                                project.getProjectDir().toPath().relativize(file.toPath()))
+                        .build());
+
+        FieldSpec initializedField = FieldSpec.builder(
+                Boolean.TYPE, "initialized", Modifier.PRIVATE, Modifier.STATIC).build();
+        builder.addField(initializedField);
+
+        MethodSpec.Builder initializeMethod = MethodSpec.methodBuilder("initialize")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addJavadoc("Initializes preferences provided by this class with {@link $T}.", preferencesClass)
+                .returns(void.class);
+
+        initializeMethod.beginControlFlow("if (!$N)", initializedField);
+        for (NetworkTableEntry entry : entries) {
+            entry.getPreferenceKey().ifPresent(key -> {
+                initializeMethod.beginControlFlow("if (!$T.containsKey(\"$L\"))", preferencesClass, key);
+                entry.addInitializer(initializeMethod);
+                initializeMethod.endControlFlow();
+            });
+//            if (entry.getType() == NetworkTableEntry.Type.BOOLEAN) {
+//                FieldSpec spec = FieldSpec.builder(Boolean.TYPE, entry.getName())
+//                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+//                        .initializer("$L", entry.getValueAsBoolean())
+//                        .build();
+//                builder.addField(spec);
+//
+//                initializeMethod.beginControlFlow("if (!$T.containsKey(\"$L\"))", preferencesClass, entry.getName());
+//                initializeMethod.addStatement("$T.initBoolean(\"$L\", $L)", preferencesClass, entry.getName(), entry.getValueAsBoolean());
+//                initializeMethod.endControlFlow();
+//            }
+        }
+
+        initializeMethod.addCode("\n");
+        initializeMethod.addStatement("$N = true", initializedField);
+        initializeMethod.endControlFlow();
+        builder.addMethod(initializeMethod.build());
+
+        return JavaFile.builder("com.team2813", builder.build()).build();
     }
 
     interface GenPreferencesExtension {

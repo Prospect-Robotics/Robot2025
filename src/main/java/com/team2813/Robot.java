@@ -23,6 +23,7 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     AllPreferences.migrateLegacyPreferences();
+    RobotPreferences.initialize();
     m_robotContainer =
         new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
   }

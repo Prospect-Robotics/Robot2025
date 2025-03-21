@@ -17,4 +17,5 @@ repositories {
 
 dependencies {
     implementation 'com.squareup:javapoet:1.12.1'
+    implementation 'com.google.code.gson:gson:2.12.1'
 }

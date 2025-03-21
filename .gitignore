@@ -9,7 +9,6 @@ simgui-ds.json
 simgui-window.json
 simgui.json
 
-networktables.json
 *.bck
 
 ntcore/connectionlistenertest.json

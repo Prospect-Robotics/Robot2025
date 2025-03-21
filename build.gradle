@@ -73,6 +73,7 @@ sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
 
 genPreferences {
 }
+sourceSets.main.java.srcDirs += 'build/generated/sources/gen_preferences/'
 
 def ROBOT_MAIN_CLASS = 'com.team2813.Main'
 

@@ -1,0 +1,36 @@
+[
+  {
+    "name": "/Preferences/exampleBooleanTrue",
+    "type": "boolean",
+    "value": true,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/exampleBooleanFalse",
+    "type": "boolean",
+    "value": false,
+    "properties": {
+      "persistent": true,
+      "retained": true
+    }
+  },
+  {
+    "name": "/Preferences/exampleInt",
+    "type": "int",
+    "value": 9,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/exampleDouble",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  }
+]
