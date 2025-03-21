@@ -54,7 +54,7 @@ public final class Constants {
 
     public static final CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
     public static final Trigger SYSID_RUN = DRIVER_CONTROLLER.cross().and(() -> false);
-    public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
+    public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.R3();
     private static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     public static final Trigger RESET_POSE = DRIVER_CONTROLLER.triangle();
 
