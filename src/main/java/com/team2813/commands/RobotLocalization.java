@@ -1,7 +1,5 @@
 package com.team2813.commands;
 
-import static com.team2813.Constants.MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -11,6 +9,7 @@ import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.subsystems.Drive;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -36,7 +35,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     useLimelightLocation = AllPreferences.useLimelightLocation();
   }
 
-  public Optional<BotPoseEstimate> limelightLocation(Supplier<Pose2d> odometryPoseSupplier) {
+  public Optional<BotPoseEstimate> limelightLocation(
+      Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
     Optional<BotPoseEstimate> optionalEstimate = rawLocation();
     botPosePublisher.set(
         rawLocation().map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
@@ -52,7 +52,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
           // estimate.
           Pose2d drivePose = odometryPoseSupplier.get();
           var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
-          return Math.abs(distance) <= MAX_LIMELIGHT_DRIVE_DIFFERENCE_METERS;
+          return Math.abs(distance) <= driveConfig.maxLimelightDifferenceMeters();
         });
   }
 

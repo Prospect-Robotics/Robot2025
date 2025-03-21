@@ -1,6 +1,8 @@
 package com.team2813.subsystems;
 
 import static com.team2813.Constants.*;
+import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
+import static com.team2813.lib2813.util.ControlUtils.deadband;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -14,10 +16,13 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
+import com.google.auto.value.AutoBuilder;
+import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
+import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -28,22 +33,18 @@ import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
 import java.util.stream.IntStream;
 
-// Also add all the nescesary imports for constants and other things
-
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase {
-  private static final String ADD_LIMELIGHT_MEASUREMENT_KEY =
-      PreferenceKey.DRIVE_ADD_LIMELIGHT_MEASUREMENT.key();
-  public static final double MAX_VELOCITY = 6;
-  public static final double MAX_ROTATION = Math.PI * 2;
+  private static final double MAX_VELOCITY = 6;
+  private static final double MAX_ROTATION = Math.PI * 2;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
-  private final boolean addLimelightMeasurement;
+  private final DriveConfiguration config;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -56,8 +57,54 @@ public class Drive extends SubsystemBase {
 
   // See above comment, do not delete past this line.
 
+  /**
+   * Configurable values for the {@code Drive} subsystem
+   *
+   * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
+   * starting with {@code "subsystems.Drive.DriveConfiguration."}.
+   */
+  public record DriveConfiguration(
+      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+
+    public DriveConfiguration {
+      if (maxLimelightDifferenceMeters <= 0) {
+        throw new IllegalArgumentException("maxLimelightDifferenceMeters must be positive");
+      }
+    }
+
+    /** Creates a builder for {@code DriveConfiguration} with default values. */
+    public static Builder builder() {
+      return new AutoBuilder_Drive_DriveConfiguration_Builder()
+          .addLimelightMeasurement(false)
+          .maxLimelightDifferenceMeters(1.0);
+    }
+
+    /** Creates an instance from preference values stored in the robot's flash memory. */
+    public static DriveConfiguration fromPreferences() {
+      DriveConfiguration defaultConfig = builder().build();
+      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+    }
+
+    @AutoBuilder
+    public interface Builder {
+      Builder addLimelightMeasurement(boolean enabled);
+
+      Builder maxLimelightDifferenceMeters(double value);
+
+      DriveConfiguration build();
+    }
+  }
+
   public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
+  }
+
+  public Drive(
+      NetworkTableInstance networkTableInstance,
+      RobotLocalization localization,
+      DriveConfiguration config) {
     this.localization = localization;
+    this.config = config;
 
     double FLSteerOffset = 0.22021484375;
     double FRSteerOffset = -0.085693359375;
@@ -166,8 +213,6 @@ public class Drive extends SubsystemBase {
             backLeft,
             backRight);
 
-    Preferences.initBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
-    addLimelightMeasurement = Preferences.getBoolean(ADD_LIMELIGHT_MEASUREMENT_KEY, false);
     // Logging
     NetworkTable networkTable = networkTableInstance.getTable("Drive");
     expectedState =
@@ -178,6 +223,22 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+
+    setDefaultCommand(createDefaultCommand());
+  }
+
+  private Command createDefaultCommand() {
+    return new DefaultDriveCommand(
+        this,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * MAX_VELOCITY,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * MAX_VELOCITY,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * MAX_ROTATION);
+  }
+
+  private static double modifyAxis(double value) {
+    value = deadband(value, 0.1);
+    value = Math.copySign(value * value, value);
+    return value;
   }
 
   private double getPosition(int moduleId) {
@@ -297,17 +358,22 @@ public class Drive extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // If the limelight has a position, send it to the drive.
+    Limelight limelight = Limelight.getDefaultLimelight();
+    LocationalData locationalData = limelight.getLocationalData();
+    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+
+    // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     currentPose.set(getPose());
-    localization.limelightLocation(this::getPose).ifPresent(this::addVisionMeasurement);
-    localization.updateDashboard();
-    Limelight limelight = Limelight.getDefaultLimelight();
-    LocationalData locationalData = limelight.getLocationalData();
+
     List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
+
+    localization.updateDashboard();
   }
 
   public void enableSlowMode(boolean enable) {

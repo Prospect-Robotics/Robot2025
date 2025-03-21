@@ -6,7 +6,6 @@ package com.team2813;
 
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
-import static com.team2813.lib2813.util.ControlUtils.deadband;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -15,7 +14,6 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
-import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
@@ -63,12 +61,6 @@ public class RobotContainer implements AutoCloseable {
     this.intake = new Intake(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
-    drive.setDefaultCommand(
-        new DefaultDriveCommand(
-            drive,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * Drive.MAX_VELOCITY,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * Drive.MAX_VELOCITY,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
@@ -261,12 +253,6 @@ public class RobotContainer implements AutoCloseable {
         );
     configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
-  }
-
-  private static double modifyAxis(double value) {
-    value = deadband(value, 0.1);
-    value = Math.copySign(value * value, value);
-    return value;
   }
 
   private static final SwerveSysidRequest DRIVE_SYSID =
