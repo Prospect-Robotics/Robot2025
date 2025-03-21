@@ -7,9 +7,10 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
+import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.subsystems.Drive;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -26,30 +27,37 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
+  private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final BooleanSupplier useLimelightLocation;
-
-  public record Location(Pose2d pos, double timestampSeconds) {}
 
   public RobotLocalization() {
     useLimelightLocation = AllPreferences.useLimelightLocation();
   }
 
-  public Optional<Location> limelightLocation() {
-    if (!useLimelightLocation.getAsBoolean()) {
-      return Optional.empty();
-    }
-    return rawLocation();
+  public Optional<BotPoseEstimate> limelightLocation(
+      Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
+    Optional<BotPoseEstimate> optionalEstimate = rawLocation();
+    botPosePublisher.set(
+        rawLocation().map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
+
+    return optionalEstimate.filter(
+        estimate -> {
+          if (!useLimelightLocation.getAsBoolean()) {
+            return false;
+          }
+
+          // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
+          // that are already within one meter or so of the current odometry pose
+          // estimate.
+          Pose2d drivePose = odometryPoseSupplier.get();
+          var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
+          return Math.abs(distance) <= driveConfig.maxLimelightDifferenceMeters();
+        });
   }
 
-  private Optional<Location> rawLocation() {
-    // TODO: Update lib2813 limelight code to include the time in LocationalData.
-    return limelight
-        .getLocationalData()
-        .getBotpose()
-        .map(Pose3d::toPose2d)
-        .map(RobotContainer::toBotposeBlue)
-        .map(pos -> new Location(pos, System.currentTimeMillis()));
+  private Optional<BotPoseEstimate> rawLocation() {
+    return limelight.getLocationalData().getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
   }
 
   private static List<Pose2d> positions() {
@@ -96,14 +104,14 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPose =
+  private final StructPublisher<Pose2d> lastPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
   private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
     Pose2d currentPose = drivePosSupplier.get();
     System.out.println("currentPose: " + currentPose);
     Pose2d newPosition = currentPose.nearest(positions);
-    lastPose.set(newPosition);
+    lastPosePublisher.set(newPosition);
 
     List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
 
@@ -158,16 +166,14 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final StructArrayPublisher<Pose2d> botpose =
+  private final StructArrayPublisher<Pose2d> botPosePublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("Limelight pose", Pose2d.struct)
           .publish();
-  private final BooleanPublisher hasData =
+  private final BooleanPublisher hasDataPublisher =
       NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
-  private static final Pose2d[] NO_POS = new Pose2d[0];
 
   public void updateDashboard() {
-    botpose.set(rawLocation().map(location -> new Pose2d[] {location.pos()}).orElse(NO_POS));
-    hasData.accept(limelight.getJsonDump().isPresent());
+    hasDataPublisher.accept(limelight.getJsonDump().isPresent());
   }
 }
