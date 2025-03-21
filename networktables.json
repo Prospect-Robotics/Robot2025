@@ -32,5 +32,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/a",
+    "type": "int",
+    "value": 2,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

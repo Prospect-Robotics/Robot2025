@@ -76,6 +76,7 @@ public abstract class GenPreferences implements Plugin<Project> {
         initializeMethod.beginControlFlow("if (!$N)", initializedField);
         for (NetworkTableEntry entry : entries) {
             entry.getPreferenceKey().ifPresent(key -> {
+                entry.addGetter(builder);
                 initializeMethod.beginControlFlow("if (!$T.containsKey(\"$L\"))", preferencesClass, key);
                 entry.addInitializer(initializeMethod);
                 initializeMethod.endControlFlow();
