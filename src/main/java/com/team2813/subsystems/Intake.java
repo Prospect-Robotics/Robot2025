@@ -10,10 +10,14 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.util.ConfigUtils;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
-public class Intake extends SubsystemBase {
+public class Intake extends SubsystemBase implements AutoCloseable {
 
   private boolean isIntaking = false;
   private final PIDMotor intakeMotor;
@@ -21,11 +25,13 @@ public class Intake extends SubsystemBase {
   static final double OUTTAKE_SPEED = -3;
   static final double BUMP_SPEED = -4;
 
-  public Intake() {
-    this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE));
+  private final DigitalInput beamBreak = new DigitalInput(1);
+
+  public Intake(NetworkTableInstance networkTableInstance) {
+    this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE), networkTableInstance);
   }
 
-  Intake(PIDMotor motor) {
+  Intake(PIDMotor motor, NetworkTableInstance networkTableInstance) {
     this.intakeMotor = motor;
     if (motor instanceof TalonFXWrapper wrapper) {
       TalonFXConfigurator config = wrapper.motor().getConfigurator();
@@ -36,6 +42,8 @@ public class Intake extends SubsystemBase {
               config.apply(
                   new VoltageConfigs().withPeakForwardVoltage(12).withPeakReverseVoltage(12)));
     }
+    NetworkTable networkTable = networkTableInstance.getTable("Intake");
+    hasCoralPublisher = networkTable.getBooleanTopic("Has Coral").publish();
   }
 
   public void intakeCoral() {
@@ -65,5 +73,21 @@ public class Intake extends SubsystemBase {
 
   boolean intaking() {
     return isIntaking;
+  }
+
+  public boolean hasCoral() {
+    return !beamBreak.get();
+  }
+
+  private final BooleanPublisher hasCoralPublisher;
+
+  @Override
+  public void periodic() {
+    hasCoralPublisher.accept(hasCoral());
+  }
+
+  @Override
+  public void close() {
+    beamBreak.close();
   }
 }

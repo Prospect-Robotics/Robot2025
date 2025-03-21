@@ -45,7 +45,7 @@ public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
 
   private final Climb climb;
-  private final Intake intake = new Intake();
+  private final Intake intake;
   private final Elevator elevator;
   private final Drive drive;
   private final IntakePivot intakePivot;
@@ -59,6 +59,7 @@ public class RobotContainer implements AutoCloseable {
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
+    this.intake = new Intake(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     drive.setDefaultCommand(
@@ -85,7 +86,7 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
     Time DROP_CORAL = Units.Seconds.of(0.25);
-    Time INTAKE_TIME = Units.Seconds.of(0.25);
+    Time INTAKE_TIME = Units.Seconds.of(3);
 
     NamedCommands.registerCommand(
         "PrepareL2",
@@ -116,7 +117,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -141,7 +142,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
@@ -205,7 +206,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(INTAKE_TIME), // TODO: Wait until we have intaked a note.
+            new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -444,5 +445,6 @@ public class RobotContainer implements AutoCloseable {
   @Override
   public void close() {
     climb.close();
+    intake.close();
   }
 }
