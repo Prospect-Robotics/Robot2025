@@ -329,12 +329,18 @@ public class RobotContainer implements AutoCloseable {
     // assume we control all of them
     AUTOALIGN.onTrue(
         new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
-    AUTO_ALIGN_LEFT.onTrue(
-        new DeferredCommand(
-            () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)));
-    AUTO_ALIGN_RIGHT.onTrue(
-        new DeferredCommand(
-            () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)));
+    AUTO_ALIGN_LEFT.onTrue(new SequentialCommandGroup(new DeferredCommand(
+            () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.375),
+            new InstantCommand(intake::stopIntakeMotor, intake))
+        );
+    AUTO_ALIGN_RIGHT.onTrue(new SequentialCommandGroup(new DeferredCommand(
+            () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)), 
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.375),
+            new InstantCommand(intake::stopIntakeMotor, intake))
+        );
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
