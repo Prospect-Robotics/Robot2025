@@ -25,6 +25,7 @@ public class BuildConstantsPublisherTest {
   private class DateTimeStringSubject extends Subject {
 
     private final String actual;
+    // The format must be consistent with the `createVersionFile` settings in the build.gradle.
     private final DateTimeFormatter formatter =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
 
@@ -57,6 +58,10 @@ public class BuildConstantsPublisherTest {
     return table.getStringTopic(key).getEntry("").get();
   }
 
+  /**
+   * Returns the value of the given key in the given table, or the given default value if the key is
+   * not present.
+   */
   private Long getIntegerEntryOrDefault(NetworkTable table, String key, long defaultValue) {
     return table.getIntegerTopic(key).getEntry(defaultValue).get();
   }
