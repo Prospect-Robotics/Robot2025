@@ -6,7 +6,6 @@ package com.team2813;
 
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
-import static com.team2813.lib2813.util.ControlUtils.deadband;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -15,12 +14,12 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
-import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.ElevatorDefaultCommand;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.commands.ManuelIntakePivot;
 import com.team2813.commands.RobotCommands;
 import com.team2813.commands.RobotLocalization;
+import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
@@ -45,7 +44,7 @@ public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
 
   private final Climb climb;
-  private final Intake intake = new Intake();
+  private final Intake intake;
   private final Elevator elevator;
   private final Drive drive;
   private final IntakePivot intakePivot;
@@ -59,14 +58,9 @@ public class RobotContainer implements AutoCloseable {
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
+    this.intake = new Intake(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
-    drive.setDefaultCommand(
-        new DefaultDriveCommand(
-            drive,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * Drive.MAX_VELOCITY,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * Drive.MAX_VELOCITY,
-            () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * Drive.MAX_ROTATION));
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
@@ -85,7 +79,7 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
     Time DROP_CORAL = Units.Seconds.of(0.25);
-    Time INTAKE_TIME = Units.Seconds.of(0.25);
+    Time INTAKE_TIME = Units.Seconds.of(3);
 
     NamedCommands.registerCommand(
         "PrepareL2",
@@ -116,7 +110,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -141,7 +135,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(DROP_CORAL), // TODO: Wait until we don't have a note
+            new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
@@ -205,7 +199,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             new InstantCommand(intake::intakeCoral),
-            new WaitCommand(INTAKE_TIME), // TODO: Wait until we have intaked a note.
+            new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
                 new InstantCommand(elevator::disable, elevator),
@@ -259,12 +253,6 @@ public class RobotContainer implements AutoCloseable {
         );
     configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
-  }
-
-  private static double modifyAxis(double value) {
-    value = deadband(value, 0.1);
-    value = Math.copySign(value * value, value);
-    return value;
   }
 
   private static final SwerveSysidRequest DRIVE_SYSID =
@@ -437,6 +425,10 @@ public class RobotContainer implements AutoCloseable {
     return orig.relativeTo(botposeBlueOrig);
   }
 
+  public static BotPoseEstimate toBotposeBlue(BotPoseEstimate estimate) {
+    return new BotPoseEstimate(toBotposeBlue(estimate.pose()), estimate.timestampSeconds());
+  }
+
   public Command getAutonomousCommand() {
     return autoChooser.getSelected();
   }
@@ -445,5 +437,6 @@ public class RobotContainer implements AutoCloseable {
   public void close() {
     climb.close();
     drive.close();
+    intake.close();
   }
 }
