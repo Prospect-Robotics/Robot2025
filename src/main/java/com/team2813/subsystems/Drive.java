@@ -39,6 +39,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.photonvision.PhotonPoseEstimator;
@@ -69,10 +71,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
           new Rotation3d(0.3930658103, -0.3553590713, -0.0872664626));
   private static final Transform3d professorInklingTransform =
       new Transform3d(
+          0.0561231288,
           0.303869598,
-          -0.0561231288,
           0.1790237974,
-          new Rotation3d(0.5235987756, 0.3553590713, 0.5235987756));
+          new Rotation3d(0.0872664626, -0.2756437583, 0.0872664626 + Math.PI));
 
   // See above comment, do not delete past this line.
 
@@ -130,7 +132,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", captBarnaclesTransform)
-            // .addCamera("professor-inkling", professorInklingTransform)
+            .addCamera("professor-inkling", professorInklingTransform)
             .build();
     this.config = config;
 
@@ -398,7 +400,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
-    if (AllPreferences.usePhotonVisionLocation().getAsBoolean() || true) {
+    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
       estimator.update(
           (estimate) ->
               drivetrain.addVisionMeasurement(
@@ -409,7 +411,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     currentPose.set(pose);
     captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
     professorPose.set(new Pose3d(pose).plus(professorInklingTransform));
-    List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
+    Collection<Pose3d> poses = locationalData.getVisibleAprilTagPoses().values();
     visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
