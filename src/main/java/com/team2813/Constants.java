@@ -42,10 +42,8 @@ public final class Constants {
   public static final int INTAKE_WHEEL = 19;
   public static final int INTAKE_ENCODER = 20;
 
-  // Algae Mechanisms (might not be used)
-  public static final int ALGAE_PIVOT = 21;
-  public static final int ALGAE_WHEEL = 22;
-  public static final int ALGAE_ENCODER = 23;
+  public static final int GROUND_INTAKE_WHEEL = 21;
+  public static final int GROUND_INTAKE_PIVOT = 22;
 
   public static final class DriverConstants {
     private DriverConstants() {
@@ -61,7 +59,7 @@ public final class Constants {
     public static Trigger AUTO_ALIGN_LEFT = DRIVER_CONTROLLER.L1();
     public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.R1();
 
-    public static Trigger ALGAE_INTAKE = DRIVER_CONTROLLER.L2().and(() -> false);
+    public static Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
 
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
   }
@@ -72,16 +70,16 @@ public final class Constants {
     }
 
     public static final CommandPS4Controller OPERATOR_CONTROLLER = new CommandPS4Controller(1);
-    public static Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
-    public static Trigger OUTTAKE_BUTTON = OPERATOR_CONTROLLER.L1();
-    public static Trigger PREP_L2_CORAL = OPERATOR_CONTROLLER.cross();
-    public static Trigger PREP_L3_CORAL = OPERATOR_CONTROLLER.triangle();
-    public static Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
-    //public static Trigger ALGAE_INTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
-    public static Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
-    public static Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
-    public static Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
-    public static Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
+    public static final Trigger INTAKE_BUTTON = OPERATOR_CONTROLLER.R1();
+    public static final Trigger OUTTAKE_BUTTON =
+        OPERATOR_CONTROLLER.L1().or(DriverConstants.PLACE_CORAL);
+    public static final Trigger PREP_L2_CORAL = OPERATOR_CONTROLLER.cross();
+    public static final Trigger PREP_L3_CORAL = OPERATOR_CONTROLLER.triangle();
+    public static final Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
+    //public static final Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2().and(() -> false);
+    public static final Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
+    public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
+    public static final Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
   }
 
   private Constants() {

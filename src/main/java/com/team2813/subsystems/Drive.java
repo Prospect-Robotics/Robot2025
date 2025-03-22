@@ -285,10 +285,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final ApplyRobotSpeeds applyRobotSpeedsApplier = new ApplyRobotSpeeds();
   /*
    * IT IS ABSOLUTELY IMPERATIVE THAT YOU USE ApplyRobotSpeeds() RATHER THAN THE DEMENTED ApplyFieldSpeeds() HERE!
-   * If ApplyFieldSpeeds() is used, pathplanner & all autonomus paths will not function properly.
+   * If ApplyFieldSpeeds() is used, pathplanner & all autonomous paths will not function properly.
    * This is because pathplanner knows where the robot is, but needs to use ApplyRobotSpeeds() in order to convert knowledge
    * of where the robot is on the field, to instruction centered on the robot.
-   * Or something like this, I'm still not too sure how this works.
+   * Or something like this, I'm still not to sure how this works.
    */
   private final FieldCentricFacingAngle fieldCentricFacingAngleApplier =
       new FieldCentricFacingAngle();
@@ -331,7 +331,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    * Sets the rotation velocity of the robot
    *
    * @param rotationRate rotation rate in radians per second
-   * @deprecated unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you
+   * @deprecated Unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you
    *     are using
    */
   @Deprecated
