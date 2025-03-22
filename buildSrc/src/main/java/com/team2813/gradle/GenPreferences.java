@@ -27,6 +27,10 @@ public abstract class GenPreferences implements Plugin<Project> {
     private static final String GEN_SRCS_TASK_NAME = "createPreferencesFile";
     private static final Gson gson = new Gson();
 
+    interface GenPreferencesExtension {
+        RegularFileProperty getJsonFile();
+    }
+
     @Override
     public void apply(Project project) {
         // Make extension configurable.
@@ -76,7 +80,7 @@ public abstract class GenPreferences implements Plugin<Project> {
 
         private JavaFile generateJavaFileFromJson(Project project, File file) {
             if (!file.exists()) {
-                throw new RuntimeException("Input file does not exist: " + file);
+                throw new IllegalStateException("Input file does not exist: " + file);
             }
             NetworkTableEntry[] entries;
             try (var reader = new FileReader(file, UTF_8)) {
@@ -114,17 +118,6 @@ public abstract class GenPreferences implements Plugin<Project> {
                     entry.addInitializer(initializeMethod);
                     initializeMethod.endControlFlow();
                 });
-//            if (entry.getType() == NetworkTableEntry.Type.BOOLEAN) {
-//                FieldSpec spec = FieldSpec.builder(Boolean.TYPE, entry.getName())
-//                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-//                        .initializer("$L", entry.getValueAsBoolean())
-//                        .build();
-//                builder.addField(spec);
-//
-//                initializeMethod.beginControlFlow("if (!$T.containsKey(\"$L\"))", preferencesClass, entry.getName());
-//                initializeMethod.addStatement("$T.initBoolean(\"$L\", $L)", preferencesClass, entry.getName(), entry.getValueAsBoolean());
-//                initializeMethod.endControlFlow();
-//            }
             }
 
             initializeMethod.addCode("\n");
@@ -137,30 +130,4 @@ public abstract class GenPreferences implements Plugin<Project> {
             return JavaFile.builder("com.team2813", builder.build()).indent("  ").build();
         }
     }
-
-    interface GenPreferencesExtension {
-        RegularFileProperty getJsonFile();
-    }
-
-//        project.afterEvaluate {
-//            //读取配置数据
-//            File file = project.file("config.json");
-//            if (!file.exists()) {
-//                throw new Exception("config.json not exist!");
-//            }
-//            String json = file.text;
-//            JsonSlurper jsonSlurper = new JsonSlurper();
-//            def config = (Map<String, Map<String, String>>) jsonSlurper.parseText(json);
-//            println("read config result is \n $config");
-//            TypeSpec.Builder builder = TypeSpec.classBuilder("UpConfigData")
-//                    .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-//            JavaFile javaFile = JavaFile.builder("com.haier.uhome.uplus.plugin.uppermissionplugin.initdemo",
-//                    builder.build()).build()
-//            File createFile = new File(project.projectDir, "src/main/java")
-//            if (!createFile.exists()) {
-//                createFile.mkdirs()
-//            }
-//            javaFile.writeTo(createFile)
-//            println "[write to]: ${createFile.absolutePath}"
-//        }
 }
