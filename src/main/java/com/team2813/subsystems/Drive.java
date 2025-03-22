@@ -59,8 +59,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
   
-  private static final Transform3d captBarnaclesTransform = new Transform3d(0.303869598, -0.0561231288, 0.1790237974, new Rotation3d(0.2756437583, 0.0872664626,0.0872664626));
-  private static final Transform3d professorInklingTransform = new Transform3d(0.2959495986, -0.164117655, 0.1758144058, new Rotation3d(0.5235987756, 0.3553590713, 0.3930658103));
+  private static final Transform3d captBarnaclesTransform = new Transform3d(0.164117655, 0.2959495986, 0.1758144058, new Rotation3d(0.3930658103, -0.3553590713,-0.0872664626));
+  private static final Transform3d professorInklingTransform = new Transform3d(0.303869598, -0.0561231288, 0.1790237974, new Rotation3d(0.5235987756, 0.3553590713, 0.5235987756));
 
   // See above comment, do not delete past this line.
 
@@ -73,7 +73,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", captBarnaclesTransform)
-            .addCamera("professor-inkling", professorInklingTransform)
+            //.addCamera("professor-inkling", professorInklingTransform)
             .build();
 
     double FLSteerOffset = 0.22021484375;
@@ -195,6 +195,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+    captPose = networkTable.getStructTopic("Front cam pos", Pose3d.struct).publish();
+    professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
   }
 
   private double getPosition(int moduleId) {
@@ -305,6 +307,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final StructPublisher<Pose2d> currentPose;
   private final StructArrayPublisher<Pose3d> visibleTargetPoses;
   private final DoubleArrayPublisher modulePositions;
+  private final StructPublisher<Pose3d> captPose;
+  private final StructPublisher<Pose3d> professorPose;
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
 
@@ -337,7 +341,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                               estimate.estimatedPose.toPose2d(),
                               Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
     }
-    currentPose.set(getPose());
+    Pose2d pose = getPose();
+    currentPose.set(pose);
+    captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
+    professorPose.set(new Pose3d(pose).plus(professorInklingTransform));
     localization.limelightLocation().ifPresent(this::addVisionMeasurement);
     localization.updateDashboard();
     List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
