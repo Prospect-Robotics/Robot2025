@@ -71,9 +71,8 @@ gversion {
 }
 sourceSets.main.java.srcDirs += BUILD_CONSTANTS_AUTOGEN_PATH
 
-genPreferences {
+gen_preferences {
 }
-sourceSets.main.java.srcDirs += layout.buildDirectory.dir('generated/sources/gen_preferences')
 
 def ROBOT_MAIN_CLASS = 'com.team2813.Main'
 

@@ -6,12 +6,11 @@ import com.squareup.javapoet.*;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.Task;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.plugins.JavaPlugin;
 import org.gradle.api.plugins.JavaPluginExtension;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -22,34 +21,51 @@ import javax.lang.model.element.Modifier;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public abstract class GenPreferences implements Plugin<Project> {
+    private static final String EXTENSION_NAME = "gen_preferences";
+    private static final String GEN_DIR = "generated/sources/" + EXTENSION_NAME;
+    private static final String DEFAULT_JSON_FILENAME = "networktables.json";
+    private static final String GEN_SRCS_TASK_NAME = "createPreferencesFile";
     private static final Gson gson = new Gson();
 
     @Override
     public void apply(Project project) {
-        var extension = project.getExtensions().create("genPreferences", GenPreferencesExtension.class);
-        extension.getJson().convention(project.getLayout().getProjectDirectory().file("networktables.json"));
-        var task = project.getTasks().register("createPreferencesFile", GenerateSources.class);
-        project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(task);
+        // Make extension configurable.
+        var extension = project.getExtensions().create(EXTENSION_NAME, GenPreferencesExtension.class);
+        extension.getJsonFile().convention(project.getLayout().getProjectDirectory().file(DEFAULT_JSON_FILENAME));
+
+        // Create task to generate Java source files.
+        var taskProvider = project.getTasks().register(GEN_SRCS_TASK_NAME, GenerateSources.class);
+        taskProvider.configure(task -> task.getJsonFile().set(extension.getJsonFile()));
+        // ... and make sure all Java tasks dend on this task.
+        project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(taskProvider);
+
+        var sourceSets = project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
+        var generatedSourcesDir = project.getLayout().getBuildDirectory().dir(GEN_DIR);
+        sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getJava().srcDirs(generatedSourcesDir);
     }
 
-    static class GenerateSources extends DefaultTask {
+    static abstract class GenerateSources extends DefaultTask {
 
         public GenerateSources() {}
+
+        @InputFile
+        abstract RegularFileProperty getJsonFile();
 
         @TaskAction
         void generateSources() {
             Project project = getProject();
-            var extension = getProject().getExtensions().getByType(GenPreferencesExtension.class);
-            File file = extension.getJson().getAsFile().get(); // project.file("preferences.json");
+            File file = getJsonFile().getAsFile().get();
             JavaFile javaFile = generateJavaFileFromJson(project, file);
 
-            File outputFile = new File(project.getProjectDir(), "build/generated/sources/gen_preferences");
-            if (!outputFile.exists()) {
-                outputFile.mkdirs();
+            File genDir = new File(project.getProjectDir(), "build/generated/sources/gen_preferences");
+            if (!genDir.exists()) {
+                if (!genDir.mkdirs()) {
+                    throw new RuntimeException("Could not create " + genDir);
+                }
             }
 
             try {
-                javaFile.writeTo(outputFile);
+                javaFile.writeTo(genDir);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -120,7 +136,7 @@ public abstract class GenPreferences implements Plugin<Project> {
     }
 
     interface GenPreferencesExtension {
-        RegularFileProperty getJson();
+        RegularFileProperty getJsonFile();
     }
 
 //        project.afterEvaluate {
