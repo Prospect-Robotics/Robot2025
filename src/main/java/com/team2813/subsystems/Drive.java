@@ -68,7 +68,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
           0.164117655,
           0.2959495986,
           0.1758144058,
-          new Rotation3d(0.3930658103, -0.3553590713, -0.0872664626));
+          new Rotation3d(0,-0.355359683, -0.416));
   private static final Transform3d professorInklingTransform =
       new Transform3d(
           0.0561231288,
