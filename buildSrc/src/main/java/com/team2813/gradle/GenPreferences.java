@@ -35,7 +35,10 @@ public abstract class GenPreferences implements Plugin<Project> {
 
         // Create task to generate Java source files.
         var taskProvider = project.getTasks().register(GEN_SRCS_TASK_NAME, GenerateSources.class);
-        taskProvider.configure(task -> task.getJsonFile().set(extension.getJsonFile()));
+        taskProvider.configure(task -> {
+            task.getJsonFile().set(extension.getJsonFile());
+            task.onlyIf(t -> extension.getJsonFile().getAsFile().get().exists());
+        });
         // ... and make sure all Java tasks dend on this task.
         project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(taskProvider);
 
@@ -57,7 +60,7 @@ public abstract class GenPreferences implements Plugin<Project> {
             File file = getJsonFile().getAsFile().get();
             JavaFile javaFile = generateJavaFileFromJson(project, file);
 
-            File genDir = new File(project.getProjectDir(), "build/generated/sources/gen_preferences");
+            File genDir = project.getLayout().getBuildDirectory().dir(GEN_DIR).get().getAsFile();
             if (!genDir.exists()) {
                 if (!genDir.mkdirs()) {
                     throw new RuntimeException("Could not create " + genDir);
