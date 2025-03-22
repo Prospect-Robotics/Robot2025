@@ -234,8 +234,9 @@ public class Drive extends SubsystemBase {
           .getConfigurator()
           .apply(
               new CurrentLimitsConfigs()
-                  .withStatorCurrentLimit(60)
-                  .withStatorCurrentLimitEnable(true));
+                  .withSupplyCurrentLimit(60)
+                  .withSupplyCurrentLimitEnable(true)
+                  .withStatorCurrentLimitEnable(false));
     }
   }
 
