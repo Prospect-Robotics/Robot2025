@@ -26,9 +26,33 @@
     }
   },
   {
+    "name": "/Preferences/exampleLong",
+    "type": "long",
+    "value": 12345,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/exampleDouble",
     "type": "double",
     "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/exampleFloat",
+    "type": "float",
+    "value": 3.14,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/exampleString",
+    "type": "string",
+    "value": "Gear Heads",
     "properties": {
       "persistent": true
     }

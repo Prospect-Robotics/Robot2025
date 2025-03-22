@@ -30,6 +30,33 @@ class NetworkTableEntry {
                         .build();
             }
         },
+        STRING(String.class) {
+            @Override
+            protected void addInitializer(MethodSpec.Builder builder, String key, Object value) {
+                builder.addStatement("$T.initString(\"$L\", \"$L\")", PREFERENCES_CLASS, key, (String) value);
+            }
+
+            @Override
+            protected void addGetter(MethodSpec.Builder builder, String key) {
+                builder.returns(type)
+                        .addStatement("return $T.getString(\"$L\", \"\")", PREFERENCES_CLASS, key)
+                        .build();
+            }
+        },
+        LONG(Long.TYPE) {
+            @Override
+            protected void addInitializer(MethodSpec.Builder builder, String key, Object value) {
+                long intValue = Math.round((Double) value);
+                builder.addStatement("$T.initLong(\"$L\", $L)", PREFERENCES_CLASS, key, intValue);
+            }
+
+            @Override
+            protected void addGetter(MethodSpec.Builder builder, String key) {
+                builder.returns(type)
+                        .addStatement("return $T.getLong(\"$L\", 0)", PREFERENCES_CLASS, key)
+                        .build();
+            }
+        },
         INT(Integer.TYPE) {
             @Override
             protected void addInitializer(MethodSpec.Builder builder, String key, Object value) {
@@ -54,6 +81,19 @@ class NetworkTableEntry {
             protected void addGetter(MethodSpec.Builder builder, String key) {
                 builder.returns(type)
                         .addStatement("return $T.getDouble(\"$L\", 0)", PREFERENCES_CLASS, key)
+                        .build();
+            }
+        },
+        FLOAT(Float.TYPE) {
+            @Override
+            protected void addInitializer(MethodSpec.Builder builder, String key, Object value) {
+                builder.addStatement("$T.initFloat(\"$L\", $Lf)", PREFERENCES_CLASS, key, (Double) value);
+            }
+
+            @Override
+            protected void addGetter(MethodSpec.Builder builder, String key) {
+                builder.returns(type)
+                        .addStatement("return $T.getFloat(\"$L\", 0)", PREFERENCES_CLASS, key)
                         .build();
             }
         };
