@@ -19,7 +19,7 @@ public final class RobotContainerTest {
   }
 
   @Test
-  public void conBeConstructedMultipleTimes() {
+  public void canBeConstructedMultipleTimes() {
     //noinspection EmptyTryBlock
     try (var container =
         new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {}
