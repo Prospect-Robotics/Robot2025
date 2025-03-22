@@ -6,6 +6,7 @@ import static com.team2813.lib2813.util.ControlUtils.deadband;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -225,6 +226,17 @@ public class Drive extends SubsystemBase {
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
 
     setDefaultCommand(createDefaultCommand());
+
+    for (int i = 0; i < 4; i++) {
+      drivetrain
+          .getModule(i)
+          .getDriveMotor()
+          .getConfigurator()
+          .apply(
+              new CurrentLimitsConfigs()
+                  .withStatorCurrentLimit(60)
+                  .withStatorCurrentLimitEnable(true));
+    }
   }
 
   private Command createDefaultCommand() {
