@@ -79,18 +79,6 @@ public abstract class GenPreferences implements Plugin<Project> {
         }
 
         private JavaFile generateJavaFileFromJson(Project project, File file) {
-            if (!file.exists()) {
-                throw new IllegalStateException("Input file does not exist: " + file);
-            }
-            NetworkTableEntry[] entries;
-            try (var reader = new FileReader(file, UTF_8)) {
-                entries = gson.fromJson(reader, NetworkTableEntry[].class);
-            } catch (IOException e) {
-                throw new RuntimeException("Could not read input file: " + file.getPath(), e);
-            } catch (JsonParseException e) {
-                throw new RuntimeException("Could not parse input file: " + file.getPath(), e);
-            }
-
             ClassName preferencesClass = ClassName.get("edu.wpi.first.wpilibj", "Preferences");
 
             TypeSpec.Builder builder = TypeSpec.classBuilder("RobotPreferences")
@@ -111,7 +99,7 @@ public abstract class GenPreferences implements Plugin<Project> {
                     .returns(void.class);
 
             initializeMethod.beginControlFlow("if (!$N)", initializedField);
-            for (NetworkTableEntry entry : entries) {
+            for (NetworkTableEntry entry : parseJson(file)) {
                 entry.getPreferenceKey().ifPresent(key -> {
                     entry.addGetter(builder);
                     initializeMethod.beginControlFlow("if (!$T.containsKey(\"$L\"))", preferencesClass, key);
@@ -128,6 +116,20 @@ public abstract class GenPreferences implements Plugin<Project> {
             builder.addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build());
 
             return JavaFile.builder("com.team2813", builder.build()).indent("  ").build();
+        }
+
+        private NetworkTableEntry[] parseJson(File file) {
+            if (!file.exists()) {
+                throw new IllegalStateException("Input file does not exist: " + file);
+            }
+
+            try (var reader = new FileReader(file, UTF_8)) {
+                return gson.fromJson(reader, NetworkTableEntry[].class);
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read input file: " + file.getPath(), e);
+            } catch (JsonParseException e) {
+                throw new RuntimeException("Could not parse input file: " + file.getPath(), e);
+            }
         }
     }
 }
