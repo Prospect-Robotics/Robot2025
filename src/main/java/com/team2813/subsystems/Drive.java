@@ -91,7 +91,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
-          .addLimelightMeasurement(false)
+          .addLimelightMeasurement(true)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -280,10 +280,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final ApplyRobotSpeeds applyRobotSpeedsApplier = new ApplyRobotSpeeds();
   /*
    * IT IS ABSOLUTELY IMPERATIVE THAT YOU USE ApplyRobotSpeeds() RATHER THAN THE DEMENTED ApplyFieldSpeeds() HERE!
-   * If ApplyFieldSpeeds() is used, pathplanner & all autonomus paths will not function properly.
+   * If ApplyFieldSpeeds() is used, pathplanner & all autonomous paths will not function properly.
    * This is because pathplanner knows where the robot is, but needs to use ApplyRobotSpeeds() in order to convert knowledge
    * of where the robot is on the field, to instruction centered on the robot.
-   * Or something like this, I'm still not too sure how this works.
+   * Or something like this, I'm still not to sure how this works.
    */
   private final FieldCentricFacingAngle fieldCentricFacingAngleApplier =
       new FieldCentricFacingAngle();
@@ -326,7 +326,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    * Sets the rotation velocity of the robot
    *
    * @param rotationRate rotation rate in radians per second
-   * @deprecated unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you
+   * @deprecated Unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you
    *     are using
    */
   @Deprecated
@@ -387,10 +387,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
-    // If the limelight has a position, send it to the drive.
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
-    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    if (config.addLimelightMeasurement) {
+      // If the limelight has a position that isn't too far from the drive's current estimated
+      // position, send it to SwerveDrivetrain.addVisionMeasurement().
+      localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    }
 
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
