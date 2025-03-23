@@ -45,8 +45,8 @@ import org.photonvision.PhotonPoseEstimator;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase implements AutoCloseable {
-  private static final double MAX_VELOCITY = 6;
-  private static final double MAX_ROTATION = Math.PI * 2;
+  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
+  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
@@ -89,7 +89,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
-      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+      boolean addLimelightMeasurement,
+      double maxLimelightDifferenceMeters,
+      double maxRotationsPerSecond,
+      double maxVelocityInMetersPerSecond) {
 
     public DriveConfiguration {
       if (maxLimelightDifferenceMeters <= 0) {
@@ -97,10 +100,16 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       }
     }
 
+    double maxRadiansPerSecond() {
+      return maxRotationsPerSecond * Math.PI * 2;
+    }
+
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(true)
+          .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
+          .maxVelocityInMetersPerSecond(DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -113,6 +122,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
+
+      Builder maxRotationsPerSecond(double value);
+
+      Builder maxVelocityInMetersPerSecond(double value);
 
       Builder maxLimelightDifferenceMeters(double value);
 
@@ -266,9 +279,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private Command createDefaultCommand() {
     return new DefaultDriveCommand(
         this,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * MAX_VELOCITY,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * MAX_VELOCITY,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * MAX_ROTATION);
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocityInMetersPerSecond,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocityInMetersPerSecond,
+        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRadiansPerSecond());
   }
 
   private static double modifyAxis(double value) {
