@@ -113,8 +113,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(true)
-          .maxRotationsPerSecond(() -> DEFAULT_MAX_ROTATIONS_PER_SECOND)
-          .maxVelocityInMetersPerSecond(() -> DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
+          .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
+          .maxVelocityInMetersPerSecond(DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -130,7 +130,15 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
       Builder maxRotationsPerSecond(DoubleSupplier value);
 
+      default Builder maxRotationsPerSecond(double value) {
+        return maxRotationsPerSecond(() -> value);
+      }
+
       Builder maxVelocityInMetersPerSecond(DoubleSupplier value);
+
+      default Builder maxVelocityInMetersPerSecond(double value) {
+        return maxVelocityInMetersPerSecond(() -> value);
+      }
 
       Builder maxLimelightDifferenceMeters(double value);
 
