@@ -60,15 +60,22 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
-  
-  /** The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the front*/
+
+  /**
+   * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
+   * front
+   */
   private static final Transform3d captBarnaclesTransform =
       new Transform3d(
           0.1688157406,
           0.2939800826,
           0.1708140348,
           new Rotation3d(0, -0.1745329252, -0.5235987756));
-  /** The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the back*/
+
+  /**
+   * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
+   * back
+   */
   private static final Transform3d professorInklingTransform =
       new Transform3d(
           0.0584240386, 0.2979761884, 0.1668812004, new Rotation3d(0, 0, 0.1745329252 + Math.PI));
