@@ -26,6 +26,8 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
+import com.team2813.subsystems.Drive.*;
+
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
@@ -81,6 +83,17 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     arrayOfPos.add(new Pose2d(3.699, 3.004, Rotation2d.fromDegrees(60))); // 6l *
     arrayOfPos.add(new Pose2d(3.981, 2.840, Rotation2d.fromDegrees(60))); // 6r*
 
+    /*if (Drive.onRed()){
+      List<Pose2d> arrayOfPosRed = new ArrayList<>();
+      for (Pose2d pose : arrayOfPos){
+        arrayOfPosRed.add(new Pose2d(17.55 - pose.getX(),
+                          8.052 - pose.getY(),
+                          pose.getRotation().plus(new Rotation2d(Math.PI))
+                          )
+                          );
+      }
+      return arrayOfPosRed;
+    }*/
     return arrayOfPos;
   }
 
@@ -107,23 +120,29 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private final StructPublisher<Pose2d> lastPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
-  private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
-    Pose2d currentPose = drivePosSupplier.get();
-    System.out.println("currentPose: " + currentPose);
-    Pose2d newPosition = currentPose.nearest(positions);
-    lastPosePublisher.set(newPosition);
+    private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
+      Pose2d currentPose = drivePosSupplier.get();
+      if (Drive.onRed()){
+        currentPose = new Pose2d(17.55 - currentPose.getX(),
+                          8.052 - currentPose.getY(),
+                          currentPose.getRotation().plus(new Rotation2d(Math.PI))
+                          );
+      }
 
-    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
+      Pose2d newPosition = currentPose.nearest(positions);
+      lastPosePublisher.set(newPosition);
 
-    PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
-
-    PathPlannerPath path =
-        new PathPlannerPath(
-            waypoints, constraints, null, new GoalEndState(0.0, newPosition.getRotation())
-            // new GoalEndState(0.0, newPosition.getRotation())
-            );
-    return AutoBuilder.followPath(path);
-  }
+      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
+  
+      PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+  
+      PathPlannerPath path =
+          new PathPlannerPath(
+              waypoints, constraints, null, new GoalEndState(0.0, newPosition.getRotation())
+              // new GoalEndState(0.0, newPosition.getRotation())
+              );
+      return AutoBuilder.followPath(path);
+    }
 
   public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
     if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
