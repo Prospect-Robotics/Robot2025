@@ -418,8 +418,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     currentPose.set(pose);
     captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
     professorPose.set(new Pose3d(pose).plus(professorInklingTransform));
-    Collection<Pose3d> poses = locationalData.getVisibleAprilTagPoses().values();
-    visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
+    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
+    visibleTargetPoses.accept(visibleAprilTagPoses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
 
