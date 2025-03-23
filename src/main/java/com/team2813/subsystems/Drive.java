@@ -42,6 +42,25 @@ import java.util.stream.IntStream;
 public class Drive extends SubsystemBase {
   private static final double MAX_VELOCITY = 6;
   private static final double MAX_ROTATION = Math.PI * 2;
+  private static final Phoenix6Configs DEFAULT_DRIVE_GAINS =
+      Phoenix6Configs.builder()
+          .kP(2.5)
+          .kI(0)
+          .kD(0) // Tune this.
+          .kS(6.4111)
+          .kV(0.087032)
+          .kA(0) // Tune this.
+          .build();
+  private static final Phoenix6Configs DEFAULT_STEER_GAINS =
+      Phoenix6Configs.builder()
+          .kP(50)
+          .kI(0)
+          .kD(3.0889) // Tune this.
+          .kS(0.21041)
+          .kV(2.68)
+          .kA(0.084645) // Tune this.
+          .build();
+
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
@@ -60,11 +79,14 @@ public class Drive extends SubsystemBase {
   /**
    * Configurable values for the {@code Drive} subsystem
    *
-   * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
+   * <p>The values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
-      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+      boolean addLimelightMeasurement,
+      double maxLimelightDifferenceMeters,
+      Phoenix6Configs steerGains,
+      Phoenix6Configs driveGains) {
 
     public DriveConfiguration {
       if (maxLimelightDifferenceMeters <= 0) {
@@ -76,7 +98,9 @@ public class Drive extends SubsystemBase {
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(true)
-          .maxLimelightDifferenceMeters(1.0);
+          .maxLimelightDifferenceMeters(1.0)
+          .steerGains(DEFAULT_STEER_GAINS)
+          .driveGains(DEFAULT_DRIVE_GAINS);
     }
 
     /** Creates an instance from preference values stored in the robot's flash memory. */
@@ -91,7 +115,41 @@ public class Drive extends SubsystemBase {
 
       Builder maxLimelightDifferenceMeters(double value);
 
+      Builder steerGains(Phoenix6Configs gains);
+
+      Builder driveGains(Phoenix6Configs gains);
+
       DriveConfiguration build();
+    }
+  }
+
+  /** Configuration for {@link Slot0Configs}, {@code Slot2Configs}, etc. */
+  public record Phoenix6Configs(double kP, double kI, double kD, double kS, double kV, double kA) {
+
+    /** Creates a builder for {@code Phoenix6Configs} with all values set to zero. */
+    public static Phoenix6Configs.Builder builder() {
+      return new AutoBuilder_Drive_Phoenix6Configs_Builder();
+    }
+
+    Slot0Configs toSlot0Configs() {
+      return new Slot0Configs().withKP(kP).withKI(kI).withKD(kD).withKS(kS).withKV(kV).withKA(kA);
+    }
+
+    @AutoBuilder
+    public interface Builder {
+      Builder kP(double value);
+
+      Builder kI(double value);
+
+      Builder kD(double value);
+
+      Builder kS(double value);
+
+      Builder kV(double value);
+
+      Builder kA(double value);
+
+      Phoenix6Configs build();
     }
   }
 
@@ -111,25 +169,6 @@ public class Drive extends SubsystemBase {
     double BLSteerOffset = -0.367919921875;
     double BRSteerOffset = -0.258544921875;
 
-    Slot0Configs steerGains =
-        new Slot0Configs()
-            .withKP(50)
-            .withKI(0)
-            .withKD(3.0889) // Tune this.
-            .withKS(0.21041)
-            .withKV(2.68)
-            .withKA(0.084645); // Tune this.
-
-    // l: 0 h: 10
-    Slot0Configs driveGains =
-        new Slot0Configs()
-            .withKP(2.5)
-            .withKI(0)
-            .withKD(0) // Tune this.
-            .withKS(6.4111)
-            .withKV(0.087032)
-            .withKA(0); // Tune this.
-
     SwerveDrivetrainConstants drivetrainConstants =
         new SwerveDrivetrainConstants()
             .withPigeon2Id(PIGEON_ID)
@@ -144,8 +183,8 @@ public class Drive extends SubsystemBase {
                 .withSteerMotorGearRatio(150.0 / 7)
                 .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
                 .withSlipCurrent(90)
-                .withSteerMotorGains(steerGains)
-                .withDriveMotorGains(driveGains)
+                .withSteerMotorGains(config.steerGains.toSlot0Configs())
+                .withDriveMotorGains(config.driveGains.toSlot0Configs())
                 .withDriveMotorClosedLoopOutput(
                     ClosedLoopOutputType
                         .TorqueCurrentFOC) // Tune this. (Important to tune values below)
