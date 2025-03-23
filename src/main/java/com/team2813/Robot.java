@@ -29,8 +29,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    // Publish build constants to NetworkTables.
-    m_buildConstantsPublisher.publish();
 
     SignalLogger.setPath("/U/logs");
     DataLogManager.start("/U/logs");
@@ -41,8 +39,9 @@ public class Robot extends TimedRobot {
     if (eventName == null || eventName.isBlank()) {
       SignalLogger.start();
     }
-
     CameraServer.startAutomaticCapture();
+    // Publish build constants to NetworkTables.
+    m_buildConstantsPublisher.publish();
   }
 
   @Override
