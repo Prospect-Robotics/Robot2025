@@ -29,7 +29,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-
     SignalLogger.setPath("/U/logs");
     DataLogManager.start("/U/logs");
     DataLogManager.logNetworkTables(true);
