@@ -39,9 +39,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.IntStream;
 import org.photonvision.PhotonPoseEstimator;
 
@@ -65,10 +63,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   private static final Transform3d captBarnaclesTransform =
       new Transform3d(
-          0.164117655,
-          0.2959495986,
-          0.1758144058,
-          new Rotation3d(0,-0.355359683, -0.416));
+          0.164117655, 0.2959495986, 0.1758144058, new Rotation3d(0, -0.355359683, -0.416));
   private static final Transform3d professorInklingTransform =
       new Transform3d(
           0.0561231288,

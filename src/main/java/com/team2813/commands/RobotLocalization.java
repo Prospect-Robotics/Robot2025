@@ -10,6 +10,7 @@ import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.Drive.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -25,8 +26,6 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
-
-import com.team2813.subsystems.Drive.*;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Pose2d[] NO_POS = new Pose2d[0];
@@ -120,29 +119,30 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private final StructPublisher<Pose2d> lastPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
-    private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
-      Pose2d currentPose = drivePosSupplier.get();
-      if (Drive.onRed()){
-        currentPose = new Pose2d(17.55 - currentPose.getX(),
-                          8.052 - currentPose.getY(),
-                          currentPose.getRotation().plus(new Rotation2d(Math.PI))
-                          );
-      }
-
-      Pose2d newPosition = currentPose.nearest(positions);
-      lastPosePublisher.set(newPosition);
-
-      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
-  
-      PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
-  
-      PathPlannerPath path =
-          new PathPlannerPath(
-              waypoints, constraints, null, new GoalEndState(0.0, newPosition.getRotation())
-              // new GoalEndState(0.0, newPosition.getRotation())
-              );
-      return AutoBuilder.followPath(path);
+  private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
+    Pose2d currentPose = drivePosSupplier.get();
+    if (Drive.onRed()) {
+      currentPose =
+          new Pose2d(
+              17.55 - currentPose.getX(),
+              8.052 - currentPose.getY(),
+              currentPose.getRotation().plus(new Rotation2d(Math.PI)));
     }
+
+    Pose2d newPosition = currentPose.nearest(positions);
+    lastPosePublisher.set(newPosition);
+
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
+
+    PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+
+    PathPlannerPath path =
+        new PathPlannerPath(
+            waypoints, constraints, null, new GoalEndState(0.0, newPosition.getRotation())
+            // new GoalEndState(0.0, newPosition.getRotation())
+            );
+    return AutoBuilder.followPath(path);
+  }
 
   public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
     if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
