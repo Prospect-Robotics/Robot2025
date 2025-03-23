@@ -107,10 +107,16 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private final StructPublisher<Pose2d> lastPosePublisher =
       NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
 
-  private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
+  /**
+   * Creates a command from the current position to the nearest target.
+   *
+   * @param drivePosSupplier Provides the current robot position (in the blue coordinate system).
+   * @param targets Locations to place coral, one for each of the sides of the coral reef.
+   */
+  private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> targets) {
     Pose2d currentPose = drivePosSupplier.get();
     System.out.println("currentPose: " + currentPose);
-    Pose2d newPosition = currentPose.nearest(positions);
+    Pose2d newPosition = currentPose.nearest(targets);
     lastPosePublisher.set(newPosition);
 
     List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(currentPose, newPosition);
