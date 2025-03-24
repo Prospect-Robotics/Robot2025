@@ -5,6 +5,7 @@ import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
 import static com.team2813.lib2813.util.ControlUtils.deadband;
 import static edu.wpi.first.units.Units.Rotations;
 
+import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -17,6 +18,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
+import com.team2813.AllPreferences;
+import com.team2813.Constants.*;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
@@ -24,9 +27,10 @@ import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import com.team2813.vision.MultiPhotonPoseEstimator;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.*;
@@ -35,16 +39,19 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.List;
+import java.util.Collection;
+import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+import org.photonvision.PhotonPoseEstimator;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
-public class Drive extends SubsystemBase {
-  private static final double MAX_VELOCITY = 6;
-  private static final double MAX_ROTATION = Math.PI * 2;
+public class Drive extends SubsystemBase implements AutoCloseable {
+  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
+  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
+  private final MultiPhotonPoseEstimator estimator;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -55,6 +62,25 @@ public class Drive extends SubsystemBase {
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
 
+  /**
+   * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
+   * front
+   */
+  private static final Transform3d captBarnaclesTransform =
+      new Transform3d(
+          0.1688157406,
+          0.2939800826,
+          0.1708140348,
+          new Rotation3d(0, -0.1745329252, -0.5235987756));
+
+  /**
+   * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
+   * back
+   */
+  private static final Transform3d professorInklingTransform =
+      new Transform3d(
+          0.0584240386, 0.2979761884, 0.1668812004, new Rotation3d(0, 0, 0.1745329252 + Math.PI));
+
   // See above comment, do not delete past this line.
 
   /**
@@ -64,7 +90,10 @@ public class Drive extends SubsystemBase {
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
-      boolean addLimelightMeasurement, double maxLimelightDifferenceMeters) {
+      boolean addLimelightMeasurement,
+      double maxLimelightDifferenceMeters,
+      DoubleSupplier maxRotationsPerSecond,
+      DoubleSupplier maxVelocityInMetersPerSecond) {
 
     public DriveConfiguration {
       if (maxLimelightDifferenceMeters <= 0) {
@@ -72,10 +101,20 @@ public class Drive extends SubsystemBase {
       }
     }
 
+    double maxRadiansPerSecond() {
+      return maxRotationsPerSecond.getAsDouble() * Math.PI * 2;
+    }
+
+    double maxVelocity() {
+      return maxVelocityInMetersPerSecond.getAsDouble();
+    }
+
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
-          .addLimelightMeasurement(false)
+          .addLimelightMeasurement(true)
+          .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
+          .maxVelocityInMetersPerSecond(DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -88,6 +127,18 @@ public class Drive extends SubsystemBase {
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
+
+      Builder maxRotationsPerSecond(DoubleSupplier value);
+
+      default Builder maxRotationsPerSecond(double value) {
+        return maxRotationsPerSecond(() -> value);
+      }
+
+      Builder maxVelocityInMetersPerSecond(DoubleSupplier value);
+
+      default Builder maxVelocityInMetersPerSecond(double value) {
+        return maxVelocityInMetersPerSecond(() -> value);
+      }
 
       Builder maxLimelightDifferenceMeters(double value);
 
@@ -104,6 +155,15 @@ public class Drive extends SubsystemBase {
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
+    estimator =
+        new MultiPhotonPoseEstimator.Builder(
+                networkTableInstance,
+                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
+                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+            // should have named our batteries after Octonauts characters >:(
+            .addCamera("capt-barnacles", captBarnaclesTransform)
+            .addCamera("professor-inkling", professorInklingTransform)
+            .build();
     this.config = config;
 
     double FLSteerOffset = 0.22021484375;
@@ -223,6 +283,8 @@ public class Drive extends SubsystemBase {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+    captPose = networkTable.getStructTopic("Front cam pos", Pose3d.struct).publish();
+    professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
   }
@@ -230,9 +292,9 @@ public class Drive extends SubsystemBase {
   private Command createDefaultCommand() {
     return new DefaultDriveCommand(
         this,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * MAX_VELOCITY,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * MAX_VELOCITY,
-        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * MAX_ROTATION);
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity(),
+        () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity(),
+        () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRadiansPerSecond());
   }
 
   private static double modifyAxis(double value) {
@@ -353,23 +415,37 @@ public class Drive extends SubsystemBase {
   private final StructPublisher<Pose2d> currentPose;
   private final StructArrayPublisher<Pose3d> visibleTargetPoses;
   private final DoubleArrayPublisher modulePositions;
+  private final StructPublisher<Pose3d> captPose;
+  private final StructPublisher<Pose3d> professorPose;
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
 
   @Override
   public void periodic() {
-    // If the limelight has a position, send it to the drive.
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
-    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    if (config.addLimelightMeasurement) {
+      // If the limelight has a position that isn't too far from the drive's current estimated
+      // position, send it to SwerveDrivetrain.addVisionMeasurement().
+      localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    }
 
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
-    currentPose.set(getPose());
-
-    List<Pose3d> poses = limelight.getLocatedAprilTags(locationalData.getVisibleTags());
-    visibleTargetPoses.accept(poses.toArray(EMPTY_LIST));
+    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+      estimator.update(
+          (estimate) ->
+              drivetrain.addVisionMeasurement(
+                  estimate.estimatedPose.toPose2d(),
+                  Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
+    }
+    Pose2d pose = getPose();
+    currentPose.set(pose);
+    captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
+    professorPose.set(new Pose3d(pose).plus(professorInklingTransform));
+    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
+    visibleTargetPoses.accept(visibleAprilTagPoses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
 
@@ -378,5 +454,11 @@ public class Drive extends SubsystemBase {
 
   public void enableSlowMode(boolean enable) {
     multiplier = enable ? 0.3 : 1;
+  }
+
+  @Override
+  public void close() {
+    drivetrain.close();
+    estimator.close();
   }
 }

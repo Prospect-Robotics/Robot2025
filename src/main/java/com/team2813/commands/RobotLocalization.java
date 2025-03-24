@@ -22,31 +22,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
-  private final BooleanSupplier useLimelightLocation;
-
-  public RobotLocalization() {
-    useLimelightLocation = AllPreferences.useLimelightLocation();
-  }
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
-    Optional<BotPoseEstimate> optionalEstimate = rawLocation();
+    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue();
     botPosePublisher.set(
-        rawLocation().map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
+        optionalEstimate.map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
 
+    // TODO(kcooney): Consider moving this logic to Drive.java.
     return optionalEstimate.filter(
         estimate -> {
-          if (!useLimelightLocation.getAsBoolean()) {
-            return false;
-          }
-
           // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
           // that are already within one meter or so of the current odometry pose
           // estimate.
@@ -56,7 +47,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
         });
   }
 
-  private Optional<BotPoseEstimate> rawLocation() {
+  private Optional<BotPoseEstimate> botPoseEstimateBlue() {
     return limelight.getLocationalData().getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
   }
 
