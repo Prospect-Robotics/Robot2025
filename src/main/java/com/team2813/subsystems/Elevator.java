@@ -11,6 +11,7 @@ import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
@@ -35,6 +36,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
             .rotationUnit(Units.Radians));
     NetworkTable networkTable = networkTableInstance.getTable("Elevator");
     atPosition = networkTable.getBooleanTopic("at position").publish();
+    position = networkTable.getDoubleTopic("position").publish();
   }
 
   private static TalonFXWrapper getMotor() {
@@ -56,9 +58,8 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   public enum Position implements Supplier<Angle> {
-    BOTTOM(-0.241211),
-    TEST(10),
-    TOP(25.463379);
+    BOTTOM(-0.212500),
+    TOP(16.358496);
 
     private final Angle position;
 
@@ -73,10 +74,12 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   private final BooleanPublisher atPosition;
+  private final DoublePublisher position;
 
   @Override
   public void periodic() {
     super.periodic();
     atPosition.set(atPosition());
+    position.set(getMeasurement());
   }
 }

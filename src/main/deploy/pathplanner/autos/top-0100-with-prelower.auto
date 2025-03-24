@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "left-lc2"
+                  "pathName": "s1corall2"
                 }
               },
               {
@@ -21,30 +21,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "lc2-top_coral"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "IntakeCoral"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "top_coral-lc4"
           }
         },
         {

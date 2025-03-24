@@ -5,34 +5,33 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "left-lc2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "PrepareL2"
-                }
-              }
-            ]
+            "pathName": "Go to A2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "BumpAlgaeHigh"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "lc2-top_coral"
+            "pathName": "Align with Reef A2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Go to Coral Station"
           }
         },
         {
@@ -44,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "top_coral-lc4"
+            "pathName": "Go to A4 from Coral Station"
           }
         },
         {

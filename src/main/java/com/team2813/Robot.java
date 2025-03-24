@@ -7,7 +7,6 @@ package com.team2813;
 import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -17,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-  private static final StringPublisher m_buildConstantsGitShaPublisher =
-      NetworkTableInstance.getDefault().getStringTopic("/BuildConstants/GitSha").publish();
+  private static final BuildConstantsPublisher m_buildConstantsPublisher =
+      new BuildConstantsPublisher(NetworkTableInstance.getDefault());
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
@@ -30,7 +29,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    m_buildConstantsGitShaPublisher.set(BuildConstants.GIT_SHA);
+    // Publish build constants to NetworkTables.
+    m_buildConstantsPublisher.publish();
 
     SignalLogger.setPath("/U/logs");
     DataLogManager.start("/U/logs");
@@ -109,5 +109,4 @@ public class Robot extends TimedRobot {
       Shuffleboard.selectTab(title);
     }
   }
-  ;
 }
