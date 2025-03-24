@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "left-lc2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "left-lc2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PrepareScore"
+                }
+              }
+            ]
           }
         },
         {
@@ -29,9 +42,35 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "top_coral-lc4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "top_coral-lc4"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PrepareScore"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -53,9 +92,35 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "top_coral-rc4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "top_coral-rc4"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PrepareScore"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
