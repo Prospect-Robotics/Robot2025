@@ -1,5 +1,7 @@
 # Robot2025
 
+![Tests Passing?](https://github.com/Prospect-Robotics/Robot2025/actions/workflows/gradle.yml/badge.svg)
+
 This is the repository for FRC team 2813's code for our 2025 robot, Maelstørm.
 
 ## Cloning the Repository
