@@ -49,9 +49,9 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
-    for (Map.Entry<PhotonCamera, PhotonPoseEstimator> estimator : estimators.entrySet()) {
-      estimator.getKey().getAllUnreadResults().stream()
-          .map(estimator.getValue()::update)
+    for (Map.Entry<PhotonCamera, PhotonPoseEstimator> entry : estimators.entrySet()) {
+      entry.getKey().getAllUnreadResults().stream()
+          .map(entry.getValue()::update)
           .flatMap(Optional::stream)
           .forEach(apply);
     }
