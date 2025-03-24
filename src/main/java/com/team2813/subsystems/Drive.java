@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -287,6 +288,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
+
+    for (int i = 0; i < 4; i++) {
+      drivetrain
+          .getModule(i)
+          .getDriveMotor()
+          .getConfigurator()
+          .apply(
+              new CurrentLimitsConfigs()
+                  .withSupplyCurrentLimit(60)
+                  .withSupplyCurrentLimitEnable(true)
+                  .withStatorCurrentLimitEnable(false));
+    }
   }
 
   private Command createDefaultCommand() {
