@@ -129,17 +129,16 @@ public class RobotContainer implements AutoCloseable {
     NamedCommands.registerCommand(
         "ScoreL3",
         new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.TOP),
-                        elevator)
-                    .withTimeout(SECONDS_2),
-                new LockFunctionCommand(
-                        intakePivot::atPosition,
-                        () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
-                        intakePivot)
-                    .withTimeout(SECONDS_2)),
+            new LockFunctionCommand(
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.TOP),
+                    elevator)
+                .withTimeout(SECONDS_2),
+            new LockFunctionCommand(
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
+                    intakePivot)
+                .withTimeout(SECONDS_2),
             new InstantCommand(intake::outakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
@@ -166,11 +165,9 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump low algae
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
-                new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                    elevator),
-                new InstantCommand(intakePivot::disable, intakePivot))));
+                new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                new InstantCommand(
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
     NamedCommands.registerCommand(
         "BumpAlgaeHigh",
@@ -190,8 +187,9 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump high algae
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
-                new InstantCommand(elevator::disable, elevator),
-                new InstantCommand(intakePivot::disable, intakePivot))));
+                new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.BOTTOM), elevator),
+                new InstantCommand(
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
     NamedCommands.registerCommand(
         "IntakeCoral",
