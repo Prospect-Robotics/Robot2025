@@ -19,7 +19,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "lc4-top_coral"
+            "pathName": "lc4-a4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BumpAlgaeHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "a4-top_coral"
           }
         },
         {
