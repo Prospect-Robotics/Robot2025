@@ -12,10 +12,6 @@ import java.util.function.DoubleSupplier;
  */
 public class AllPreferences {
 
-  public static BooleanSupplier useLimelightLocation() {
-    return booleanPref(Key.USE_LIMELIGHT_LOCATION, false);
-  }
-
   public static BooleanSupplier useAutoAlignWaypoints() {
     return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true);
   }
@@ -41,7 +37,6 @@ public class AllPreferences {
   }
 
   private enum Key {
-    USE_LIMELIGHT_LOCATION,
     USE_AUTO_ALIGN_WAYPOINTS,
     USE_PHOTON_VISION_LOCATION,
   }

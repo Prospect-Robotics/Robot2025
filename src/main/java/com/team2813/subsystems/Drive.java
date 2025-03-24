@@ -91,7 +91,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
-          .addLimelightMeasurement(false)
+          .addLimelightMeasurement(true)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -387,10 +387,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
-    // If the limelight has a position, send it to the drive.
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
-    localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    if (config.addLimelightMeasurement) {
+      // If the limelight has a position that isn't too far from the drive's current estimated
+      // position, send it to SwerveDrivetrain.addVisionMeasurement().
+      localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
+    }
 
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);

@@ -59,8 +59,6 @@ public final class Constants {
     public static Trigger AUTO_ALIGN_LEFT = DRIVER_CONTROLLER.L1();
     public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.R1();
 
-    public static Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
-
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
   }
 
@@ -80,6 +78,7 @@ public final class Constants {
     public static final Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
     public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     public static final Trigger AUTOALIGN = OPERATOR_CONTROLLER.circle();
+    public static final Trigger GROUND_CORAL_INTAKE = OPERATOR_CONTROLLER.R2();
   }
 
   private Constants() {
