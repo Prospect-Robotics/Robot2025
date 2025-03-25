@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "s1corall2"
+            "pathName": "left-lc2"
           }
         },
         {
@@ -19,13 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Align with Reef A2"
+            "pathName": "a2-rc2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Go to Coral Station"
+            "pathName": "rc2-top_coral"
           }
         },
         {
@@ -37,7 +37,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Go to A4 from Coral Station"
+            "pathName": "top_coral-lc4"
           }
         },
         {
