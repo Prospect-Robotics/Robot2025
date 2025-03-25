@@ -10,7 +10,6 @@ import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.Drive;
-import com.team2813.subsystems.Drive.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
@@ -73,17 +72,6 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     arrayOfPos.add(new Pose2d(3.699, 3.004, Rotation2d.fromDegrees(60))); // 6l *
     arrayOfPos.add(new Pose2d(3.981, 2.840, Rotation2d.fromDegrees(60))); // 6r*
 
-    /*if (Drive.onRed()){
-      List<Pose2d> arrayOfPosRed = new ArrayList<>();
-      for (Pose2d pose : arrayOfPos){
-        arrayOfPosRed.add(new Pose2d(17.55 - pose.getX(),
-                          8.052 - pose.getY(),
-                          pose.getRotation().plus(new Rotation2d(Math.PI))
-                          )
-                          );
-      }
-      return arrayOfPosRed;
-    }*/
     return arrayOfPos;
   }
 

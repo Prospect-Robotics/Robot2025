@@ -333,27 +333,6 @@ public class RobotContainer implements AutoCloseable {
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
-    AUTOALIGN.onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(
-                () ->
-                    Limelight.getDefaultLimelight()
-                        .getLocationalData()
-                        .getBotpose()
-                        .map(Pose3d::toPose2d)
-                        .map(RobotContainer::toBotposeBlue)
-                        .ifPresent(drive::setPose)),
-            new DeferredCommand(
-                () -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive))));
-    /*AUTO_ALIGN_LEFT.onTrue(
-        new SequentialCommandGroup(
-            new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake)
-        )
-    );*/
     AUTO_ALIGN_LEFT.onTrue(
         new SequentialCommandGroup(
             new InstantCommand(
@@ -380,15 +359,6 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
                     intakePivot))));
 
-    /*AUTO_ALIGN_RIGHT.onTrue(
-        new SequentialCommandGroup(
-            new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake)
-        )
-    );*/
     AUTO_ALIGN_RIGHT.onTrue(
         new SequentialCommandGroup(
             new InstantCommand(
