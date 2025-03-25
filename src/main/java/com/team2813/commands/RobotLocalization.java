@@ -32,19 +32,9 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
     Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue();
-    botPosePublisher.set(
+    limelightPosePublisher.set(
         optionalEstimate.map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
-
-    // TODO(kcooney): Consider moving this logic to Drive.java.
-    return optionalEstimate.filter(
-        estimate -> {
-          // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
-          // that are already within one meter or so of the current odometry pose
-          // estimate.
-          Pose2d drivePose = odometryPoseSupplier.get();
-          var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
-          return Math.abs(distance) <= driveConfig.maxLimelightDifferenceMeters();
-        });
+    return optionalEstimate;
   }
 
   private Optional<BotPoseEstimate> botPoseEstimateBlue() {
@@ -157,7 +147,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final StructArrayPublisher<Pose2d> botPosePublisher =
+  private final StructArrayPublisher<Pose2d> limelightPosePublisher =
       NetworkTableInstance.getDefault()
           .getStructArrayTopic("Limelight pose", Pose2d.struct)
           .publish();

@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
@@ -57,7 +58,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final double WHEEL_RADIUS_IN = 1.875;
 
   private double multiplier = 1;
-  private double lastVisionEstimateTime = -1;
 
   static double frontDist = 0.330200;
   static double leftDist = 0.330200;
@@ -402,12 +402,21 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
-  public void addVisionMeasurement(BotPoseEstimate estimate) {
-    double estimateTimestamp = estimate.timestampSeconds();
-    if (estimateTimestamp > lastVisionEstimateTime) {
-      drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp);
-      lastVisionEstimateTime = estimateTimestamp;
+  private void addVisionMeasurement(BotPoseEstimate estimate) {
+    // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
+    // that are already within one meter or so of the current odometry pose
+    // estimate.
+    Pose2d drivePose = getPose();
+    double distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
+    if (Math.abs(distance) <= config.maxLimelightDifferenceMeters()) {
+      drivetrain.addVisionMeasurement(estimate.pose(), estimate.timestampSeconds());
     }
+  }
+
+  private void addVisionMeasurement(EstimatedRobotPose estimate) {
+    addVisionMeasurement(
+        new BotPoseEstimate(
+            estimate.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
   }
 
   private final StructArrayPublisher<SwerveModuleState> expectedState;
@@ -425,8 +434,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     Limelight limelight = Limelight.getDefaultLimelight();
     LocationalData locationalData = limelight.getLocationalData();
     if (config.addLimelightMeasurement) {
-      // If the limelight has a position that isn't too far from the drive's current estimated
-      // position, send it to SwerveDrivetrain.addVisionMeasurement().
       localization.limelightLocation(this::getPose, config).ifPresent(this::addVisionMeasurement);
     }
 
@@ -434,11 +441,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
-      estimator.update(
-          (estimate) ->
-              drivetrain.addVisionMeasurement(
-                  estimate.estimatedPose.toPose2d(),
-                  Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
+      estimator.update(this::addVisionMeasurement);
     }
     Pose2d pose = getPose();
     currentPose.set(pose);
