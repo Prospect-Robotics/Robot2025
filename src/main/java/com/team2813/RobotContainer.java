@@ -333,14 +333,57 @@ public class RobotContainer implements AutoCloseable {
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
-    AUTOALIGN.onTrue(
-        new DeferredCommand(() -> localization.getAutoAlignCommand(drive::getPose), Set.of(drive)));
     AUTO_ALIGN_LEFT.onTrue(
-        new DeferredCommand(
-            () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)));
+        new SequentialCommandGroup(
+            new InstantCommand(
+                () ->
+                    Limelight.getDefaultLimelight()
+                        .getLocationalData()
+                        .getBotpose()
+                        .map(Pose3d::toPose2d)
+                        .map(RobotContainer::toBotposeBlue)
+                        .ifPresent(drive::setPose)),
+            new WaitCommand(0.2),
+            new DeferredCommand(
+                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.375),
+            new InstantCommand(intake::stopIntakeMotor, intake),
+            new ParallelCommandGroup(
+                new LockFunctionCommand(
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
+                    elevator),
+                new LockFunctionCommand(
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
+                    intakePivot))));
+
     AUTO_ALIGN_RIGHT.onTrue(
-        new DeferredCommand(
-            () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)));
+        new SequentialCommandGroup(
+            new InstantCommand(
+                () ->
+                    Limelight.getDefaultLimelight()
+                        .getLocationalData()
+                        .getBotpose()
+                        .map(Pose3d::toPose2d)
+                        .map(RobotContainer::toBotposeBlue)
+                        .ifPresent(drive::setPose)),
+            new WaitCommand(0.2),
+            new DeferredCommand(
+                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
+            new InstantCommand(intake::outakeCoral, intake),
+            new WaitCommand(0.375),
+            new InstantCommand(intake::stopIntakeMotor, intake),
+            new ParallelCommandGroup(
+                new LockFunctionCommand(
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
+                    elevator),
+                new LockFunctionCommand(
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
+                    intakePivot))));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
@@ -446,8 +489,8 @@ public class RobotContainer implements AutoCloseable {
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)));
 
-    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
-    SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    // SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    // SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   private static final Pose2d botposeBlueOrig =

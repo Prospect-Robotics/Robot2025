@@ -100,7 +100,14 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
 
   private Command createPath(Supplier<Pose2d> drivePosSupplier, List<Pose2d> positions) {
     Pose2d currentPose = drivePosSupplier.get();
-    System.out.println("currentPose: " + currentPose);
+    if (Drive.onRed()) {
+      currentPose =
+          new Pose2d(
+              17.55 - currentPose.getX(),
+              8.052 - currentPose.getY(),
+              currentPose.getRotation().plus(new Rotation2d(Math.PI)));
+    }
+
     Pose2d newPosition = currentPose.nearest(positions);
     lastPosePublisher.set(newPosition);
 

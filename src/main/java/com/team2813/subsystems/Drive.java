@@ -325,7 +325,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final FieldCentric fieldCentricApplier =
       new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
-  private static boolean onRed() {
+  public static boolean onRed() {
     return DriverStation.getAlliance()
         .map(alliance -> alliance == DriverStation.Alliance.Red)
         .orElse(false);
