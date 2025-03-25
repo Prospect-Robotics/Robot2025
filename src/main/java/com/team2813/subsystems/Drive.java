@@ -402,21 +402,31 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
+  /** Adds a vision measurement from a Limelight camera to the drive's Kalman Filter. */
   private void addVisionMeasurement(BotPoseEstimate estimate) {
+    addVisionMeasurement(estimate.pose(), estimate.timestampSeconds());
+  }
+
+  /** Adds a vision measurement from a PhotonVision camera to the drive's Kalman Filter. */
+  private void addVisionMeasurement(EstimatedRobotPose estimate) {
+    addVisionMeasurement(
+        estimate.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(estimate.timestampSeconds));
+  }
+
+  /**
+   * Adds a vision measurement to the drive's Kalman Filter.
+   *
+   * @param visionRobotPose Pose of the robot as measured by the vision camera.
+   * @param timestampSeconds Timestamp in epoch since system startup.
+   */
+  private void addVisionMeasurement(Pose2d visionRobotPose, double timestampSeconds) {
     // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
     // that are already within one meter or so of the current odometry pose
     // estimate.
-    Pose2d drivePose = getPose();
-    double distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
+    double distance = getPose().getTranslation().getDistance(visionRobotPose.getTranslation());
     if (Math.abs(distance) <= config.maxLimelightDifferenceMeters()) {
-      drivetrain.addVisionMeasurement(estimate.pose(), estimate.timestampSeconds());
+      drivetrain.addVisionMeasurement(visionRobotPose, timestampSeconds);
     }
-  }
-
-  private void addVisionMeasurement(EstimatedRobotPose estimate) {
-    addVisionMeasurement(
-        new BotPoseEstimate(
-            estimate.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
   }
 
   private final StructArrayPublisher<SwerveModuleState> expectedState;
