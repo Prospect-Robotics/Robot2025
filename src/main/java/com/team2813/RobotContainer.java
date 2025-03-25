@@ -97,11 +97,11 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator)));
-    
+
     NamedCommands.registerCommand(
-            "PrepareScore",
-            new InstantCommand(() -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot)
-    );
+        "PrepareScore",
+        new InstantCommand(
+            () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot));
 
     NamedCommands.registerCommand(
         "ScoreL2",

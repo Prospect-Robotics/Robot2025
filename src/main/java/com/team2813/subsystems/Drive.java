@@ -20,7 +20,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
 import com.team2813.AllPreferences;
-import com.team2813.Constants.*;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
@@ -41,9 +40,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase implements AutoCloseable {
@@ -53,6 +56,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
   private final MultiPhotonPoseEstimator estimator;
+  private final AprilTagFieldLayout aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -286,6 +290,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
     captPose = networkTable.getStructTopic("Front cam pos", Pose3d.struct).publish();
     professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
+    visiblePhotonTagPublisher = networkTable.getStructArrayTopic("Visible Photon Tags", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
 
@@ -430,6 +435,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositions;
   private final StructPublisher<Pose3d> captPose;
   private final StructPublisher<Pose3d> professorPose;
+  private final StructArrayPublisher<Pose3d> visiblePhotonTagPublisher;
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
 
@@ -447,11 +453,19 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+      Set<Integer> visiblePoses = new HashSet<>();
       estimator.update(
-          (estimate) ->
-              drivetrain.addVisionMeasurement(
-                  estimate.estimatedPose.toPose2d(),
-                  Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
+          (estimate) -> {
+            estimate.targetsUsed.stream()
+                .map(PhotonTrackedTarget::getFiducialId)
+                .forEach(visiblePoses::add);
+            drivetrain.addVisionMeasurement(
+                estimate.estimatedPose.toPose2d(),
+                Utils.fpgaToCurrentTime(estimate.timestampSeconds));
+          });
+      visiblePhotonTagPublisher.accept(visiblePoses.stream().map(aprilTagFieldLayout::getTagPose).flatMap(Optional::stream).toArray(Pose3d[]::new));
+    } else {
+      visiblePhotonTagPublisher.accept(EMPTY_LIST);
     }
     Pose2d pose = getPose();
     currentPose.set(pose);
