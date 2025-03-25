@@ -18,7 +18,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
-import com.team2813.AllPreferences;
 import com.team2813.Constants.*;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
@@ -91,6 +90,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    */
   public record DriveConfiguration(
       boolean addLimelightMeasurement,
+      boolean usePhotonVisionLocation,
       double maxLimelightDifferenceMeters,
       DoubleSupplier maxRotationsPerSecond,
       DoubleSupplier maxVelocityInMetersPerSecond) {
@@ -113,6 +113,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
           .addLimelightMeasurement(true)
+          .usePhotonVisionLocation(false)
           .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
           .maxVelocityInMetersPerSecond(DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
           .maxLimelightDifferenceMeters(1.0);
@@ -127,6 +128,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
+
+      Builder usePhotonVisionLocation(boolean enabled);
 
       Builder maxRotationsPerSecond(DoubleSupplier value);
 
@@ -433,7 +436,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
-    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+    if (config.usePhotonVisionLocation) {
       estimator.update(
           (estimate) ->
               drivetrain.addVisionMeasurement(
