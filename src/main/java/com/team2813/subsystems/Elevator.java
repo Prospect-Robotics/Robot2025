@@ -40,9 +40,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   private static TalonFXWrapper getMotor() {
-    TalonFXWrapper wrapper =
-        new TalonFXWrapper(
-            ELEVATOR_1, InvertType.CLOCKWISE);
+    TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, InvertType.CLOCKWISE);
     wrapper.setNeutralMode(NeutralModeValue.Brake);
     wrapper.addFollower(ELEVATOR_2, InvertType.FOLLOW_MASTER);
     return wrapper;
