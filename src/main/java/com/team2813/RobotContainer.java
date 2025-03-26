@@ -22,6 +22,7 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.subsystems.elevator.Elevator;
+import com.team2813.subsystems.intake.Intake;
 import com.team2813.sysid.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -60,7 +61,7 @@ public class RobotContainer implements AutoCloseable {
     this.elevator = Elevator.create(() -> -OPERATOR_CONTROLLER.getRightY());
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
-    this.intake = new Intake(networkTableInstance);
+    this.intake = Intake.create();
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
@@ -108,10 +109,10 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
-                new InstantCommand(intake::stopIntakeMotor, intake),
+                intake.stopIntakeMotorCommand(),
                 elevator.disableCommand(),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
@@ -131,10 +132,10 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                     intakePivot)
                 .withTimeout(SECONDS_2),
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
-                new InstantCommand(intake::stopIntakeMotor, intake),
+                intake.stopIntakeMotorCommand(),
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
@@ -149,10 +150,10 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump low algae
             new ParallelCommandGroup(
-                new InstantCommand(intake::stopIntakeMotor, intake),
+                intake.stopIntakeMotorCommand(),
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
@@ -167,10 +168,10 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::bumpAlgae, intake),
+            intake.bumpAlgaeCommand(),
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump high algae
             new ParallelCommandGroup(
-                new InstantCommand(intake::stopIntakeMotor, intake),
+                intake.stopIntakeMotorCommand(),
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
@@ -185,10 +186,10 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::intakeCoral),
+            intake.intakeCoralCommand(),
             new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
             new ParallelCommandGroup(
-                new InstantCommand(intake::stopIntakeMotor, intake),
+                intake.stopIntakeMotorCommand(),
                 elevator.disableCommand(),
                 new InstantCommand(intakePivot::disable, intakePivot))));
 
@@ -327,9 +328,9 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(0.2),
             new DeferredCommand(
                 () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
+            intake.stopIntakeMotorCommand(),
             new ParallelCommandGroup(
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM),
                 new LockFunctionCommand(
@@ -350,9 +351,9 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(0.2),
             new DeferredCommand(
                 () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
+            intake.stopIntakeMotorCommand(),
             new ParallelCommandGroup(
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM),
                 new LockFunctionCommand(
@@ -372,8 +373,8 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
                         intakePivot)
                     .withTimeout(Units.Seconds.of(0.5))),
-            new InstantCommand(intake::intakeCoral, intake)));
-    INTAKE_BUTTON.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+            intake.intakeCoralCommand()));
+    INTAKE_BUTTON.onFalse(intake.stopIntakeMotorCommand());
 
     GROUND_CORAL_INTAKE.whileTrue(
         new SequentialCommandGroup(
@@ -391,14 +392,14 @@ public class RobotContainer implements AutoCloseable {
 
     OUTTAKE_BUTTON.onTrue(
         new ParallelCommandGroup(
-            new InstantCommand(intake::outakeCoral, intake),
+            intake.outakeCoralCommand(),
             new InstantCommand(groundIntake::outtakeCoral, groundIntake),
             new InstantCommand(
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
                 groundIntakePivot)));
     OUTTAKE_BUTTON.onFalse(
         new ParallelCommandGroup(
-            new InstantCommand(intake::stopIntakeMotor, intake),
+            intake.stopIntakeMotorCommand(),
             new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake),
             new InstantCommand(
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
@@ -447,15 +448,15 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
                     intakePivot)
                 .withTimeout(Units.Seconds.of(2)),
-            new InstantCommand(intake::bumpAlgae, intake)));
+            intake.bumpAlgaeCommand()));
     ALGAE_BUMP.onFalse(
         new ParallelCommandGroup(
             new InstantCommand(
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
-            new InstantCommand(intake::stopIntakeMotor, intake)));
+            intake.stopIntakeMotorCommand()));
 
     // SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
-    // SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    // SLOW_OUTTAKE.onFalse(intake.stopIntakeMotorCommand());
   }
 
   private static final Pose2d botposeBlueOrig =
