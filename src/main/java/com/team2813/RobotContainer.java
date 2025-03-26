@@ -22,6 +22,7 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.subsystems.elevator.Elevator;
+import com.team2813.subsystems.intake.Intake;
 import com.team2813.sysid.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -60,7 +61,7 @@ public class RobotContainer implements AutoCloseable {
     this.elevator = Elevator.create(() -> -OPERATOR_CONTROLLER.getRightY());
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
-    this.intake = new Intake(networkTableInstance);
+    this.intake = Intake.create(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
