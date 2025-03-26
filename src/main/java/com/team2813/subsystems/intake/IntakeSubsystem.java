@@ -1,4 +1,4 @@
-package com.team2813.subsystems;
+package com.team2813.subsystems.intake;
 
 import static com.team2813.Constants.INTAKE_WHEEL;
 
@@ -14,10 +14,13 @@ import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
-public class Intake extends SubsystemBase implements AutoCloseable {
+class IntakeSubsystem extends SubsystemBase implements Intake {
 
   private boolean isIntaking = false;
   private final PIDMotor intakeMotor;
@@ -25,14 +28,19 @@ public class Intake extends SubsystemBase implements AutoCloseable {
   static final double OUTTAKE_SPEED = -3;
   static final double BUMP_SPEED = -4;
 
-  private final DigitalInput beamBreak = new DigitalInput(1);
+  private final DigitalInput beamBreak;
 
-  public Intake(NetworkTableInstance networkTableInstance) {
-    this(new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE), networkTableInstance);
+  public IntakeSubsystem(NetworkTableInstance networkTableInstance) {
+    this(
+        new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE),
+        new DigitalInput(1),
+        networkTableInstance);
   }
 
-  Intake(PIDMotor motor, NetworkTableInstance networkTableInstance) {
+  IntakeSubsystem(
+      PIDMotor motor, DigitalInput beamBreak, NetworkTableInstance networkTableInstance) {
     this.intakeMotor = motor;
+    this.beamBreak = beamBreak;
     if (motor instanceof TalonFXWrapper wrapper) {
       TalonFXConfigurator config = wrapper.motor().getConfigurator();
       ConfigUtils.phoenix6Config(
@@ -46,35 +54,69 @@ public class Intake extends SubsystemBase implements AutoCloseable {
     hasCoralPublisher = networkTable.getBooleanTopic("Has Coral").publish();
   }
 
-  public void intakeCoral() {
+  @Override
+  public Subsystem asSubsystem() {
+    return this;
+  }
+
+  @Override
+  public Command bumpAlgaeCommand() {
+    return new InstantCommand(this::bumpAlgae, this);
+  }
+
+  @Override
+  public Command intakeCoralCommand() {
+    return new InstantCommand(this::intakeCoral, this);
+  }
+
+  @Override
+  public Command outakeCoralCommand() {
+    return new InstantCommand(this::outakeCoral, this);
+  }
+
+  @Override
+  public Command slowOutakeCoralCommand() {
+    return new InstantCommand(this::slowOuttakeCoral, this);
+  }
+
+  @Override
+  public Command stopIntakeMotorCommand() {
+    return new InstantCommand(this::stopIntakeMotorNow, this);
+  }
+
+  // Visible for testing
+  void intakeCoral() {
     intakeMotor.set(ControlMode.VOLTAGE, INTAKE_SPEED);
     isIntaking = true;
   }
 
-  public void outakeCoral() {
+  private void outakeCoral() {
     intakeMotor.set(ControlMode.VOLTAGE, OUTTAKE_SPEED);
     isIntaking = false;
   }
 
-  public void slowOuttakeCoral() {
+  private void slowOuttakeCoral() {
     intakeMotor.set(ControlMode.VOLTAGE, 0.75 * OUTTAKE_SPEED);
     isIntaking = false;
   }
 
-  public void bumpAlgae() {
+  private void bumpAlgae() {
     intakeMotor.set(ControlMode.VOLTAGE, BUMP_SPEED);
     isIntaking = false;
   }
 
-  public void stopIntakeMotor() {
+  @Override
+  public void stopIntakeMotorNow() {
     intakeMotor.set(ControlMode.VOLTAGE, 0);
     isIntaking = false;
   }
 
-  boolean intaking() {
+  @Override
+  public boolean intaking() {
     return isIntaking;
   }
 
+  @Override
   public boolean hasCoral() {
     return !beamBreak.get();
   }

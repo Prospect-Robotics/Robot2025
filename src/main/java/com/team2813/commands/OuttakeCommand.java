@@ -2,7 +2,7 @@ package com.team2813.commands;
 
 import com.team2813.subsystems.GroundIntake;
 import com.team2813.subsystems.GroundIntakePivot;
-import com.team2813.subsystems.Intake;
+import com.team2813.subsystems.intake.Intake;
 import edu.wpi.first.wpilibj2.command.*;
 
 public class OuttakeCommand extends Command {
@@ -16,7 +16,7 @@ public class OuttakeCommand extends Command {
     commandGroup =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                new InstantCommand(intake::outakeCoral, intake),
+                intake.outakeCoralCommand(),
                 new ParallelCommandGroup(
                     new InstantCommand(
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
@@ -33,11 +33,11 @@ public class OuttakeCommand extends Command {
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                         groundIntakePivot)),
                 new SequentialCommandGroup(
-                    new WaitCommand(0.15), new InstantCommand(intake::stopIntakeMotor, intake))));
+                    new WaitCommand(0.15), intake.stopIntakeMotorCommand())));
     this.intake = intake;
     this.groundIntake = groundIntake;
     this.groundIntakePivot = groundIntakePivot;
-    addRequirements(intake, groundIntake, groundIntakePivot);
+    addRequirements(intake.asSubsystem(), groundIntake, groundIntakePivot);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class OuttakeCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     commandGroup.end(interrupted);
-    intake.stopIntakeMotor();
+    intake.stopIntakeMotorNow();
     groundIntake.stopGroundIntakeMotor();
     groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
   }
