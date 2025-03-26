@@ -1,17 +1,11 @@
 package com.team2813.subsystems.intake;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
 public interface IntakePivot {
-
-  static IntakePivot create(NetworkTableInstance networkTableInstance) {
-    return new IntakePivotSubsystem(networkTableInstance);
-  }
-
   /**
    * Returns a command that sets the setpoint and waits for the elevator to reach that point.
    *

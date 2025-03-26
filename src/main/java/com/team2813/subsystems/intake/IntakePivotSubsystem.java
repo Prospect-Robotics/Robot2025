@@ -18,14 +18,18 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * This is the Intake Pivot. Her name is Sophie. Please be kind to her and say hi. Have a nice day!
  */
+@Singleton
 class IntakePivotSubsystem extends MotorSubsystem<IntakePivotSubsystem.Rotations>
     implements IntakePivot {
   private static final Time MOVEMENT_TIMEOUT = Units.Seconds.of(2);
 
+  @Inject
   IntakePivotSubsystem(NetworkTableInstance networkTableInstance) {
     super(
         new MotorSubsystemConfiguration(

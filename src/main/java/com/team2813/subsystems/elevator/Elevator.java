@@ -2,22 +2,11 @@ package com.team2813.subsystems.elevator;
 
 import static edu.wpi.first.units.Units.Rotations;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public interface Elevator {
-
-  /**
-   * Creates an instance.
-   *
-   * @param movement Controller input.
-   */
-  static Elevator create(NetworkTableInstance networkTableInstance, DoubleSupplier movement) {
-    return new ElevatorSubsystem(networkTableInstance, movement);
-  }
 
   /**
    * Returns a command that sets the setpoint and waits for the elevator to reach that point.

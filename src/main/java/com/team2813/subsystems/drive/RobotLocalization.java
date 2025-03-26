@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import javax.inject.Inject;
 import org.json.simple.parser.ParseException;
 
 class RobotLocalization {
@@ -47,7 +48,8 @@ class RobotLocalization {
     }
   }
 
-  public RobotLocalization(NetworkTableInstance networkTableInstance) {
+  @Inject
+  RobotLocalization(NetworkTableInstance networkTableInstance) {
     this(networkTableInstance, Configuration.fromPreferences());
   }
 

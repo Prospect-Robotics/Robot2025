@@ -7,7 +7,6 @@ package com.team2813;
 import static com.team2813.Constants.DriverConstants.*;
 import static com.team2813.Constants.OperatorConstants.*;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.PIDConstants;
@@ -21,7 +20,6 @@ import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.subsystems.climb.Climb;
 import com.team2813.subsystems.drive.Drive;
-import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.subsystems.elevator.Elevator;
 import com.team2813.subsystems.intake.Intake;
 import com.team2813.subsystems.intake.IntakePivot;
@@ -36,10 +34,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import org.json.simple.parser.ParseException;
 
@@ -58,18 +53,18 @@ public class RobotContainer implements AutoCloseable {
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    var registry = new SubsystemRegistry();
-    this.drive = Drive.create(networkTableInstance, registry);
-    this.elevator = Elevator.create(networkTableInstance, () -> -OPERATOR_CONTROLLER.getRightY());
-    this.intakePivot = IntakePivot.create(networkTableInstance);
-    this.climb = Climb.create(networkTableInstance);
-    this.intake = Intake.create(networkTableInstance);
-    this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
+    Subsystems subsystems = Subsystems.create(networkTableInstance);
+    drive = subsystems.drive();
+    elevator = subsystems.elevator();
+    intakePivot = subsystems.intakePivot();
+    climb = subsystems.climb();
+    intake = subsystems.intake();
+    groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
-        new SysIdRoutineSelector(registry, RobotContainer::getSysIdRoutines, shuffleboard);
+        new SysIdRoutineSelector(subsystems.registry(), subsystems.sysIdRoutines(), shuffleboard);
     configureBindings();
   }
 
@@ -78,7 +73,7 @@ public class RobotContainer implements AutoCloseable {
    *
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private static void configureAutoCommands(
+  private static void configureAutoCommands( // TODO: extract class
       Elevator elevator,
       IntakePivot intakePivot,
       Intake intake,
@@ -230,58 +225,6 @@ public class RobotContainer implements AutoCloseable {
         );
     configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     return AutoBuilder.buildAutoChooser();
-  }
-
-  private static final SwerveSysidRequest DRIVE_SYSID =
-      new SwerveSysidRequest(MotorType.Drive, RequestType.TorqueCurrentFOC);
-  private static final SwerveSysidRequest STEER_SYSID =
-      new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
-
-  private static List<DropdownEntry> getSysIdRoutines(SubsystemRegistry registry) {
-    List<DropdownEntry> routines = new ArrayList<>();
-    routines.add(
-        new DropdownEntry(
-            "Drive-Drive Motor",
-            new SysIdRoutine(
-                new SysIdRoutine.Config(
-                    null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
-                new SysIdRoutine.Mechanism(
-                    (v) ->
-                        registry
-                            .getSubsystem(DriveSubsystem.class)
-                            .runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
-                    null,
-                    registry.getSubsystem(DriveSubsystem.class)))));
-    routines.add(
-        new DropdownEntry(
-            "Drive-Steer Motor",
-            new SysIdRoutine(
-                new SysIdRoutine.Config(
-                    null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
-                new SysIdRoutine.Mechanism(
-                    (v) ->
-                        registry
-                            .getSubsystem(DriveSubsystem.class)
-                            .runSysIdRequest(STEER_SYSID.withVoltage(v)),
-                    null,
-                    registry.getSubsystem(DriveSubsystem.class)))));
-    routines.add(
-        new DropdownEntry(
-            "Drive-Slip Test (Forward Quasistatic only)",
-            new SysIdRoutine(
-                new SysIdRoutine.Config(
-                    Units.Volts.of(0.25).per(Units.Second),
-                    null,
-                    null,
-                    (s) -> SignalLogger.writeString("state", s.toString())),
-                new SysIdRoutine.Mechanism(
-                    (v) ->
-                        registry
-                            .getSubsystem(DriveSubsystem.class)
-                            .runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
-                    null,
-                    registry.getSubsystem(DriveSubsystem.class)))));
-    return routines;
   }
 
   private void configureBindings() {
