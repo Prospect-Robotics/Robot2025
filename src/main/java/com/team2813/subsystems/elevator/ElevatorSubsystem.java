@@ -20,6 +20,7 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.*;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
+import javax.inject.Inject;
 
 /** This is the Elevator. His name is Pablo. Please be kind to him and say hi. Have a nice day! */
 class ElevatorSubsystem extends MotorSubsystem<ElevatorSubsystem.Position> implements Elevator {
@@ -32,7 +33,9 @@ class ElevatorSubsystem extends MotorSubsystem<ElevatorSubsystem.Position> imple
   // HERE BE DRAGONS.
   // Your companion notes: "...jeez... that is a lot of blood... couldn't they just leave a paper
   // taped to the wall, rather than raid a blood donation clinic."
-  ElevatorSubsystem(NetworkTableInstance networkTableInstance, DoubleSupplier movement) {
+  @Inject
+  ElevatorSubsystem(
+      NetworkTableInstance networkTableInstance, @ElevatorControl DoubleSupplier movement) {
     super(
         new MotorSubsystemConfiguration(getMotor())
             .controlMode(ControlMode.VOLTAGE)

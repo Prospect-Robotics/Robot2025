@@ -59,9 +59,10 @@ public class RobotContainer implements AutoCloseable {
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     var registry = new SubsystemRegistry();
     this.drive = Drive.create(networkTableInstance, registry);
-    this.elevator = Elevator.create(networkTableInstance, () -> -OPERATOR_CONTROLLER.getRightY());
+    Subsystems subsystems = Subsystems.builder().networkTableInstance(networkTableInstance).build();
+    this.elevator = subsystems.elevator();
     this.intakePivot = IntakePivot.create(networkTableInstance);
-    this.climb = Climb.create(networkTableInstance);
+    this.climb = subsystems.climb();
     this.intake = Intake.create(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
