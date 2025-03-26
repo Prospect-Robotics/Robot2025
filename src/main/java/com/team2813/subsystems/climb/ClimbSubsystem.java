@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import javax.inject.Inject;
 
 /** This is the Climb. Her name is Lisa. Please be kind to her and say hi. Have a nice day! */
 final class ClimbSubsystem extends SubsystemBase implements AutoCloseable, Climb {
@@ -27,7 +28,8 @@ final class ClimbSubsystem extends SubsystemBase implements AutoCloseable, Climb
   private final PIDMotor climbMotor1;
   private final DigitalInput limitSwitch;
 
-  public ClimbSubsystem(NetworkTableInstance networkTableInstance) {
+  @Inject
+  ClimbSubsystem(NetworkTableInstance networkTableInstance) {
     limitSwitch = new DigitalInput(0);
     TalonFXWrapper climbMotor1 = new TalonFXWrapper(CLIMB_1, InvertType.CLOCKWISE);
     climbMotor1.motor().setNeutralMode(NeutralModeValue.Brake);
