@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -48,8 +47,6 @@ public interface Elevator {
   Command disableCommand();
 
   boolean atPosition();
-
-  Subsystem asSubsystem();
 
   public enum Position implements Supplier<Angle> {
     BOTTOM(-0.212500),
