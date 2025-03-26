@@ -54,11 +54,6 @@ class ElevatorSubsystem extends MotorSubsystem<ElevatorSubsystem.Position> imple
   }
 
   @Override
-  public Subsystem asSubsystem() {
-    return this;
-  }
-
-  @Override
   public Command moveToPositionCommand(Position position) {
     return new LockFunctionCommand(this::atPosition, () -> this.setSetpoint(position), this)
         .withTimeout(MOVEMENT_TIMEOUT);

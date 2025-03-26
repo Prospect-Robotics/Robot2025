@@ -214,9 +214,10 @@ public class RobotContainer implements AutoCloseable {
                 elevator.setSetpointCommand(Elevator.Position.BOTTOM)));
     new EventTrigger("PrepareL3")
         .onTrue(
-            new DeferredCommand(
-                () -> NamedCommands.getCommand("PrepareL3"),
-                Set.of(intakePivot, elevator.asSubsystem())));
+            new ParallelCommandGroup(
+                new InstantCommand(
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
+                elevator.setSetpointCommand(Elevator.Position.TOP)));
   }
 
   private static SendableChooser<Command> configureAuto(
