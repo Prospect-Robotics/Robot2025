@@ -7,14 +7,12 @@ import static com.team2813.subsystems.intake.IntakeSubsystem.OUTTAKE_SPEED;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import com.team2813.CommandTester;
 import com.team2813.NetworkTableResource;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.PIDMotor;
-import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -24,7 +22,10 @@ import org.mockito.Answers;
 public final class IntakeSubsystemTest {
   final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
   final DigitalInput mockBeamBreak = mock(DigitalInput.class);
+
   @Rule public final NetworkTableResource ntResource = new NetworkTableResource();
+
+  @Rule @ClassRule public static final CommandTester commandTester = new CommandTester();
 
   abstract static class FakePIDMotor implements PIDMotor {
     double dutyCycle = 0.0f;
@@ -36,22 +37,7 @@ public final class IntakeSubsystemTest {
     }
   }
 
-  @BeforeClass
-  public static void enableCommandTesting() {
-    HAL.initialize(500, 0);
-    DriverStationSim.setEnabled(true);
-    DriverStationSim.notifyNewData();
-    CommandScheduler.getInstance().enable();
-    CommandScheduler.getInstance().unregisterAllSubsystems();
-  }
-
-  @After
-  public void resetCommandScheduler() {
-    CommandScheduler.getInstance().unregisterAllSubsystems();
-  }
-
   @Test
-  // @Ignore
   public void constructRealInstance() {
     try (var intake = new IntakeSubsystem(ntResource.getNetworkTableInstance())) {
       assertThat(intake.intaking()).isFalse();
@@ -74,7 +60,7 @@ public final class IntakeSubsystemTest {
       Command command = intake.intakeCoralCommand();
       assertThat(intake.intaking()).isFalse();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isTrue();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(INTAKE_SPEED);
@@ -86,11 +72,11 @@ public final class IntakeSubsystemTest {
     try (var intake =
         new IntakeSubsystem(fakeMotor, mockBeamBreak, ntResource.getNetworkTableInstance())) {
       Command command = intake.intakeCoralCommand();
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
       command = intake.stopIntakeMotorCommand();
       assertThat(intake.intaking()).isTrue();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
@@ -105,7 +91,7 @@ public final class IntakeSubsystemTest {
       Command command = intake.outakeCoralCommand();
       assertThat(intake.intaking()).isTrue();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(OUTTAKE_SPEED);
@@ -118,10 +104,10 @@ public final class IntakeSubsystemTest {
         new IntakeSubsystem(fakeMotor, mockBeamBreak, ntResource.getNetworkTableInstance())) {
       intake.intakeCoral();
       Command command = intake.outakeCoralCommand();
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
       command = intake.stopIntakeMotorCommand();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
@@ -136,7 +122,7 @@ public final class IntakeSubsystemTest {
       Command command = intake.bumpAlgaeCommand();
       assertThat(intake.intaking()).isTrue();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(BUMP_SPEED);
@@ -148,21 +134,13 @@ public final class IntakeSubsystemTest {
     try (var intake =
         new IntakeSubsystem(fakeMotor, mockBeamBreak, ntResource.getNetworkTableInstance())) {
       Command command = intake.bumpAlgaeCommand();
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
       command = intake.stopIntakeMotorCommand();
 
-      runUntilComplete(command);
+      commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
     }
-  }
-
-  private static void runUntilComplete(Command command) {
-    CommandScheduler scheduler = CommandScheduler.getInstance();
-    command.schedule();
-    do {
-      scheduler.run();
-    } while (scheduler.isScheduled(command));
   }
 }
