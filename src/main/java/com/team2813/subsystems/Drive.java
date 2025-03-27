@@ -30,9 +30,13 @@ import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -40,9 +44,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase implements AutoCloseable {
@@ -417,8 +426,22 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositions;
   private final StructPublisher<Pose3d> captPose;
   private final StructPublisher<Pose3d> professorPose;
+  
+  private static final Matrix<N3, N1> DEFAULT_STD_DEVS = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1 });
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
+  
+  private void handlePhotonPose(EstimatedRobotPose estimate) {
+    Optional<Matrix<N3, N1>> stdDevs = Optional.empty();
+    List<PhotonTrackedTarget> targets = estimate.targetsUsed;
+    if (targets.size() < 1) {
+      return;
+    } else if (targets.size() == 1) {
+      double ambiguity = targets.get(0).poseAmbiguity;
+      stdDevs = Optional.of(new Matrix<>(Nat.N3(), Nat.N1(), new double[] {ambiguity, ambiguity, ambiguity}));
+    }
+    drivetrain.addVisionMeasurement(estimate.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(estimate.timestampSeconds), stdDevs.orElse(DEFAULT_STD_DEVS));
+  }
 
   @Override
   public void periodic() {
