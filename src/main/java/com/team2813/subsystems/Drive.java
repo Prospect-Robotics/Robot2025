@@ -431,13 +431,17 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
   
+  private final DoublePublisher ambiguityPublisher = NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+  
   private void handlePhotonPose(EstimatedRobotPose estimate) {
     Matrix<N3, N1> stdDevs;
     List<PhotonTrackedTarget> targets = estimate.targetsUsed;
     if (targets.isEmpty()) {
       return;
     } else if (targets.size() == 1) {
-      double ambiguity = targets.get(0).poseAmbiguity;
+      PhotonTrackedTarget target = targets.get(0);
+      double ambiguity = (1.0 /target.area);
+      ambiguityPublisher.accept(ambiguity);
       stdDevs = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {ambiguity, ambiguity, ambiguity});
     } else {
       // we see multiple tags
