@@ -60,7 +60,7 @@ public final class Constants {
     public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.R1();
 
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
-    
+
     public static final Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
   }
 

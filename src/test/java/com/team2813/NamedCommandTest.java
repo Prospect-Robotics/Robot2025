@@ -27,7 +27,8 @@ public class NamedCommandTest {
         "BumpAlgaeHigh",
         "IntakeCoral",
         "PrepareL2",
-        "PrepareL3");
+        "PrepareL3",
+        "PrepareScore");
   }
 
   @Parameter public String commandName;

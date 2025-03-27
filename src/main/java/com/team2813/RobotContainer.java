@@ -81,7 +81,7 @@ public class RobotContainer implements AutoCloseable {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
-    Time DROP_CORAL = Units.Seconds.of(0.25);
+    Time DROP_CORAL = Units.Seconds.of(0.4);
     Time INTAKE_TIME = Units.Seconds.of(3);
 
     NamedCommands.registerCommand(
@@ -97,6 +97,11 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator)));
+
+    NamedCommands.registerCommand(
+        "PrepareScore",
+        new InstantCommand(
+            () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot));
 
     NamedCommands.registerCommand(
         "ScoreL2",

@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "left-lc2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "left-lc2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "ScoreL2"
+                }
+              }
+            ]
           }
         },
         {
