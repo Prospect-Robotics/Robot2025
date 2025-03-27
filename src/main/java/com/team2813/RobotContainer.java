@@ -343,7 +343,7 @@ public class RobotContainer implements AutoCloseable {
                         .map(Pose3d::toPose2d)
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
-            new WaitCommand(0.2),
+            new WaitCommand(0.02),
             new DeferredCommand(
                 () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
             new InstantCommand(intake::outakeCoral, intake),
@@ -369,7 +369,7 @@ public class RobotContainer implements AutoCloseable {
                         .map(Pose3d::toPose2d)
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
-            new WaitCommand(0.2),
+            new WaitCommand(0.02),
             new DeferredCommand(
                 () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
             new InstantCommand(intake::outakeCoral, intake),
