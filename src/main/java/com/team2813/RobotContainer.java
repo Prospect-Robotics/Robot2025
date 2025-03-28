@@ -350,19 +350,7 @@ public class RobotContainer implements AutoCloseable {
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.02),
             new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
-            new ParallelCommandGroup(
-                new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                    elevator),
-                new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
-                    intakePivot))));
+                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive))));
 
     AUTO_ALIGN_RIGHT.onTrue(
         new SequentialCommandGroup(
@@ -376,19 +364,7 @@ public class RobotContainer implements AutoCloseable {
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.02),
             new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
-            new ParallelCommandGroup(
-                new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                    elevator),
-                new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
-                    intakePivot))));
+                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive))));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
