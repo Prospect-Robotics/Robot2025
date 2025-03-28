@@ -171,9 +171,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", captBarnaclesTransform)
-            // Currently, the back camera is barely helping us (maybe because it is looking at tags
-            // head on?), so we are just disabling it for now.
-            //            .addCamera("professor-inkling", professorInklingTransform)
+            .addCamera("professor-inkling", professorInklingTransform)
             .build();
     this.config = config;
 
