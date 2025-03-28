@@ -78,6 +78,7 @@ public final class Constants {
     public static final Trigger ALGAE_BUMP = OPERATOR_CONTROLLER.L2();
     public static final Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
     public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
+    public static final Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
   }
 
   private Constants() {
