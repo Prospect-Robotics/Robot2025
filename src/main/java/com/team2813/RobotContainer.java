@@ -62,7 +62,7 @@ public class RobotContainer implements AutoCloseable {
     this.climb = new Climb(networkTableInstance);
     this.intake = new Intake(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
-    autoChooser = configureAuto(drive, elevator, intakePivot, intake);
+    autoChooser = configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
@@ -77,7 +77,7 @@ public class RobotContainer implements AutoCloseable {
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
   private static void configureAutoCommands(
-      Elevator elevator, IntakePivot intakePivot, Intake intake) {
+      Elevator elevator, IntakePivot intakePivot, Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
@@ -117,7 +117,8 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::outakeCoral, intake),
+            //new InstantCommand(intake::outakeCoral, intake),
+            new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
@@ -125,11 +126,13 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
-    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an
-    // actual command)
-    // TODO: Since we are adding a dedicated L1 scorer, we should consider updating this to be an
-    // actual command.
-    NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
+    NamedCommands.registerCommand(
+        "ScoreL1",
+        new ParallelCommandGroup(
+            new InstantCommand(groundIntake::outtakeCoral, groundIntake),
+            new InstantCommand(
+                () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
+                groundIntakePivot)));
 
     NamedCommands.registerCommand(
         "ScoreL3",
@@ -144,7 +147,8 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                     intakePivot)
                 .withTimeout(SECONDS_2),
-            new InstantCommand(intake::outakeCoral, intake),
+            //new InstantCommand(intake::outakeCoral, intake),
+            new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
@@ -231,7 +235,7 @@ public class RobotContainer implements AutoCloseable {
   }
 
   private static SendableChooser<Command> configureAuto(
-      Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
+      Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -263,7 +267,7 @@ public class RobotContainer implements AutoCloseable {
         },
         drive // Reference to this subsystem to set requirements
         );
-    configureAutoCommands(elevator, intakePivot, intake);
+    configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     return AutoBuilder.buildAutoChooser();
   }
 

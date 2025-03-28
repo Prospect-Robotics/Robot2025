@@ -28,7 +28,8 @@ public class NamedCommandTest {
         "IntakeCoral",
         "PrepareL2",
         "PrepareL3",
-        "PrepareScore");
+        "PrepareScore",
+        "ScoreL1");
   }
 
   @Parameter public String commandName;
