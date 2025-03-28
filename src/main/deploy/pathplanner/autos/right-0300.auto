@@ -74,6 +74,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "rc4-bottom_coral"
