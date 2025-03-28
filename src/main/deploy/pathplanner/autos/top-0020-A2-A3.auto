@@ -1,0 +1,73 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "step 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BumpAlgaeHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "step 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "step 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "step 4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "BumpAlgaeHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "step 5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL3"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
