@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 5.296712476344141,
-        "y": 5.090707294971748
+        "y": 5.091
       },
       "prevControl": null,
       "nextControl": {
         "x": 4.94779223549488,
-        "y": 5.7949432060580195
+        "y": 5.795235911086272
       },
       "isLocked": false,
       "linkedName": "lc2"
@@ -33,11 +33,11 @@
     {
       "anchor": {
         "x": 1.5428857751794762,
-        "y": 7.3094875026393575
+        "y": 7.309
       },
       "prevControl": {
         "x": 2.2125459950938566,
-        "y": 7.100172981548634
+        "y": 7.099685478909277
       },
       "nextControl": null,
       "isLocked": false,
@@ -69,7 +69,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 125.00000000000001
+    "rotation": 126.0
   },
   "reversed": false,
   "folder": null,

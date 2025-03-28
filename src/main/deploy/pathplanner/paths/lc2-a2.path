@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 5.296712476344141,
-        "y": 5.090707294971748
+        "y": 5.091
       },
       "prevControl": null,
       "nextControl": {
         "x": 5.011746952485791,
-        "y": 5.206352520689637
+        "y": 5.20664522571789
       },
       "isLocked": false,
       "linkedName": "lc2"
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -119.99999999999999
+    "rotation": -119.60445074600486
   },
   "reversed": false,
   "folder": null,
