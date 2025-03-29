@@ -441,8 +441,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositions;
   private final StructPublisher<Pose3d> captPose;
   private final StructPublisher<Pose3d> professorPose;
-  private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
-      new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
 
@@ -460,8 +458,16 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       ambiguityPublisher.accept(ambiguity);
       stdDevs = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {ambiguity, ambiguity, ambiguity});
     } else {
-      // we see multiple tags
-      stdDevs = PHOTON_MULTIPLE_TAG_STD_DEVS;
+      // We see multiple tags. To calculate the combined standard deviations we need to sum the
+      // variances (the standard deviation is defined as the square root of the variance).
+      double sumOfVariances = 0;
+      for (PhotonTrackedTarget target : targets) {
+        double ambiguity = (1.0 / target.area);
+        double variance = ambiguity * ambiguity;
+        sumOfVariances += variance;
+      }
+      double stdDev = Math.sqrt(sumOfVariances);
+      stdDevs = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {stdDev, stdDev, stdDev});
     }
     drivetrain.addVisionMeasurement(
         estimate.estimatedPose.toPose2d(),
