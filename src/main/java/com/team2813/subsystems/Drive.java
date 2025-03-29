@@ -460,7 +460,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       ambiguityPublisher.accept(ambiguity);
       stdDevs = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {ambiguity, ambiguity, ambiguity});
     } else {
-      // we see multiple tags
+      // We see multiple tags.
+      // TODO: Calculate the pooled standard deviation.
+      // See https://www.statisticshowto.com/pooled-standard-deviation/
       stdDevs = PHOTON_MULTIPLE_TAG_STD_DEVS;
     }
     drivetrain.addVisionMeasurement(
