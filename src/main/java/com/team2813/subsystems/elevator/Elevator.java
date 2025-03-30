@@ -15,8 +15,8 @@ public interface Elevator {
    *
    * @param movement Controller input.
    */
-  static Elevator create(DoubleSupplier movement) {
-    return new ElevatorSubsystem(NetworkTableInstance.getDefault(), movement);
+  static Elevator create(NetworkTableInstance networkTableInstance, DoubleSupplier movement) {
+    return new ElevatorSubsystem(networkTableInstance, movement);
   }
 
   /**
