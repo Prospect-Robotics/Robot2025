@@ -1,4 +1,4 @@
-package com.team2813.subsystems;
+package com.team2813.subsystems.climb;
 
 import static com.team2813.Constants.CLIMB_1;
 import static com.team2813.Constants.CLIMB_2;
@@ -6,6 +6,7 @@ import static com.team2813.Constants.CLIMB_2;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.team2813.commands.LockFunctionCommand;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
@@ -15,15 +16,18 @@ import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This is the Climb. Her name is Lisa. Please be kind to her and say hi. Have a nice day! */
-public class Climb extends SubsystemBase implements AutoCloseable {
+final class ClimbSubsystem extends SubsystemBase implements AutoCloseable, Climb {
 
   private final PIDMotor climbMotor1;
   private final DigitalInput limitSwitch;
 
-  public Climb(NetworkTableInstance networkTableInstance) {
+  public ClimbSubsystem(NetworkTableInstance networkTableInstance) {
     limitSwitch = new DigitalInput(0);
     TalonFXWrapper climbMotor1 = new TalonFXWrapper(CLIMB_1, InvertType.CLOCKWISE);
     climbMotor1.motor().setNeutralMode(NeutralModeValue.Brake);
@@ -43,6 +47,22 @@ public class Climb extends SubsystemBase implements AutoCloseable {
     limitSwitchPressed = networkTable.getBooleanTopic("limit switch pressed").publish();
   }
 
+  @Override
+  public Command stopCommand() {
+    return new InstantCommand(this::stop, this);
+  }
+
+  @Override
+  public Command raiseCommand() {
+    return new SequentialCommandGroup(
+        new LockFunctionCommand(this::limitSwitchPressed, this::raise, this), stopCommand());
+  }
+
+  @Override
+  public Command lowerCommand() {
+    return new InstantCommand(this::lower, this);
+  }
+
   public void raise() {
     if (!limitSwitchPressed()) {
       climbMotor1.set(ControlMode.VOLTAGE, -5);
@@ -53,7 +73,7 @@ public class Climb extends SubsystemBase implements AutoCloseable {
     climbMotor1.set(ControlMode.VOLTAGE, 6);
   }
 
-  public void stop() {
+  private void stop() {
     climbMotor1.set(ControlMode.VOLTAGE, 0);
   }
 
