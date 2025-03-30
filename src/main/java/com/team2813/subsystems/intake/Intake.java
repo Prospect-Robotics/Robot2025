@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public interface Intake extends AutoCloseable {
 
-  static Intake create() {
-    return new IntakeSubsystem(NetworkTableInstance.getDefault());
+  static Intake create(NetworkTableInstance networkTableInstance) {
+    return new IntakeSubsystem(networkTableInstance);
   }
 
   boolean hasCoral();

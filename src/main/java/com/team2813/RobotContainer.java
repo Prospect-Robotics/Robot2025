@@ -21,6 +21,7 @@ import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
+import com.team2813.subsystems.climb.Climb;
 import com.team2813.subsystems.elevator.Elevator;
 import com.team2813.subsystems.intake.Intake;
 import com.team2813.sysid.*;
@@ -58,10 +59,10 @@ public class RobotContainer implements AutoCloseable {
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     var localization = new RobotLocalization(networkTableInstance);
     this.drive = new Drive(networkTableInstance, localization);
-    this.elevator = Elevator.create(() -> -OPERATOR_CONTROLLER.getRightY());
+    this.elevator = Elevator.create(networkTableInstance, () -> -OPERATOR_CONTROLLER.getRightY());
     this.intakePivot = new IntakePivot(networkTableInstance);
-    this.climb = new Climb(networkTableInstance);
-    this.intake = Intake.create();
+    this.climb = Climb.create(networkTableInstance);
+    this.intake = Intake.create(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
@@ -430,14 +431,11 @@ public class RobotContainer implements AutoCloseable {
                 intakePivot::atPosition,
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
                 intakePivot),
-            new InstantCommand(climb::lower, climb)));
-    CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
+            climb.lowerCommand()));
+    CLIMB_DOWN.onFalse(climb.stopCommand());
 
-    CLIMB_UP.whileTrue(
-        new SequentialCommandGroup(
-            new LockFunctionCommand(climb::limitSwitchPressed, climb::raise, climb),
-            new InstantCommand(climb::stop, climb)));
-    CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
+    CLIMB_UP.whileTrue(climb.raiseCommand());
+    CLIMB_UP.onFalse(climb.stopCommand());
 
     ALGAE_BUMP.whileTrue(
         new SequentialCommandGroup(
