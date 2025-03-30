@@ -62,7 +62,8 @@ public class RobotContainer implements AutoCloseable {
     this.climb = new Climb(networkTableInstance);
     this.intake = new Intake(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
-    autoChooser = configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
+    autoChooser =
+        configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
@@ -77,7 +78,11 @@ public class RobotContainer implements AutoCloseable {
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
   private static void configureAutoCommands(
-      Elevator elevator, IntakePivot intakePivot, Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
+      Elevator elevator,
+      IntakePivot intakePivot,
+      Intake intake,
+      GroundIntake groundIntake,
+      GroundIntakePivot groundIntakePivot) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
@@ -117,7 +122,7 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            //new InstantCommand(intake::outakeCoral, intake),
+            // new InstantCommand(intake::outakeCoral, intake),
             new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
@@ -147,7 +152,7 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                     intakePivot)
                 .withTimeout(SECONDS_2),
-            //new InstantCommand(intake::outakeCoral, intake),
+            // new InstantCommand(intake::outakeCoral, intake),
             new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
@@ -235,7 +240,12 @@ public class RobotContainer implements AutoCloseable {
   }
 
   private static SendableChooser<Command> configureAuto(
-      Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
+      Drive drive,
+      Elevator elevator,
+      IntakePivot intakePivot,
+      Intake intake,
+      GroundIntake groundIntake,
+      GroundIntakePivot groundIntakePivot) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
