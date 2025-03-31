@@ -13,7 +13,8 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
-import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.drive.Drive;
+import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.vision.LimelightPosePublisher;
 import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -68,7 +69,7 @@ public class RobotLocalization {
   }
 
   public Optional<BotPoseEstimate> limelightLocation(
-      Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
+      Supplier<Pose2d> odometryPoseSupplier, DriveSubsystem.DriveConfiguration driveConfig) {
     LocationalData locationalData = limelight.getLocationalData();
     hasDataPublisher.accept(locationalData.isValid());
 
