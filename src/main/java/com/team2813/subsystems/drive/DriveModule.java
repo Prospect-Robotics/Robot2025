@@ -1,12 +1,9 @@
 package com.team2813.subsystems.drive;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.team2813.subsystems.SubsystemKey;
 import com.team2813.sysid.*;
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoMap;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.ArrayList;
@@ -20,17 +17,17 @@ public interface DriveModule {
   static final SwerveSysidRequest STEER_SYSID =
       new SwerveSysidRequest(MotorType.Swerve, RequestType.VoltageOut);
 
-  @Binds
-  Drive bindDrive(DriveSubsystem driveSubsystem);
-
   @Provides
-  @IntoMap
-  @SubsystemKey(DriveSubsystem.class)
-  static List<DropdownEntry> provideSysIdRoutines(DriveSubsystem driveSubsystem) {
+  static Drive provideDrive(DriveSubsystem driveSubsystem, SysIdRoutineRegistry registry) {
+    registry.registerRoutines(driveSubsystem, sysIdRoutines(driveSubsystem));
+    return driveSubsystem;
+  }
+
+  static List<DropdownEntry> sysIdRoutines(DriveSubsystem driveSubsystem) {
     List<DropdownEntry> routines = new ArrayList<>();
     routines.add(
         new DropdownEntry(
-            "Drive-Drive Motor",
+            "Drive Motor",
             new SysIdRoutine(
                 new SysIdRoutine.Config(
                     null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
@@ -40,7 +37,7 @@ public interface DriveModule {
                     driveSubsystem))));
     routines.add(
         new DropdownEntry(
-            "Drive-Steer Motor",
+            "Steer Motor",
             new SysIdRoutine(
                 new SysIdRoutine.Config(
                     null, null, null, (s) -> SignalLogger.writeString("state", s.toString())),
@@ -50,7 +47,7 @@ public interface DriveModule {
                     driveSubsystem))));
     routines.add(
         new DropdownEntry(
-            "Drive-Slip Test (Forward Quasistatic only)",
+            "Slip Test (Forward Quasistatic only)",
             new SysIdRoutine(
                 new SysIdRoutine.Config(
                     Units.Volts.of(0.25).per(Units.Second),
