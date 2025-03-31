@@ -9,7 +9,8 @@ import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
-import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.drive.Drive;
+import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,7 +30,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private static final Limelight limelight = Limelight.getDefaultLimelight();
 
   public Optional<BotPoseEstimate> limelightLocation(
-      Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
+      Supplier<Pose2d> odometryPoseSupplier, DriveSubsystem.DriveConfiguration driveConfig) {
     Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue();
     limelightPosePublisher.publish(optionalEstimate);
 

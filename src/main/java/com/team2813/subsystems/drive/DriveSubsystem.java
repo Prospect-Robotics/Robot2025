@@ -1,4 +1,4 @@
-package com.team2813.subsystems;
+package com.team2813.subsystems.drive;
 
 import static com.team2813.Constants.*;
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
@@ -19,7 +19,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
-import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
@@ -42,6 +41,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +55,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
-public class Drive extends SubsystemBase implements AutoCloseable {
+public class DriveSubsystem extends SubsystemBase implements Drive {
   private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private final RobotLocalization localization;
@@ -123,7 +124,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
-      return new AutoBuilder_Drive_DriveConfiguration_Builder()
+      return new AutoBuilder_DriveSubsystem_DriveConfiguration_Builder()
           .addLimelightMeasurement(true)
           .usePhotonVisionLocation(false)
           .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
@@ -161,11 +162,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
   }
 
-  public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
     this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
   }
 
-  public Drive(
+  DriveSubsystem(
       NetworkTableInstance networkTableInstance,
       RobotLocalization localization,
       DriveConfiguration config) {
@@ -327,8 +328,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
   }
 
+  @Override
+  public Subsystem asSubsystem() {
+    return this;
+  }
+
   private Command createDefaultCommand() {
-    return new DefaultDriveCommand(
+    return new DefaultCommand(
         this,
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity(),
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity(),
@@ -363,17 +369,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final FieldCentric fieldCentricApplier =
       new FieldCentric().withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
-  public static boolean onRed() {
-    return DriverStation.getAlliance()
-        .map(alliance -> alliance == DriverStation.Alliance.Red)
-        .orElse(false);
-  }
-
   private boolean correctRotation = false;
 
   // Note: This is used for teleop drive.
   public void drive(double xSpeed, double ySpeed, double rotation) {
-    double multiplier = onRed() && correctRotation ? -this.multiplier : this.multiplier;
+    double multiplier = Drive.onRed() && correctRotation ? -this.multiplier : this.multiplier;
     drivetrain.setControl(
         fieldCentricApplier
             .withVelocityX(xSpeed * multiplier)
@@ -387,6 +387,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   // Note: This is used for auto drive.
+  @Override
   public void drive(ChassisSpeeds demand) {
     drivetrain.setControl(applyRobotSpeedsApplier.withSpeeds(demand));
   }
@@ -416,6 +417,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
   }
 
+  @Override
   public Pose2d getPose() {
     return drivetrain.getState().Pose;
   }
@@ -432,6 +434,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    * <p>This is called when the robot is being controlled by path planner. It assumes that the
    * passed-in pose is correct.
    */
+  @Override
   public void setPose(Pose2d pose) {
     correctRotation = true;
     if (pose != null) {
@@ -446,6 +449,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
   }
 
+  @Override
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
@@ -537,13 +541,23 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     simVisionSystem.update(pose);
   }
 
-  public void enableSlowMode(boolean enable) {
-    multiplier = enable ? 0.3 : 1;
+  @Override
+  public Command enableSlowModeCommand(boolean enable) {
+    return new InstantCommand(
+        () -> {
+          multiplier = enable ? 0.3 : 1;
+        },
+        this);
   }
 
   @Override
   public void close() {
     drivetrain.close();
     photonPoseEstimator.close();
+  }
+
+  @Override
+  public Command resetPoseCommand() {
+    return new InstantCommand(this::resetPose, this);
   }
 }
