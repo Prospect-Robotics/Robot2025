@@ -3,6 +3,7 @@ package com.team2813.subsystems;
 import com.team2813.subsystems.climb.Climb;
 import com.team2813.subsystems.elevator.Elevator;
 import com.team2813.subsystems.intake.Intake;
+import com.team2813.subsystems.intake.IntakePivot;
 import dagger.BindsInstance;
 import dagger.Component;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -21,6 +22,8 @@ public interface Subsystems {
   Climb climb();
 
   Intake intake();
+
+  IntakePivot intakePivot();
 
   @Component.Factory
   interface Factory {
