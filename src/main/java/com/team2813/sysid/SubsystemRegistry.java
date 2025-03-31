@@ -2,17 +2,15 @@ package com.team2813.sysid;
 
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.*;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public final class SubsystemRegistry {
   private final Map<Class<? extends Subsystem>, Subsystem> subsystemMap = new HashMap<>();
 
+  @Inject
   public SubsystemRegistry() {}
-
-  public SubsystemRegistry(Collection<? extends Subsystem> subsystems) {
-    for (Subsystem subsystem : subsystems) {
-      subsystemMap.put(subsystem.getClass(), subsystem);
-    }
-  }
 
   public void addSubsystem(Subsystem subsystem) {
     if (subsystemMap.putIfAbsent(subsystem.getClass(), subsystem) != null) {

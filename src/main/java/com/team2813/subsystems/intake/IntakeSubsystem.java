@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
 class IntakeSubsystem extends SubsystemBase implements Intake {
+  private static final DigitalInput defaultDigitalInput = new DigitalInput(1);
 
   private boolean isIntaking = false;
   private final PIDMotor intakeMotor;
@@ -34,7 +35,7 @@ class IntakeSubsystem extends SubsystemBase implements Intake {
   IntakeSubsystem(NetworkTableInstance networkTableInstance) {
     this(
         new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE),
-        new DigitalInput(1),
+        defaultDigitalInput,
         networkTableInstance);
   }
 

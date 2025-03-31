@@ -23,6 +23,7 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
+import com.team2813.sysid.SubsystemRegistry;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -47,6 +48,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+import javax.inject.Inject;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.SimCameraProperties;
@@ -161,12 +163,17 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
     }
   }
 
-  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
-    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
+  @Inject
+  DriveSubsystem(
+      NetworkTableInstance networkTableInstance,
+      SubsystemRegistry registry,
+      RobotLocalization localization) {
+    this(networkTableInstance, registry, localization, DriveConfiguration.fromPreferences());
   }
 
   DriveSubsystem(
       NetworkTableInstance networkTableInstance,
+      SubsystemRegistry registry,
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
@@ -325,6 +332,8 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
       simDrivetrain = null;
       simVisionSystem = null;
     }
+
+    registry.addSubsystem(this);
   }
 
   @Override
@@ -338,6 +347,11 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity(),
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity(),
         () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRadiansPerSecond());
+  }
+
+  @Override
+  public RobotLocalization localization() {
+    return localization;
   }
 
   private static double modifyAxis(double value) {

@@ -24,13 +24,12 @@ import javax.inject.Inject;
 
 /** This is the Climb. Her name is Lisa. Please be kind to her and say hi. Have a nice day! */
 final class ClimbSubsystem extends SubsystemBase implements AutoCloseable, Climb {
+  private static final DigitalInput limitSwitch = new DigitalInput(0);
 
   private final PIDMotor climbMotor1;
-  private final DigitalInput limitSwitch;
 
   @Inject
   ClimbSubsystem(NetworkTableInstance networkTableInstance) {
-    limitSwitch = new DigitalInput(0);
     TalonFXWrapper climbMotor1 = new TalonFXWrapper(CLIMB_1, InvertType.CLOCKWISE);
     climbMotor1.motor().setNeutralMode(NeutralModeValue.Brake);
     TalonFXConfigurator cnf = climbMotor1.motor().getConfigurator();
