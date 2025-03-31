@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 public final class SysIdRoutineSelector {
   private final SendableChooser<SysIdRoutine> routineSelector = new SendableChooser<>();
@@ -20,12 +20,15 @@ public final class SysIdRoutineSelector {
 
   public SysIdRoutineSelector(
       SubsystemRegistry registry,
-      Function<SubsystemRegistry, List<DropdownEntry>> routineSupplier,
+      Map<Class<? extends Subsystem>, List<DropdownEntry>> sysIdRoutines,
       ShuffleboardTabs shuffleboard) {
     requirements = registry.allSubsystems();
-    for (DropdownEntry entry : routineSupplier.apply(registry)) {
-      routineSelector.addOption(entry.name(), entry.routine());
-    }
+    sysIdRoutines.values().stream()
+        .flatMap(List::stream)
+        .forEach(
+            entry -> {
+              routineSelector.addOption(entry.name(), entry.routine());
+            });
     for (SysIdRequestType requestType : SysIdRequestType.values()) {
       requestTypeSelector.addOption(requestType.toString(), requestType);
     }

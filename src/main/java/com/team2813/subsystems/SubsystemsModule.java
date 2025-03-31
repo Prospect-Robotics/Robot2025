@@ -11,7 +11,13 @@ import dagger.Module;
 import dagger.Provides;
 import java.util.function.DoubleSupplier;
 
-@Module(includes = {ClimbModule.class, DriveModule.class, ElevatorModule.class, IntakeModule.class})
+@Module(
+    includes = {
+      ClimbModule.class,
+      DriveModule.class,
+      ElevatorModule.class,
+      IntakeModule.class,
+    })
 class SubsystemsModule {
 
   @Provides
