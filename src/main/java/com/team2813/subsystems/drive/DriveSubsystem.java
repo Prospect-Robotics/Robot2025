@@ -43,9 +43,11 @@ import java.util.Collection;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import org.photonvision.PhotonPoseEstimator;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
+@Singleton
 public class DriveSubsystem extends SubsystemBase implements Drive {
   private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;

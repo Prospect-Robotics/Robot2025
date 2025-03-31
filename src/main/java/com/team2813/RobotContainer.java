@@ -77,7 +77,7 @@ public class RobotContainer implements AutoCloseable {
    *
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
-  private static void configureAutoCommands(
+  private static void configureAutoCommands( // TODO: extract class
       Elevator elevator, IntakePivot intakePivot, Intake intake) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);

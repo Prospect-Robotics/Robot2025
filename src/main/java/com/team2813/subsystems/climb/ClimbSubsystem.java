@@ -21,8 +21,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /** This is the Climb. Her name is Lisa. Please be kind to her and say hi. Have a nice day! */
+@Singleton
 final class ClimbSubsystem extends SubsystemBase implements AutoCloseable, Climb {
   private static final DigitalInput limitSwitch = new DigitalInput(0);
 

@@ -18,8 +18,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
+@Singleton
 class IntakeSubsystem extends SubsystemBase implements Intake {
   private static final DigitalInput defaultDigitalInput = new DigitalInput(1);
 
