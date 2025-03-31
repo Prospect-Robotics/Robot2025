@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import javax.inject.Inject;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
 class IntakeSubsystem extends SubsystemBase implements Intake {
@@ -29,7 +30,8 @@ class IntakeSubsystem extends SubsystemBase implements Intake {
 
   private final DigitalInput beamBreak;
 
-  public IntakeSubsystem(NetworkTableInstance networkTableInstance) {
+  @Inject
+  IntakeSubsystem(NetworkTableInstance networkTableInstance) {
     this(
         new TalonFXWrapper(INTAKE_WHEEL, InvertType.CLOCKWISE),
         new DigitalInput(1),
