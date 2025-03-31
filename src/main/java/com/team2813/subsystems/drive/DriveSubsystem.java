@@ -23,7 +23,6 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
-import com.team2813.sysid.SubsystemRegistry;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -150,16 +149,12 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
   }
 
   @Inject
-  DriveSubsystem(
-      NetworkTableInstance networkTableInstance,
-      SubsystemRegistry registry,
-      RobotLocalization localization) {
-    this(networkTableInstance, registry, localization, DriveConfiguration.fromPreferences());
+  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
   }
 
   DriveSubsystem(
       NetworkTableInstance networkTableInstance,
-      SubsystemRegistry registry,
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
@@ -295,7 +290,6 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
     professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
-    registry.addSubsystem(this);
   }
 
   @Override
