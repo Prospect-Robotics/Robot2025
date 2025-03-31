@@ -1,4 +1,4 @@
-package com.team2813.commands;
+package com.team2813.subsystems.drive;
 
 import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
@@ -13,8 +13,6 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
-import com.team2813.subsystems.drive.Drive;
-import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.vision.LimelightPosePublisher;
 import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,7 +29,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
-public class RobotLocalization {
+class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final Configuration config;
