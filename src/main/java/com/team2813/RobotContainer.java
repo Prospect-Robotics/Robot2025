@@ -57,18 +57,18 @@ public class RobotContainer implements AutoCloseable {
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    var registry = new SubsystemRegistry();
-    this.drive = Drive.create(networkTableInstance, registry);
     Subsystems subsystems = Subsystems.create(networkTableInstance);
-    this.elevator = subsystems.elevator();
-    this.intakePivot = subsystems.intakePivot();
-    this.climb = subsystems.climb();
-    this.intake = subsystems.intake();
-    this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
+    drive = subsystems.drive();
+    elevator = subsystems.elevator();
+    intakePivot = subsystems.intakePivot();
+    climb = subsystems.climb();
+    intake = subsystems.intake();
+    groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
-        new SysIdRoutineSelector(registry, RobotContainer::getSysIdRoutines, shuffleboard);
+        new SysIdRoutineSelector(
+            subsystems.registry(), RobotContainer::getSysIdRoutines, shuffleboard);
     configureBindings();
   }
 

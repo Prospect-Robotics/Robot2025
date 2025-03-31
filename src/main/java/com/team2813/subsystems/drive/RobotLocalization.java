@@ -22,11 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import javax.inject.Inject;
 import org.json.simple.parser.ParseException;
 
 class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
+
+  @Inject
+  RobotLocalization() {}
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, DriveSubsystem.DriveConfiguration driveConfig) {

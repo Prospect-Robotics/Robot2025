@@ -23,6 +23,7 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
+import com.team2813.sysid.SubsystemRegistry;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -41,6 +42,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+import javax.inject.Inject;
 import org.photonvision.PhotonPoseEstimator;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
@@ -145,12 +147,17 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
     }
   }
 
-  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
-    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
+  @Inject
+  DriveSubsystem(
+      NetworkTableInstance networkTableInstance,
+      SubsystemRegistry registry,
+      RobotLocalization localization) {
+    this(networkTableInstance, registry, localization, DriveConfiguration.fromPreferences());
   }
 
   DriveSubsystem(
       NetworkTableInstance networkTableInstance,
+      SubsystemRegistry registry,
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
@@ -286,6 +293,7 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
     professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
+    registry.addSubsystem(this);
   }
 
   @Override
@@ -299,6 +307,11 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftY()) * config.maxVelocity(),
         () -> -modifyAxis(DRIVER_CONTROLLER.getLeftX()) * config.maxVelocity(),
         () -> -modifyAxis(DRIVER_CONTROLLER.getRightX()) * config.maxRadiansPerSecond());
+  }
+
+  @Override
+  public RobotLocalization localization() {
+    return localization;
   }
 
   private static double modifyAxis(double value) {

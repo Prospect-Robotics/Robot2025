@@ -1,9 +1,11 @@
 package com.team2813.subsystems;
 
 import com.team2813.subsystems.climb.Climb;
+import com.team2813.subsystems.drive.Drive;
 import com.team2813.subsystems.elevator.Elevator;
 import com.team2813.subsystems.intake.Intake;
 import com.team2813.subsystems.intake.IntakePivot;
+import com.team2813.sysid.SubsystemRegistry;
 import dagger.BindsInstance;
 import dagger.Component;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -16,6 +18,10 @@ public interface Subsystems {
   static Subsystems create(NetworkTableInstance instance) {
     return DaggerSubsystems.factory().createSubsystems(instance);
   }
+
+  SubsystemRegistry registry();
+
+  Drive drive();
 
   Elevator elevator();
 
