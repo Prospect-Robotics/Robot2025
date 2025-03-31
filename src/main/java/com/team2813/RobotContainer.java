@@ -15,7 +15,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
 import com.team2813.commands.LockFunctionCommand;
-import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
@@ -58,9 +57,8 @@ public class RobotContainer implements AutoCloseable {
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    var localization = new RobotLocalization();
     var registry = new SubsystemRegistry();
-    this.drive = Drive.create(networkTableInstance, localization, registry);
+    this.drive = Drive.create(networkTableInstance, registry);
     this.elevator = Elevator.create(networkTableInstance, () -> -OPERATOR_CONTROLLER.getRightY());
     this.intakePivot = IntakePivot.create(networkTableInstance);
     this.climb = Climb.create(networkTableInstance);
@@ -70,7 +68,7 @@ public class RobotContainer implements AutoCloseable {
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
         new SysIdRoutineSelector(registry, RobotContainer::getSysIdRoutines, shuffleboard);
-    configureBindings(localization);
+    configureBindings();
   }
 
   /**
@@ -269,7 +267,7 @@ public class RobotContainer implements AutoCloseable {
     return routines;
   }
 
-  private void configureBindings(RobotLocalization localization) {
+  private void configureBindings() {
     // Driver
     SLOWMODE_BUTTON.whileTrue(drive.enableSlowModeCommand(true));
     SLOWMODE_BUTTON.onFalse(drive.enableSlowModeCommand(false));
@@ -298,9 +296,7 @@ public class RobotContainer implements AutoCloseable {
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.2),
-            new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose),
-                Set.of(drive.asSubsystem())),
+            new DeferredCommand(drive::leftAutoAlignCommand, Set.of(drive.asSubsystem())),
             intake.outakeCoralCommand(),
             new WaitCommand(0.375),
             intake.stopIntakeMotorCommand(),
@@ -319,9 +315,7 @@ public class RobotContainer implements AutoCloseable {
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.2),
-            new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose),
-                Set.of(drive.asSubsystem())),
+            new DeferredCommand(drive::rightAutoAlignCommand, Set.of(drive.asSubsystem())),
             intake.outakeCoralCommand(),
             new WaitCommand(0.375),
             intake.stopIntakeMotorCommand(),
