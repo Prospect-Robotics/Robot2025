@@ -1,16 +1,15 @@
-package com.team2813.commands;
+package com.team2813.subsystems.intake;
 
 import com.team2813.lib2813.control.ControlMode;
-import com.team2813.subsystems.IntakePivot;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 
-public class ManuelIntakePivot extends Command {
+public class ManualIntakePivot extends Command {
 
-  private final IntakePivot intakepivot;
+  private final IntakePivotSubsystem intakepivot;
   private final DoubleSupplier rotation;
 
-  public ManuelIntakePivot(IntakePivot intakepivot, DoubleSupplier rotation) {
+  public ManualIntakePivot(IntakePivotSubsystem intakepivot, DoubleSupplier rotation) {
     this.intakepivot = intakepivot;
     this.rotation = rotation;
     addRequirements(intakepivot);
