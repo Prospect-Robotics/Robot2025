@@ -10,19 +10,18 @@ import javax.inject.Singleton;
 @Component(modules = {SubsystemsModule.class})
 @Singleton
 public interface Subsystems {
+
+  static Subsystems create(NetworkTableInstance instance) {
+    return DaggerSubsystems.factory().createSubsystems(instance);
+  }
+
   Elevator elevator();
 
   Climb climb();
 
-  @Component.Builder
-  interface Builder {
-    @BindsInstance
-    Builder networkTableInstance(NetworkTableInstance instance);
+  @Component.Factory
+  interface Factory {
 
-    Subsystems build();
-  }
-
-  static Builder builder() {
-    return DaggerSubsystems.builder();
+    Subsystems createSubsystems(@BindsInstance NetworkTableInstance instance);
   }
 }
