@@ -15,7 +15,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
 import com.team2813.commands.LockFunctionCommand;
-import com.team2813.commands.RobotCommands;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
@@ -71,8 +70,7 @@ public class RobotContainer implements AutoCloseable {
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
         new SysIdRoutineSelector(registry, RobotContainer::getSysIdRoutines, shuffleboard);
-    RobotCommands autoCommands = new RobotCommands(intake, elevator);
-    configureBindings(autoCommands, localization);
+    configureBindings(localization);
   }
 
   /**
@@ -271,7 +269,7 @@ public class RobotContainer implements AutoCloseable {
     return routines;
   }
 
-  private void configureBindings(RobotCommands autoCommands, RobotLocalization localization) {
+  private void configureBindings(RobotLocalization localization) {
     // Driver
     SLOWMODE_BUTTON.whileTrue(drive.enableSlowModeCommand(true));
     SLOWMODE_BUTTON.onFalse(drive.enableSlowModeCommand(false));
