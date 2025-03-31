@@ -7,9 +7,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 
 public final class SysIdRoutineSelector {
   private final SendableChooser<SysIdRoutine> routineSelector = new SendableChooser<>();
@@ -18,13 +17,11 @@ public final class SysIdRoutineSelector {
 
   private final Set<? extends Subsystem> requirements;
 
-  public SysIdRoutineSelector(
-      SubsystemRegistry registry,
-      Map<Class<? extends Subsystem>, List<DropdownEntry>> sysIdRoutines,
-      ShuffleboardTabs shuffleboard) {
+  @Inject
+  SysIdRoutineSelector(SysIdRoutineRegistry registry, ShuffleboardTabs shuffleboard) {
     requirements = registry.allSubsystems();
-    sysIdRoutines.values().stream()
-        .flatMap(List::stream)
+    registry
+        .entries()
         .forEach(
             entry -> {
               routineSelector.addOption(entry.name(), entry.routine());

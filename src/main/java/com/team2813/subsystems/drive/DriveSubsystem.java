@@ -27,7 +27,6 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
-import com.team2813.sysid.SubsystemRegistry;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -63,7 +62,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 @Singleton
-public class DriveSubsystem extends SubsystemBase implements Drive {
+class DriveSubsystem extends SubsystemBase implements Drive {
   private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private final RobotLocalization localization;
@@ -171,16 +170,12 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
   }
 
   @Inject
-  DriveSubsystem(
-      NetworkTableInstance networkTableInstance,
-      SubsystemRegistry registry,
-      RobotLocalization localization) {
-    this(networkTableInstance, registry, localization, DriveConfiguration.fromPreferences());
+  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
+    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
   }
 
   DriveSubsystem(
       NetworkTableInstance networkTableInstance,
-      SubsystemRegistry registry,
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
@@ -337,8 +332,6 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
       simDrivetrain = null;
       simVisionSystem = null;
     }
-
-    registry.addSubsystem(this);
   }
 
   @Override
