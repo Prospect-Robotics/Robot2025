@@ -1,6 +1,5 @@
 package com.team2813.subsystems.drive;
 
-import com.team2813.commands.RobotLocalization;
 import com.team2813.sysid.SubsystemRegistry;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -11,10 +10,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public interface Drive extends AutoCloseable {
 
-  static Drive create(
-      NetworkTableInstance networkTableInstance,
-      RobotLocalization localization,
-      SubsystemRegistry registry) {
+  static Drive create(NetworkTableInstance networkTableInstance, SubsystemRegistry registry) {
+    RobotLocalization localization = new RobotLocalization(networkTableInstance);
     DriveSubsystem drive = new DriveSubsystem(networkTableInstance, localization);
     registry.addSubsystem(drive);
     return drive;
@@ -43,4 +40,8 @@ public interface Drive extends AutoCloseable {
   Command enableSlowModeCommand(boolean enable);
 
   Command resetPoseCommand();
+
+  Command rightAutoAlignCommand();
+
+  Command leftAutoAlignCommand();
 }

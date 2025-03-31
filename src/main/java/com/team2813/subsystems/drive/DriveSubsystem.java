@@ -23,7 +23,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
-import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.sysid.SwerveSysidRequest;
@@ -572,5 +571,15 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
   @Override
   public Command resetPoseCommand() {
     return new InstantCommand(this::resetPose, this);
+  }
+
+  @Override
+  public Command rightAutoAlignCommand() {
+    return localization.getRightAutoAlignCommand(this::getPose);
+  }
+
+  @Override
+  public Command leftAutoAlignCommand() {
+    return localization.getLeftAutoAlignCommand(this::getPose);
   }
 }
