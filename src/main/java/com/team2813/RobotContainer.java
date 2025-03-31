@@ -21,6 +21,8 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
 import com.team2813.subsystems.climb.Climb;
+import com.team2813.subsystems.drive.Drive;
+import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.subsystems.elevator.Elevator;
 import com.team2813.subsystems.intake.Intake;
 import com.team2813.subsystems.intake.IntakePivot;
@@ -58,7 +60,8 @@ public class RobotContainer implements AutoCloseable {
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     var localization = new RobotLocalization();
-    this.drive = new Drive(networkTableInstance, localization);
+    var registry = new SubsystemRegistry();
+    this.drive = Drive.create(networkTableInstance, localization, registry);
     this.elevator = Elevator.create(networkTableInstance, () -> -OPERATOR_CONTROLLER.getRightY());
     this.intakePivot = IntakePivot.create(networkTableInstance);
     this.climb = Climb.create(networkTableInstance);
@@ -67,8 +70,7 @@ public class RobotContainer implements AutoCloseable {
     autoChooser = configureAuto(drive, elevator, intakePivot, intake);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
-        new SysIdRoutineSelector(
-            new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
+        new SysIdRoutineSelector(registry, RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, elevator);
     configureBindings(autoCommands, localization);
   }
@@ -211,7 +213,7 @@ public class RobotContainer implements AutoCloseable {
               .map(alliance -> alliance != ALLIANCE_USED_IN_PATHS)
               .orElse(false);
         },
-        drive // Reference to this subsystem to set requirements
+        drive.asSubsystem() // Reference to this subsystem to set requirements
         );
     configureAutoCommands(elevator, intakePivot, intake);
     return AutoBuilder.buildAutoChooser();
@@ -233,10 +235,10 @@ public class RobotContainer implements AutoCloseable {
                 new SysIdRoutine.Mechanism(
                     (v) ->
                         registry
-                            .getSubsystem(Drive.class)
+                            .getSubsystem(DriveSubsystem.class)
                             .runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
                     null,
-                    registry.getSubsystem(Drive.class)))));
+                    registry.getSubsystem(DriveSubsystem.class)))));
     routines.add(
         new DropdownEntry(
             "Drive-Steer Motor",
@@ -246,10 +248,10 @@ public class RobotContainer implements AutoCloseable {
                 new SysIdRoutine.Mechanism(
                     (v) ->
                         registry
-                            .getSubsystem(Drive.class)
+                            .getSubsystem(DriveSubsystem.class)
                             .runSysIdRequest(STEER_SYSID.withVoltage(v)),
                     null,
-                    registry.getSubsystem(Drive.class)))));
+                    registry.getSubsystem(DriveSubsystem.class)))));
     routines.add(
         new DropdownEntry(
             "Drive-Slip Test (Forward Quasistatic only)",
@@ -262,19 +264,18 @@ public class RobotContainer implements AutoCloseable {
                 new SysIdRoutine.Mechanism(
                     (v) ->
                         registry
-                            .getSubsystem(Drive.class)
+                            .getSubsystem(DriveSubsystem.class)
                             .runSysIdRequest(DRIVE_SYSID.withVoltage(v)),
                     null,
-                    registry.getSubsystem(Drive.class)))));
+                    registry.getSubsystem(DriveSubsystem.class)))));
     return routines;
   }
 
   private void configureBindings(RobotCommands autoCommands, RobotLocalization localization) {
     // Driver
-    SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
-    SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
-    SLOWMODE_BUTTON.onTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
-    SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
+    SLOWMODE_BUTTON.whileTrue(drive.enableSlowModeCommand(true));
+    SLOWMODE_BUTTON.onFalse(drive.enableSlowModeCommand(false));
+    SLOWMODE_BUTTON.onTrue(drive.enableSlowModeCommand(true));
     SETPOSE.onTrue(
         new InstantCommand(
             () ->
@@ -284,7 +285,7 @@ public class RobotContainer implements AutoCloseable {
                     .map(Pose3d::toPose2d)
                     .map(RobotContainer::toBotposeBlue)
                     .ifPresent(drive::setPose)));
-    RESET_POSE.onTrue(new InstantCommand(drive::resetPose, drive));
+    RESET_POSE.onTrue(drive.resetPoseCommand());
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
@@ -300,7 +301,8 @@ public class RobotContainer implements AutoCloseable {
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.2),
             new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
+                () -> localization.getLeftAutoAlignCommand(drive::getPose),
+                Set.of(drive.asSubsystem())),
             intake.outakeCoralCommand(),
             new WaitCommand(0.375),
             intake.stopIntakeMotorCommand(),
@@ -320,7 +322,8 @@ public class RobotContainer implements AutoCloseable {
                         .ifPresent(drive::setPose)),
             new WaitCommand(0.2),
             new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
+                () -> localization.getRightAutoAlignCommand(drive::getPose),
+                Set.of(drive.asSubsystem())),
             intake.outakeCoralCommand(),
             new WaitCommand(0.375),
             intake.stopIntakeMotorCommand(),
