@@ -1,4 +1,4 @@
-package com.team2813.commands;
+package com.team2813.subsystems.drive;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
@@ -9,8 +9,6 @@ import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
-import com.team2813.subsystems.drive.Drive;
-import com.team2813.subsystems.drive.DriveSubsystem;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -26,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
-public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
+class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Limelight limelight = Limelight.getDefaultLimelight();
 
   public Optional<BotPoseEstimate> limelightLocation(
