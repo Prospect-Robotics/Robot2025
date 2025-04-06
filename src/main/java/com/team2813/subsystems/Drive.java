@@ -403,11 +403,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return drivetrain.getState().Pose;
   }
 
+  /** Makes the current orientation of the robot "forward" for field-centric maneuvers. */
   public void resetPose() {
     this.correctRotation = false;
     this.drivetrain.seedFieldCentric();
   }
 
+  /**
+   * Sets the pose, in the blue coordinate system.
+   *
+   * <p>This is called when the robot is being controlled by path planner. It assumes that the
+   * passed-in pose is correct.
+   */
   public void setPose(Pose2d pose) {
     correctRotation = true;
     if (pose != null) {
