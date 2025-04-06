@@ -11,13 +11,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "left-lc2"
+                  "pathName": "right-rc6"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "PrepareScore"
+                  "name": "PrepareL2"
                 }
               }
             ]
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "lc2-top_coral"
+            "pathName": "rc6-bottom_coral"
           }
         },
         {
@@ -48,7 +48,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "top_coral-lc4"
+                  "pathName": "bottom_coral-rc4"
                 }
               },
               {
@@ -64,7 +64,57 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "PrepareScore"
+                        "name": "PrepareL2"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "rc4-bottom_coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "bottom_coral-lc4"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PrepareL2"
                       }
                     }
                   ]

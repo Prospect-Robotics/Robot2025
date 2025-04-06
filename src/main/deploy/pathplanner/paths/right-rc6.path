@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.182898444098395,
-        "y": 0.47144692910684055
+        "x": 7.202,
+        "y": 0.491
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.83161483202725,
-        "y": 0.8540073891548683
+        "x": 6.622627162657935,
+        "y": 1.121129443329071
       },
       "isLocked": false,
       "linkedName": "R-Start"
     },
     {
       "anchor": {
-        "x": 5.272436357082747,
-        "y": 3.0004329584012845
+        "x": 5.297,
+        "y": 2.961
       },
       "prevControl": {
-        "x": 5.396704637961336,
-        "y": 2.78350579466313
+        "x": 5.406910337112639,
+        "y": 2.7364566460663196
       },
       "nextControl": null,
       "isLocked": false,
@@ -29,7 +29,21 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.88,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 3.0,
+        "maxAcceleration": 1.5,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {

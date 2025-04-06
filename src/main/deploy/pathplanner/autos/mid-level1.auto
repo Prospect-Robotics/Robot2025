@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "s1corall2"
+            "pathName": "mid-level1"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreL2"
+            "name": "ScoreL1"
           }
         }
       ]

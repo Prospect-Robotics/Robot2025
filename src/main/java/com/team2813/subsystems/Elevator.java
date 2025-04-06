@@ -32,7 +32,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
         new MotorSubsystemConfiguration(getMotor())
             .controlMode(ControlMode.VOLTAGE)
             .acceptableError(1.7)
-            .PID(0.201524, 0, 0.0004)
+            .PID(0.2, 0.001, 0.001)
             .rotationUnit(Units.Radians));
     NetworkTable networkTable = networkTableInstance.getTable("Elevator");
     atPosition = networkTable.getBooleanTopic("at position").publish();
@@ -40,9 +40,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   private static TalonFXWrapper getMotor() {
-    TalonFXWrapper wrapper =
-        new TalonFXWrapper(
-            ELEVATOR_1, InvertType.CLOCKWISE); // TODO: See if the motors need to be reversed.
+    TalonFXWrapper wrapper = new TalonFXWrapper(ELEVATOR_1, InvertType.CLOCKWISE);
     wrapper.setNeutralMode(NeutralModeValue.Brake);
     wrapper.addFollower(ELEVATOR_2, InvertType.FOLLOW_MASTER);
     return wrapper;
@@ -50,15 +48,12 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
 
   @Override
   protected void useOutput(double output, double setpoint) {
-    // TODO: Once we have a working elevator, tune this.
-    if (output > 0) {
-      output += 0.40798;
-    }
     super.useOutput(MathUtil.clamp(output, -6, 6), setpoint);
   }
 
   public enum Position implements Supplier<Angle> {
     BOTTOM(-0.212500),
+    TEST(10),
     TOP(16.358496);
 
     private final Angle position;

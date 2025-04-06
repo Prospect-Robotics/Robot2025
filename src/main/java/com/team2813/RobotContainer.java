@@ -62,7 +62,8 @@ public class RobotContainer implements AutoCloseable {
     this.climb = new Climb(networkTableInstance);
     this.intake = new Intake(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
-    autoChooser = configureAuto(drive, elevator, intakePivot, intake);
+    autoChooser =
+        configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
@@ -77,11 +78,15 @@ public class RobotContainer implements AutoCloseable {
    * @see <a href="https://pathplanner.dev/pplib-named-commands.html">PathPlanner docs</a>
    */
   private static void configureAutoCommands(
-      Elevator elevator, IntakePivot intakePivot, Intake intake) {
+      Elevator elevator,
+      IntakePivot intakePivot,
+      Intake intake,
+      GroundIntake groundIntake,
+      GroundIntakePivot groundIntakePivot) {
     Time SECONDS_1 = Units.Seconds.of(1);
     Time SECONDS_HALF = Units.Seconds.of(0.5);
     Time SECONDS_2 = Units.Seconds.of(2);
-    Time DROP_CORAL = Units.Seconds.of(0.25);
+    Time DROP_CORAL = Units.Seconds.of(0.4);
     Time INTAKE_TIME = Units.Seconds.of(3);
 
     NamedCommands.registerCommand(
@@ -99,6 +104,11 @@ public class RobotContainer implements AutoCloseable {
             new InstantCommand(() -> elevator.setSetpoint(Elevator.Position.TOP), elevator)));
 
     NamedCommands.registerCommand(
+        "PrepareScore",
+        new InstantCommand(
+            () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot));
+
+    NamedCommands.registerCommand(
         "ScoreL2",
         new SequentialCommandGroup(
             new ParallelCommandGroup(
@@ -112,7 +122,8 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            new InstantCommand(intake::outakeCoral, intake),
+            // new InstantCommand(intake::outakeCoral, intake),
+            new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
@@ -120,11 +131,13 @@ public class RobotContainer implements AutoCloseable {
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
-    // TODO: Test L2 position works well for L1. If it doesn't make this not an alias (make an
-    // actual command)
-    // TODO: Since we are adding a dedicated L1 scorer, we should consider updating this to be an
-    // actual command.
-    NamedCommands.registerCommand("ScoreL1", NamedCommands.getCommand("ScoreL2"));
+    NamedCommands.registerCommand(
+        "ScoreL1",
+        new ParallelCommandGroup(
+            new InstantCommand(groundIntake::outtakeCoral, groundIntake),
+            new InstantCommand(
+                () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
+                groundIntakePivot)));
 
     NamedCommands.registerCommand(
         "ScoreL3",
@@ -139,7 +152,8 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                     intakePivot)
                 .withTimeout(SECONDS_2),
-            new InstantCommand(intake::outakeCoral, intake),
+            // new InstantCommand(intake::outakeCoral, intake),
+            new InstantCommand(intake::slowOuttakeCoral, intake),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(intake::stopIntakeMotor, intake),
@@ -226,7 +240,12 @@ public class RobotContainer implements AutoCloseable {
   }
 
   private static SendableChooser<Command> configureAuto(
-      Drive drive, Elevator elevator, IntakePivot intakePivot, Intake intake) {
+      Drive drive,
+      Elevator elevator,
+      IntakePivot intakePivot,
+      Intake intake,
+      GroundIntake groundIntake,
+      GroundIntakePivot groundIntakePivot) {
     RobotConfig config;
     try {
       config = RobotConfig.fromGUISettings();
@@ -258,7 +277,7 @@ public class RobotContainer implements AutoCloseable {
         },
         drive // Reference to this subsystem to set requirements
         );
-    configureAutoCommands(elevator, intakePivot, intake);
+    configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     return AutoBuilder.buildAutoChooser();
   }
 
@@ -343,21 +362,9 @@ public class RobotContainer implements AutoCloseable {
                         .map(Pose3d::toPose2d)
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
-            new WaitCommand(0.2),
+            new WaitCommand(0.02),
             new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
-            new ParallelCommandGroup(
-                new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                    elevator),
-                new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
-                    intakePivot))));
+                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive))));
 
     AUTO_ALIGN_RIGHT.onTrue(
         new SequentialCommandGroup(
@@ -369,21 +376,9 @@ public class RobotContainer implements AutoCloseable {
                         .map(Pose3d::toPose2d)
                         .map(RobotContainer::toBotposeBlue)
                         .ifPresent(drive::setPose)),
-            new WaitCommand(0.2),
+            new WaitCommand(0.02),
             new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive)),
-            new InstantCommand(intake::outakeCoral, intake),
-            new WaitCommand(0.375),
-            new InstantCommand(intake::stopIntakeMotor, intake),
-            new ParallelCommandGroup(
-                new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                    elevator),
-                new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
-                    intakePivot))));
+                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive))));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
@@ -489,8 +484,8 @@ public class RobotContainer implements AutoCloseable {
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(intake::stopIntakeMotor, intake)));
 
-    // SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
-    // SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
+    SLOW_OUTTAKE.onTrue(new InstantCommand(intake::slowOuttakeCoral, intake));
+    SLOW_OUTTAKE.onFalse(new InstantCommand(intake::stopIntakeMotor, intake));
   }
 
   private static final Pose2d botposeBlueOrig =

@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "s1corall2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ScoreL2"
+            "pathName": "leave (mirrored)"
           }
         }
       ]

@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -19,7 +20,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
 import com.team2813.AllPreferences;
-import com.team2813.Constants.*;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
@@ -30,9 +30,13 @@ import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -40,9 +44,12 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
 public class Drive extends SubsystemBase implements AutoCloseable {
@@ -52,6 +59,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final DriveConfiguration config;
   private final MultiPhotonPoseEstimator estimator;
+  private final AprilTagFieldLayout aprilTagFieldLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -287,6 +296,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
+
+    for (int i = 0; i < 4; i++) {
+      drivetrain
+          .getModule(i)
+          .getDriveMotor()
+          .getConfigurator()
+          .apply(
+              new CurrentLimitsConfigs()
+                  .withSupplyCurrentLimit(60)
+                  .withSupplyCurrentLimitEnable(true)
+                  .withStatorCurrentLimitEnable(false));
+    }
   }
 
   private Command createDefaultCommand() {
@@ -409,10 +430,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
+  private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
+      new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
+
   public void addVisionMeasurement(BotPoseEstimate estimate) {
     double estimateTimestamp = estimate.timestampSeconds();
     if (estimateTimestamp > lastVisionEstimateTime) {
-      drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp);
+      drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp, LIMELIGHT_STD_DEVS);
       lastVisionEstimateTime = estimateTimestamp;
     }
   }
@@ -424,8 +448,35 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositions;
   private final StructPublisher<Pose3d> captPose;
   private final StructPublisher<Pose3d> professorPose;
+  private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
+      new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
 
   private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
+
+  private final DoublePublisher ambiguityPublisher =
+      NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+
+  private void handlePhotonPose(EstimatedRobotPose estimate) {
+    Matrix<N3, N1> stdDevs;
+    List<PhotonTrackedTarget> targets = estimate.targetsUsed;
+    if (targets.isEmpty()) {
+      return;
+    } else if (targets.size() == 1) {
+      PhotonTrackedTarget target = targets.get(0);
+      double ambiguity = (1.0 / target.area);
+      ambiguityPublisher.accept(ambiguity);
+      stdDevs = new Matrix<>(Nat.N3(), Nat.N1(), new double[] {ambiguity, ambiguity, ambiguity});
+    } else {
+      // We see multiple tags.
+      // TODO: Calculate the pooled standard deviation.
+      // See https://www.statisticshowto.com/pooled-standard-deviation/
+      stdDevs = PHOTON_MULTIPLE_TAG_STD_DEVS;
+    }
+    drivetrain.addVisionMeasurement(
+        estimate.estimatedPose.toPose2d(),
+        Utils.fpgaToCurrentTime(estimate.timestampSeconds),
+        stdDevs);
+  }
 
   @Override
   public void periodic() {
@@ -441,11 +492,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
-      estimator.update(
-          (estimate) ->
-              drivetrain.addVisionMeasurement(
-                  estimate.estimatedPose.toPose2d(),
-                  Utils.fpgaToCurrentTime(estimate.timestampSeconds)));
+      estimator.update(this::handlePhotonPose);
     }
     Pose2d pose = getPose();
     currentPose.set(pose);

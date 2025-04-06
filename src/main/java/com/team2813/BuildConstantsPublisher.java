@@ -50,7 +50,7 @@ import edu.wpi.first.networktables.StringPublisher;
  * }</pre>
  */
 public class BuildConstantsPublisher {
-  public static final String TABLE_NAME = "BuildConstants";
+  public static final String TABLE_NAME = "Metadata";
   // No publisher for BuildConstants.MAVEN_GROUP because it is always empty.
   private StringPublisher m_mavenNamePublisher;
   // No publisher for BuildConstants.VERSION because it is always "unspecified".

@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "bottom-0100"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "bottom-0100"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "PrepareL2"
+                }
+              }
+            ]
           }
         },
         {
