@@ -403,13 +403,20 @@ public class RobotContainer implements AutoCloseable {
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                 groundIntakePivot)));
 
-    OUTTAKE_BUTTON.onTrue(
+    OUTTAKE_BUTTON.onTrue(new SequentialCommandGroup(
         new ParallelCommandGroup(
             new InstantCommand(intake::outakeCoral, intake),
             new InstantCommand(groundIntake::outtakeCoral, groundIntake),
             new InstantCommand(
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
-                groundIntakePivot)));
+                groundIntakePivot)),
+            new WaitCommand(0.25),
+            new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake),
+            new WaitCommand(0.25),
+            new InstantCommand(
+                () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
+                groundIntakePivot)
+            ));
     OUTTAKE_BUTTON.onFalse(
         new ParallelCommandGroup(
             new InstantCommand(intake::stopIntakeMotor, intake),
