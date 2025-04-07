@@ -87,7 +87,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
 
   private static StructPublisher<Pose2d> createPosePublisher(
       NetworkTableInstance ntInstance, PhotonCamera camera) {
-    NetworkTable table = ntInstance.getTable("photonVision/" + camera.getName());
+    NetworkTable table = ntInstance.getTable("photonvision/" + camera.getName());
     return table.getStructTopic("pose", Pose2d.struct).publish();
   }
 }
