@@ -22,7 +22,7 @@ public class GroundIntake extends SubsystemBase {
   private boolean isActive = false;
 
   private static final double INTAKE_SPEED = 8; // TODO: Tweak speed
-  private static final double OUTTAKE_SPEED = -8; // TODO: Tweak speed
+  private static final double OUTTAKE_SPEED = -3.2; // TODO: Tweak speed
 
   private static final AngularVelocity STALL_SPEED =
       RotationsPerSecond.of(
