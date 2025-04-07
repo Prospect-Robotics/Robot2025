@@ -421,8 +421,6 @@ public class RobotContainer implements AutoCloseable {
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
                 groundIntakePivot)),
             new WaitCommand(0.25),
-            new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake),
-            new WaitCommand(0.25),
             new InstantCommand(
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                 groundIntakePivot)
