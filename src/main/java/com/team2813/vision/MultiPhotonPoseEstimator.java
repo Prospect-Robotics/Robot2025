@@ -2,9 +2,11 @@ package com.team2813.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,7 +20,7 @@ import org.photonvision.PhotonPoseEstimator;
 
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final Map<PhotonCamera, PhotonPoseEstimator> estimators = new HashMap<>();
-  private final Map<PhotonCamera, StructPublisher<Pose2d>> publishers = new HashMap<>();
+  private final Map<PhotonCamera, StructArrayPublisher<Pose3d>> publishers = new HashMap<>();
 
   public static class Builder {
     private final Map<String, Transform3d> cameras = new HashMap<>();
@@ -55,6 +57,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       estimators.put(camera, estimator);
     }
   }
+  
+  private static final Pose3d[] EMPTY_ARRAY = new Pose3d[0];
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
     for (Map.Entry<PhotonCamera, PhotonPoseEstimator> entry : estimators.entrySet()) {
@@ -63,16 +67,18 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
           camera.getAllUnreadResults().stream()
               .map(entry.getValue()::update)
               .flatMap(Optional::stream)
-              .sorted(
-                  Comparator.comparing(estimatedRobotPose -> estimatedRobotPose.timestampSeconds))
               .toList();
-      if (!poses.isEmpty()) {
-        StructPublisher<Pose2d> publisher = publishers.get(camera);
-        if (publisher != null) {
-          EstimatedRobotPose mostRecentPose = poses.get(poses.size() - 1);
-          publisher.set(mostRecentPose.estimatedPose.toPose2d());
+      poses.forEach(apply);
+      StructArrayPublisher<Pose3d> publisher = publishers.get(camera);
+      if (publisher != null) {
+        if (poses.isEmpty()) {
+          publisher.set(EMPTY_ARRAY);
+        } else {
+          for (EstimatedRobotPose pose : poses) {
+            // under normal circumstances the NT time is the FPGA time converted into microseconds, so this should be sound
+            publisher.set(new Pose3d[] {pose.estimatedPose}, (long) (pose.timestampSeconds * 1e6));
+          }
         }
-        poses.forEach(apply);
       }
     }
   }
@@ -85,9 +91,9 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     estimators.clear();
   }
 
-  private static StructPublisher<Pose2d> createPosePublisher(
+  private static StructArrayPublisher<Pose3d> createPosePublisher(
       NetworkTableInstance ntInstance, PhotonCamera camera) {
     NetworkTable table = ntInstance.getTable("photonvision/" + camera.getName());
-    return table.getStructTopic("pose", Pose2d.struct).publish();
+    return table.getStructArrayTopic("pose", Pose3d.struct).publish();
   }
 }
