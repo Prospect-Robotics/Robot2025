@@ -1,9 +1,14 @@
 package com.team2813.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -13,6 +18,7 @@ import org.photonvision.PhotonPoseEstimator;
 
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final Map<PhotonCamera, PhotonPoseEstimator> estimators = new HashMap<>();
+  private final Map<PhotonCamera, StructPublisher<Pose2d>> publishers = new HashMap<>();
 
   public static class Builder {
     private final Map<String, Transform3d> cameras = new HashMap<>();
@@ -44,16 +50,30 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       PhotonCamera camera = new PhotonCamera(builder.ntInstance, entry.getKey());
       PhotonPoseEstimator estimator =
           new PhotonPoseEstimator(builder.fieldTags, builder.poseStrategy, entry.getValue());
+
+      publishers.put(camera, createPosePublisher(builder.ntInstance, camera));
       estimators.put(camera, estimator);
     }
   }
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
     for (Map.Entry<PhotonCamera, PhotonPoseEstimator> entry : estimators.entrySet()) {
-      entry.getKey().getAllUnreadResults().stream()
-          .map(entry.getValue()::update)
-          .flatMap(Optional::stream)
-          .forEach(apply);
+      PhotonCamera camera = entry.getKey();
+      List<EstimatedRobotPose> poses =
+          camera.getAllUnreadResults().stream()
+              .map(entry.getValue()::update)
+              .flatMap(Optional::stream)
+              .sorted(
+                  Comparator.comparing(estimatedRobotPose -> estimatedRobotPose.timestampSeconds))
+              .toList();
+      if (!poses.isEmpty()) {
+        StructPublisher<Pose2d> publisher = publishers.get(camera);
+        if (publisher != null) {
+          EstimatedRobotPose mostRecentPose = poses.get(poses.size() - 1);
+          publisher.set(mostRecentPose.estimatedPose.toPose2d());
+        }
+        poses.forEach(apply);
+      }
     }
   }
 
@@ -63,5 +83,11 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       camera.close();
     }
     estimators.clear();
+  }
+
+  private static StructPublisher<Pose2d> createPosePublisher(
+      NetworkTableInstance ntInstance, PhotonCamera camera) {
+    NetworkTable table = ntInstance.getTable("photonVision/" + camera.getName());
+    return table.getStructTopic("pose", Pose2d.struct).publish();
   }
 }
