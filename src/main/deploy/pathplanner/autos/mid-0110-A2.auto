@@ -30,41 +30,27 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "lc2-a2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "BumpAlgaeLow"
-                }
-              }
-            ]
+            "pathName": "lc2-a2"
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "lc2-top_coral"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCoral"
-                }
-              }
-            ]
+            "name": "BumpAlgaeHigh"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "lc2-top_coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
           }
         },
         {
@@ -78,9 +64,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "PrepareL3"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "PrepareL3"
+                      }
+                    }
+                  ]
                 }
               }
             ]
