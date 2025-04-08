@@ -1,14 +1,11 @@
 package com.team2813.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +54,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       estimators.put(camera, estimator);
     }
   }
-  
+
   private static final Pose3d[] EMPTY_ARRAY = new Pose3d[0];
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
@@ -75,7 +72,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
           publisher.set(EMPTY_ARRAY);
         } else {
           for (EstimatedRobotPose pose : poses) {
-            // under normal circumstances the NT time is the FPGA time converted into microseconds, so this should be sound
+            // under normal circumstances the NT time is the FPGA time converted into microseconds,
+            // so this should be sound
             publisher.set(new Pose3d[] {pose.estimatedPose}, (long) (pose.timestampSeconds * 1e6));
           }
         }
