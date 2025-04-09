@@ -9,9 +9,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final List<CameraData> cameraDatas = new ArrayList<>();
@@ -41,6 +45,16 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     public MultiPhotonPoseEstimator build() {
       return new MultiPhotonPoseEstimator(this);
     }
+  }
+
+  public void addToSim(
+      VisionSystemSim simVisionSystem, Function<String, SimCameraProperties> propertyFactory) {
+    cameraDatas.forEach(
+        estimatorData -> {
+          SimCameraProperties cameraProp = propertyFactory.apply(estimatorData.camera.getName());
+          PhotonCameraSim simCamera = new PhotonCameraSim(estimatorData.camera(), cameraProp);
+          simVisionSystem.addCamera(simCamera, estimatorData.estimator.getRobotToCameraTransform());
+        });
   }
 
   private record CameraData(
