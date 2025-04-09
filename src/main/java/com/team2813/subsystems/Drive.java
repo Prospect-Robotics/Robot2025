@@ -41,6 +41,7 @@ import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.Collection;
@@ -49,6 +50,8 @@ import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
@@ -57,10 +60,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+  private final SimulatedSwerveDrivetrain simDrivetrain;
+  private final VisionSystemSim simVisionSystem;
   private final DriveConfiguration config;
-  private final MultiPhotonPoseEstimator estimator;
-  private final AprilTagFieldLayout aprilTagFieldLayout =
-      AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+  private final MultiPhotonPoseEstimator photonPoseEstimator;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -164,10 +167,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       RobotLocalization localization,
       DriveConfiguration config) {
     this.localization = localization;
-    estimator =
+
+    var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
                 networkTableInstance,
-                AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded),
+                aprilTagFieldLayout,
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", captBarnaclesTransform)
@@ -271,16 +276,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 true, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
+    SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
     drivetrain =
         new SwerveDrivetrain<>(
-            TalonFX::new,
-            TalonFX::new,
-            CANcoder::new,
-            drivetrainConstants,
-            frontLeft,
-            frontRight,
-            backLeft,
-            backRight);
+            TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, modules);
 
     // Logging
     NetworkTable networkTable = networkTableInstance.getTable("Drive");
@@ -307,6 +306,21 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                   .withSupplyCurrentLimit(60)
                   .withSupplyCurrentLimitEnable(true)
                   .withStatorCurrentLimitEnable(false));
+    }
+
+    // Simulation code.
+    // See https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/
+    if (RobotBase.isSimulation()) {
+      simDrivetrain = new SimulatedSwerveDrivetrain(networkTable, drivetrain, modules);
+
+      // See https://docs.photonvision.org/en/latest/docs/simulation/simulation-java.html
+      simVisionSystem = new VisionSystemSim("main");
+      simVisionSystem.addAprilTags(aprilTagFieldLayout);
+      photonPoseEstimator.addToSim(
+          simVisionSystem, cameraName -> SimCameraProperties.PERFECT_90DEG());
+    } else {
+      simDrivetrain = null;
+      simVisionSystem = null;
     }
   }
 
@@ -492,7 +506,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
-      estimator.update(this::handlePhotonPose);
+      photonPoseEstimator.update(this::handlePhotonPose);
     }
     Pose2d pose = getPose();
     currentPose.set(pose);
@@ -506,6 +520,17 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     localization.updateDashboard();
   }
 
+  @Override
+  public void simulationPeriodic() {
+    if (simDrivetrain == null || simVisionSystem == null) {
+      return; // We should never get here, but just in case...
+    }
+
+    simDrivetrain.periodic();
+    Pose2d pose = simDrivetrain.getPose();
+    simVisionSystem.update(pose);
+  }
+
   public void enableSlowMode(boolean enable) {
     multiplier = enable ? 0.3 : 1;
   }
@@ -513,6 +538,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   @Override
   public void close() {
     drivetrain.close();
-    estimator.close();
+    photonPoseEstimator.close();
   }
 }
