@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.7366362533844768,
-        "y": 6.297946750902526
+        "x": 1.2509085697525597,
+        "y": 6.433851055887371
       },
       "isLocked": false,
       "linkedName": "top_coral"
     },
     {
       "anchor": {
-        "x": 2.038491369584838,
-        "y": 5.2552720273014435
+        "x": 1.5836600762585327,
+        "y": 5.122615920968429
       },
       "prevControl": {
-        "x": 1.8864463599580379,
-        "y": 5.538688214916918
+        "x": 1.41933160462884,
+        "y": 5.489176821139077
       },
       "nextControl": {
-        "x": 2.2490227324007224,
-        "y": 4.862835627256316
+        "x": 1.7658374297412605,
+        "y": 4.716240239255653
       },
       "isLocked": false,
       "linkedName": null
@@ -52,7 +52,7 @@
         "x": 3.658,
         "y": 4.026
       },
-      "rotationOffset": 0.0,
+      "rotationOffset": -5.0,
       "minWaypointRelativePos": 1.0,
       "maxWaypointRelativePos": 1.8,
       "name": "Point Towards Zone"
