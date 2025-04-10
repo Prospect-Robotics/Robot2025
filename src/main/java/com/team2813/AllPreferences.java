@@ -2,6 +2,7 @@ package com.team2813;
 
 import edu.wpi.first.wpilibj.Preferences;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -16,6 +17,9 @@ public class AllPreferences {
           Key.USE_PHOTON_VISION_LOCATION,
           "subsystems.Drive.DriveConfiguration.usePhotonVisionLocation");
 
+  private static final Set<String> REMOVED_PREFERENCES =
+      Set.of("USE_LIMELIGHT_LOCATION", "DRIVE_ADD_LIMELIGHT_MEASUREMENT");
+
   static synchronized void migrateLegacyPreferences() {
     for (var entry : LEGACY_BOOLEAN_PREFERENCES.entrySet()) {
       String oldKey = entry.getKey().name();
@@ -26,6 +30,11 @@ public class AllPreferences {
           Preferences.initBoolean(newKey, value);
         }
         Preferences.remove(oldKey);
+      }
+    }
+    for (var key : REMOVED_PREFERENCES) {
+      if (Preferences.containsKey(key)) {
+        Preferences.remove(key);
       }
     }
   }
