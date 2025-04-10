@@ -171,8 +171,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   private final LimelightPosePublisher limelightPosePublisher =
       new LimelightPosePublisher(NetworkTableInstance.getDefault());
   private final BooleanPublisher hasDataPublisher =
-      NetworkTableInstance.getDefault()
-          .getTable(LimelightPosePublisher.TABLE_NAME)
+      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
           .getBooleanTopic("hasData")
           .publish();
 
