@@ -5,11 +5,11 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
+import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,6 +29,37 @@ import org.json.simple.parser.ParseException;
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
+  private final AutoAlignConfiguration config;
+
+  public record AutoAlignConfiguration(boolean useAutoAlignWaypoints) {
+
+    /** Creates a builder for {@code AutoAlignConfiguration} with default values. */
+    public static AutoAlignConfiguration.Builder builder() {
+      return new AutoBuilder_RobotLocalization_AutoAlignConfiguration_Builder()
+          .useAutoAlignWaypoints(true);
+    }
+
+    /** Creates an instance from preference values stored in the robot's flash memory. */
+    public static AutoAlignConfiguration fromPreferences() {
+      AutoAlignConfiguration defaultConfig = builder().build();
+      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+    }
+
+    @com.google.auto.value.AutoBuilder
+    interface Builder {
+      Builder useAutoAlignWaypoints(boolean enabled);
+
+      AutoAlignConfiguration build();
+    }
+  }
+
+  public RobotLocalization() {
+    this(AutoAlignConfiguration.fromPreferences());
+  }
+
+  RobotLocalization(AutoAlignConfiguration config) {
+    this.config = config;
+  }
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
@@ -136,7 +167,7 @@ public class RobotLocalization {
   }
 
   public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, positions());
     } else {
       return createPathfindCommand();
@@ -144,7 +175,7 @@ public class RobotLocalization {
   }
 
   public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, leftPositions());
     } else {
       // TODO: be able to use left ones only
@@ -153,7 +184,7 @@ public class RobotLocalization {
   }
 
   public Command getRightAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, rightPositions());
     } else {
       // TODO: be able to use right ones only

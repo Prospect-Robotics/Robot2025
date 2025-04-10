@@ -3,17 +3,21 @@ package com.team2813;
 import edu.wpi.first.wpilibj.Preferences;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BooleanSupplier;
 
 /**
  * Holder for all values stored in {@link Preferences} for the robot.
  *
  * <p>The values can be viewed and edited on SmartDashboard or Shuffleboard. If the values are
  * edited, the updated values are persisted across reboots.
+ *
+ * @deprecated use {@link com.team2813.lib2813.preferences.PreferencesInjector}
  */
-public class AllPreferences {
+@Deprecated
+class AllPreferences {
   private static final Map<Key, String> LEGACY_BOOLEAN_PREFERENCES =
       Map.of(
+          Key.USE_AUTO_ALIGN_WAYPOINTS,
+          "commands.RobotLocalization.AutoAlignConfiguration.useAutoAlignWaypoints",
           Key.USE_PHOTON_VISION_LOCATION,
           "subsystems.Drive.DriveConfiguration.usePhotonVisionLocation");
 
@@ -37,18 +41,6 @@ public class AllPreferences {
         Preferences.remove(key);
       }
     }
-  }
-
-  public static BooleanSupplier useAutoAlignWaypoints() {
-    return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true);
-  }
-
-  private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
-    String name = key.name();
-    if (!Preferences.containsKey(name)) {
-      Preferences.initBoolean(name, defaultValue);
-    }
-    return () -> Preferences.getBoolean(name, defaultValue);
   }
 
   private enum Key {
