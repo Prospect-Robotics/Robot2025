@@ -51,12 +51,21 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     }
   }
 
-  public RobotLocalization() {
-    this(AutoAlignConfiguration.fromPreferences());
+  public RobotLocalization(NetworkTableInstance networkTableInstance) {
+    this(networkTableInstance, AutoAlignConfiguration.fromPreferences());
   }
 
-  RobotLocalization(AutoAlignConfiguration config) {
+  RobotLocalization(NetworkTableInstance networkTableInstance, AutoAlignConfiguration config) {
     this.config = config;
+
+    lastPosePublisher =
+        networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
+    limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
+    hasDataPublisher =
+        networkTableInstance
+            .getTable(LimelightPosePublisher.TABLE_NAME)
+            .getBooleanTopic("hasData")
+            .publish();
   }
 
   public Optional<BotPoseEstimate> limelightLocation(
@@ -124,8 +133,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> lastPosePublisher;
 
   /**
    * Creates a command from the current position to the nearest target.
@@ -199,13 +207,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final LimelightPosePublisher limelightPosePublisher =
-      new LimelightPosePublisher(NetworkTableInstance.getDefault());
-  private final BooleanPublisher hasDataPublisher =
-      NetworkTableInstance.getDefault()
-          .getTable(LimelightPosePublisher.TABLE_NAME)
-          .getBooleanTopic("hasData")
-          .publish();
+  private final LimelightPosePublisher limelightPosePublisher;
+  private final BooleanPublisher hasDataPublisher;
 
   public void updateDashboard() {
     hasDataPublisher.accept(limelight.getJsonDump().isPresent());
