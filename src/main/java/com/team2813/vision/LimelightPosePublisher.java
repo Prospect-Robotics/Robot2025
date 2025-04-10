@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class LimelightPosePublisher {
-  private static final String CAMERA_NAME = "limelight";
+  static final String CAMERA_NAME = "limelight";
   private final TimestampedStructPublisher<Pose2d> publisher;
   private final double timestampOffset;
 

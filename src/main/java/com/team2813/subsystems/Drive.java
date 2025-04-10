@@ -178,8 +178,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 aprilTagFieldLayout,
                 PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             // should have named our batteries after Octonauts characters >:(
-            .addCamera("capt-barnacles", captBarnaclesTransform)
-            .addCamera("professor-inkling", professorInklingTransform)
+            .addCamera("capt-barnacles", captBarnaclesTransform, "Front PhotonVision camera")
+            .addCamera("professor-inkling", professorInklingTransform, "Back PhotonVision camera")
             .build();
     this.config = config;
 
@@ -294,8 +294,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     visibleTargetPoses =
         networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
-    captPose = networkTable.getStructTopic("Front cam pos", Pose3d.struct).publish();
-    professorPose = networkTable.getStructTopic("Back cam pos", Pose3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
 
@@ -466,8 +464,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final StructPublisher<Pose2d> currentPose;
   private final StructArrayPublisher<Pose3d> visibleTargetPoses;
   private final DoubleArrayPublisher modulePositions;
-  private final StructPublisher<Pose3d> captPose;
-  private final StructPublisher<Pose3d> professorPose;
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
 
@@ -516,8 +512,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
     Pose2d pose = getPose();
     currentPose.set(pose);
-    captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
-    professorPose.set(new Pose3d(pose).plus(professorInklingTransform));
+    photonPoseEstimator.setDrivePose(pose);
     Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
     visibleTargetPoses.accept(visibleAprilTagPoses.toArray(EMPTY_LIST));
 
