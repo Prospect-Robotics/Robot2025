@@ -3,6 +3,7 @@ package com.team2813.vision;
 import com.ctre.phoenix6.Utils;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.units.Units;
@@ -11,7 +12,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class LimelightPosePublisher {
-  public static final String TABLE_NAME = "limelight";
+  private static final String CAMERA_NAME = "limelight";
   private final TimestampedStructPublisher<Pose2d> publisher;
   private final double timestampOffset;
 
@@ -23,8 +24,12 @@ public final class LimelightPosePublisher {
     timestampOffset =
         clocks.fpgaTimestampSupplier().get() - clocks.currentTimestampSupplier().get();
     StructTopic<Pose2d> topic =
-        ntInstance.getTable(TABLE_NAME).getStructTopic("poseEstimate", Pose2d.struct);
+        getNetworkTable(ntInstance).getStructTopic("poseEstimate", Pose2d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose2d.kZero, clocks.fpgaTimestampSupplier);
+  }
+
+  public static NetworkTable getNetworkTable(NetworkTableInstance ntInstance) {
+    return VisionUtil.getTableForCamera(ntInstance, CAMERA_NAME);
   }
 
   /**
