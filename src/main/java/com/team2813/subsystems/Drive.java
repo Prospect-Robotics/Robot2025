@@ -475,6 +475,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
 
   private void handlePhotonPose(EstimatedRobotPose estimate) {
+    if (!AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
+      return;
+    }
+
     Matrix<N3, N1> stdDevs;
     List<PhotonTrackedTarget> targets = estimate.targetsUsed;
     if (targets.isEmpty()) {
@@ -516,9 +520,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
-    if (AllPreferences.usePhotonVisionLocation().getAsBoolean()) {
-      photonPoseEstimator.update(this::handlePhotonPose);
-    }
+    photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d pose = getPose();
     currentPose.set(pose);
     captPose.set(new Pose3d(pose).plus(captBarnaclesTransform));
