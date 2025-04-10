@@ -163,14 +163,6 @@ public class RobotLocalization {
     return AutoBuilder.followPath(path);
   }
 
-  public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (config.useAutoAlignWaypoints) {
-      return createPath(drivePosSupplier, positions());
-    } else {
-      return createPathfindCommand();
-    }
-  }
-
   public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
     if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, leftPositions());
