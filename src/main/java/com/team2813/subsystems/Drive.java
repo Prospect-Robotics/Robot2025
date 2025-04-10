@@ -433,6 +433,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
+      if (simDrivetrain != null) {
+        simDrivetrain.resetPose(pose);
+      }
     } else {
       DriverStation.reportError(
           "setPose() passed null! Possibly unintended behavior may occur!",
