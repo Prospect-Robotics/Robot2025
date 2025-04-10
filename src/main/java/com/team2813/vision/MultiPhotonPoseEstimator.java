@@ -3,6 +3,7 @@ package com.team2813.vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,8 +14,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 
 public class MultiPhotonPoseEstimator implements AutoCloseable {
-  private final Map<PhotonCamera, PhotonPoseEstimator> estimators = new HashMap<>();
-  private final Map<String, PhotonVisionPosePublisher> posePublishers = new HashMap<>();
+  private final List<CameraData> cameraDatas = new ArrayList<>();
 
   public static class Builder {
     private final Map<String, Transform3d> cameras = new HashMap<>();
@@ -43,41 +43,40 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     }
   }
 
+  private record CameraData(
+      PhotonCamera camera, PhotonPoseEstimator estimator, PhotonVisionPosePublisher publisher) {}
+
   private MultiPhotonPoseEstimator(Builder builder) {
     for (Map.Entry<String, Transform3d> entry : builder.cameras.entrySet()) {
       String cameraName = entry.getKey();
       PhotonCamera camera = new PhotonCamera(builder.ntInstance, cameraName);
+      Transform3d robotToCamera = entry.getValue();
       PhotonPoseEstimator estimator =
-          new PhotonPoseEstimator(builder.fieldTags, builder.poseStrategy, entry.getValue());
+          new PhotonPoseEstimator(builder.fieldTags, builder.poseStrategy, robotToCamera);
+      var publisher = new PhotonVisionPosePublisher(camera);
 
-      posePublishers.put(cameraName, new PhotonVisionPosePublisher(camera));
-      estimators.put(camera, estimator);
+      cameraDatas.add(new CameraData(camera, estimator, publisher));
     }
   }
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
-    for (Map.Entry<PhotonCamera, PhotonPoseEstimator> entry : estimators.entrySet()) {
-      PhotonCamera camera = entry.getKey();
+    for (CameraData cameraData : cameraDatas) {
       List<EstimatedRobotPose> poses =
-          camera.getAllUnreadResults().stream()
-              .map(entry.getValue()::update)
+          cameraData.camera.getAllUnreadResults().stream()
+              .map(cameraData.estimator::update)
               .flatMap(Optional::stream)
               .toList();
 
       poses.forEach(apply);
-
-      PhotonVisionPosePublisher posePublisher = posePublishers.get(camera.getName());
-      if (posePublisher != null) {
-        posePublisher.publish(poses);
-      }
+      cameraData.publisher.publish(poses);
     }
   }
 
   @Override
   public void close() {
-    for (PhotonCamera camera : estimators.keySet()) {
-      camera.close();
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.camera.close();
     }
-    estimators.clear();
+    cameraDatas.clear();
   }
 }
