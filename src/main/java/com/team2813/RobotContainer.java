@@ -51,7 +51,7 @@ public class RobotContainer implements AutoCloseable {
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    var localization = new RobotLocalization();
+    var localization = new RobotLocalization(networkTableInstance);
     this.drive = new Drive(networkTableInstance, localization);
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);

@@ -53,12 +53,20 @@ public class RobotLocalization {
     }
   }
 
-  public RobotLocalization() {
-    this(AutoAlignConfiguration.fromPreferences());
+  public RobotLocalization(NetworkTableInstance networkTableInstance) {
+    this(networkTableInstance, AutoAlignConfiguration.fromPreferences());
   }
 
-  RobotLocalization(AutoAlignConfiguration config) {
+  RobotLocalization(NetworkTableInstance networkTableInstance, AutoAlignConfiguration config) {
     this.config = config;
+
+    lastPosePublisher =
+        networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
+    limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
+    hasDataPublisher =
+        LimelightPosePublisher.getNetworkTable(networkTableInstance)
+            .getBooleanTopic("hasData")
+            .publish();
   }
 
   public Optional<BotPoseEstimate> limelightLocation(
@@ -132,8 +140,7 @@ public class RobotLocalization {
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> lastPosePublisher;
 
   /**
    * Creates a command from the current position to the nearest target.
@@ -207,12 +214,8 @@ public class RobotLocalization {
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final LimelightPosePublisher limelightPosePublisher =
-      new LimelightPosePublisher(NetworkTableInstance.getDefault());
-  private final BooleanPublisher hasDataPublisher =
-      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
-          .getBooleanTopic("hasData")
-          .publish();
+  private final LimelightPosePublisher limelightPosePublisher;
+  private final BooleanPublisher hasDataPublisher;
   private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher =
       LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
           .getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct)
