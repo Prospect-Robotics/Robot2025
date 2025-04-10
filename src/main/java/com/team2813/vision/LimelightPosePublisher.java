@@ -24,7 +24,7 @@ public final class LimelightPosePublisher {
     timestampOffset =
         clocks.fpgaTimestampSupplier().get() - clocks.currentTimestampSupplier().get();
     StructTopic<Pose2d> topic =
-        ntInstance.getTable(TABLE_NAME).getStructTopic("pose", Pose2d.struct);
+        ntInstance.getTable(TABLE_NAME).getStructTopic("poseEstimate", Pose2d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose2d.kZero, clocks.fpgaTimestampSupplier);
   }
 

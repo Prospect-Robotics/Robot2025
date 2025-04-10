@@ -83,7 +83,7 @@ public class LimelightPosePublisherTest {
 
   private StructTopic<Pose2d> getTopic() {
     NetworkTable table = networkTable.getNetworkTableInstance().getTable(EXPECTED_TABLE_NAME);
-    return table.getStructTopic("pose", Pose2d.struct);
+    return table.getStructTopic("poseEstimate", Pose2d.struct);
   }
 
   private static double fpgaSecondsToCurrentTime(double fpgaTimeSeconds) {

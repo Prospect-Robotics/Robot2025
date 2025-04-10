@@ -98,7 +98,7 @@ public class PhotonVisionPosePublisherTest {
 
   private StructTopic<Pose3d> getTopic() {
     NetworkTable table = networkTable.getNetworkTableInstance().getTable(EXPECTED_TABLE_NAME);
-    return table.getStructTopic("pose", Pose3d.struct);
+    return table.getStructTopic("poseEstimate", Pose3d.struct);
   }
 
   private static class FakeClock implements Supplier<Double> {

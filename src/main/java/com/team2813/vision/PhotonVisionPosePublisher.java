@@ -18,7 +18,8 @@ public final class PhotonVisionPosePublisher {
   }
 
   PhotonVisionPosePublisher(PhotonCamera camera, Supplier<Double> fpgaTimestampSupplier) {
-    StructTopic<Pose3d> topic = camera.getCameraTable().getStructTopic("pose", Pose3d.struct);
+    StructTopic<Pose3d> topic =
+        camera.getCameraTable().getStructTopic("poseEstimate", Pose3d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose3d.kZero, fpgaTimestampSupplier);
   }
 
