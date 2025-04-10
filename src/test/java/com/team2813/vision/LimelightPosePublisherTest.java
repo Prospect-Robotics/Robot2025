@@ -17,7 +17,7 @@ import org.junit.Test;
 public class LimelightPosePublisherTest {
   private static final double FAKE_TIMESTAMP_OFFSET = 0.25;
   private static final Pose2d DEFAULT_POSE = new Pose2d(28, 13, Rotation2d.fromDegrees(45));
-  private static final String EXPECTED_TABLE_NAME = "limelight";
+  private static final String EXPECTED_TABLE_NAME = "Vision/limelight";
 
   @Rule public final NetworkTableResource networkTable = new NetworkTableResource();
 
