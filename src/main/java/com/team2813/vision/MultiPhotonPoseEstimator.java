@@ -1,11 +1,8 @@
 package com.team2813.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +14,7 @@ import org.photonvision.PhotonPoseEstimator;
 
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final Map<PhotonCamera, PhotonPoseEstimator> estimators = new HashMap<>();
-  private final Map<PhotonCamera, StructArrayPublisher<Pose3d>> publishers = new HashMap<>();
+  private final Map<String, PhotonVisionPosePublisher> posePublishers = new HashMap<>();
 
   public static class Builder {
     private final Map<String, Transform3d> cameras = new HashMap<>();
@@ -35,7 +32,9 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     }
 
     public Builder addCamera(String name, Transform3d transform) {
-      cameras.put(name, transform);
+      if (cameras.put(name, transform) != null) {
+        throw new IllegalArgumentException(String.format("Already a camera with name '%s'", name));
+      }
       return this;
     }
 
@@ -46,16 +45,15 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
 
   private MultiPhotonPoseEstimator(Builder builder) {
     for (Map.Entry<String, Transform3d> entry : builder.cameras.entrySet()) {
-      PhotonCamera camera = new PhotonCamera(builder.ntInstance, entry.getKey());
+      String cameraName = entry.getKey();
+      PhotonCamera camera = new PhotonCamera(builder.ntInstance, cameraName);
       PhotonPoseEstimator estimator =
           new PhotonPoseEstimator(builder.fieldTags, builder.poseStrategy, entry.getValue());
 
-      publishers.put(camera, createPosePublisher(builder.ntInstance, camera));
+      posePublishers.put(cameraName, new PhotonVisionPosePublisher(camera));
       estimators.put(camera, estimator);
     }
   }
-
-  private static final Pose3d[] EMPTY_ARRAY = new Pose3d[0];
 
   public void update(Consumer<? super EstimatedRobotPose> apply) {
     for (Map.Entry<PhotonCamera, PhotonPoseEstimator> entry : estimators.entrySet()) {
@@ -65,18 +63,12 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
               .map(entry.getValue()::update)
               .flatMap(Optional::stream)
               .toList();
+
       poses.forEach(apply);
-      StructArrayPublisher<Pose3d> publisher = publishers.get(camera);
-      if (publisher != null) {
-        if (poses.isEmpty()) {
-          publisher.set(EMPTY_ARRAY);
-        } else {
-          for (EstimatedRobotPose pose : poses) {
-            // under normal circumstances the NT time is the FPGA time converted into microseconds,
-            // so this should be sound
-            publisher.set(new Pose3d[] {pose.estimatedPose}, (long) (pose.timestampSeconds * 1e6));
-          }
-        }
+
+      PhotonVisionPosePublisher posePublisher = posePublishers.get(camera.getName());
+      if (posePublisher != null) {
+        posePublisher.publish(poses);
       }
     }
   }
@@ -87,11 +79,5 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       camera.close();
     }
     estimators.clear();
-  }
-
-  private static StructArrayPublisher<Pose3d> createPosePublisher(
-      NetworkTableInstance ntInstance, PhotonCamera camera) {
-    NetworkTable table = ntInstance.getTable("photonvision/" + camera.getName());
-    return table.getStructArrayTopic("pose", Pose3d.struct).publish();
   }
 }

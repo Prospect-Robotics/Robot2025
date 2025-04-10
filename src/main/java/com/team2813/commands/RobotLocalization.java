@@ -10,11 +10,11 @@ import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.Drive;
+import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -26,14 +26,12 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
-  private static final Pose2d[] NO_POS = new Pose2d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
     Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue();
-    botPosePublisher.set(
-        optionalEstimate.map(estimate -> new Pose2d[] {estimate.pose()}).orElse(NO_POS));
+    limelightPosePublisher.publish(optionalEstimate);
 
     // TODO(kcooney): Consider moving this logic to Drive.java.
     return optionalEstimate.filter(
@@ -163,19 +161,20 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
       path = PathPlannerPath.fromPathFile(pathName);
     } catch (IOException | ParseException e) {
       return Commands.print(
-          String.format("An error occured when reading the path file \"%s\": ", e.getMessage()));
+          String.format("An error occurred when reading the path file \"%s\": ", e.getMessage()));
     }
 
     PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final StructArrayPublisher<Pose2d> botPosePublisher =
-      NetworkTableInstance.getDefault()
-          .getStructArrayTopic("Limelight pose", Pose2d.struct)
-          .publish();
+  private final LimelightPosePublisher limelightPosePublisher =
+      new LimelightPosePublisher(NetworkTableInstance.getDefault());
   private final BooleanPublisher hasDataPublisher =
-      NetworkTableInstance.getDefault().getBooleanTopic("Has Limelight Data").publish();
+      NetworkTableInstance.getDefault()
+          .getTable(LimelightPosePublisher.TABLE_NAME)
+          .getBooleanTopic("hasData")
+          .publish();
 
   public void updateDashboard() {
     hasDataPublisher.accept(limelight.getJsonDump().isPresent());
