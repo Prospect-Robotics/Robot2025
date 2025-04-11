@@ -5,14 +5,13 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructTopic;
-import edu.wpi.first.networktables.TimestampedObject;
+import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class LimelightPosePublisher {
   public static final String TABLE_NAME = "limelight";
-  private static final long MICROS_PER_SECOND = 1_000_000;
   private final TimestampedStructPublisher<Pose2d> publisher;
   private final double timestampOffset;
 
@@ -34,16 +33,12 @@ public final class LimelightPosePublisher {
    * @param poseEstimate The estimated location (with the blue driver station as the origin).
    */
   public void publish(Optional<BotPoseEstimate> poseEstimate) {
-    publisher.publish(poseEstimate.stream().map(this::toTimestampedObject).toList());
+    publisher.publish(poseEstimate.stream().map(this::toTimestampedValue).toList());
   }
 
-  private TimestampedObject<Pose2d> toTimestampedObject(BotPoseEstimate estimate) {
-    return new TimestampedObject<>(timestampMicros(estimate), 0, estimate.pose());
-  }
-
-  private long timestampMicros(BotPoseEstimate estimate) {
-    double fpgaTimestampSeconds = currentTimeToFpgaTime(estimate.timestampSeconds());
-    return (long) (fpgaTimestampSeconds * MICROS_PER_SECOND);
+  private TimestampedValue<Pose2d> toTimestampedValue(BotPoseEstimate estimate) {
+    return TimestampedValue.withFpgaTimestamp(
+        currentTimeToFpgaTime(estimate.timestampSeconds()), Units.Seconds, estimate.pose());
   }
 
   /**

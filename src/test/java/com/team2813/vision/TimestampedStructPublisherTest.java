@@ -39,36 +39,40 @@ public class TimestampedStructPublisherTest {
       createPublisher();
 
       // Assert
-      List<TimestampedValue> publishedValues = TimestampedValue.fromSubscriberQueue(subscriber);
-      TimestampedValue expectedPose = new TimestampedValue(Translation2d.kZero, 1);
-      assertThat(publishedValues).containsExactly(expectedPose);
-    }
-  }
-
-  @Test
-  public void publish_withOnePose() {
-    // Arrange
-    var topic = getTopic();
-
-    try (StructSubscriber<Translation2d> subscriber = topic.subscribe(DEFAULT_VALUE)) {
-      TimestampedStructPublisher<Translation2d> publisher = createPublisher();
-      long firstFpgaTimestampMicros = 25;
-      Translation2d value = new Translation2d(7.35, 0.708);
-      TimestampedObject<Translation2d> object =
-          new TimestampedObject<>(firstFpgaTimestampMicros, 0, value);
-
-      // Act
-      publisher.publish(List.of(object));
-
-      // Assert
-      List<TimestampedValue> publishedValues = TimestampedValue.fromSubscriberQueue(subscriber);
-      TimestampedValue expectedValue = new TimestampedValue(value, firstFpgaTimestampMicros);
+      List<TimestampedValue<Translation2d>> publishedValues =
+          TimestampedValue.fromSubscriberQueue(subscriber);
+      TimestampedValue<Translation2d> expectedValue =
+          TimestampedValue.withFpgaTimestampMicros(1, Translation2d.kZero);
       assertThat(publishedValues).containsExactly(expectedValue);
     }
   }
 
   @Test
-  public void publish_withManyPoses() {
+  public void publish_withOneValue() {
+    // Arrange
+    var topic = getTopic();
+
+    try (StructSubscriber<Translation2d> subscriber = topic.subscribe(DEFAULT_VALUE)) {
+      TimestampedStructPublisher<Translation2d> publisher = createPublisher();
+      long firstFpgaTimestampMillis = 25;
+      Translation2d value = new Translation2d(7.35, 0.708);
+      TimestampedValue<Translation2d> valueToPublish =
+          TimestampedValue.withFpgaTimestamp(firstFpgaTimestampMillis, Units.Milliseconds, value);
+
+      // Act
+      publisher.publish(List.of(valueToPublish));
+
+      // Assert
+      List<TimestampedValue<Translation2d>> publishedValues =
+          TimestampedValue.fromSubscriberQueue(subscriber);
+      var expectedValue =
+          TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMillis * 1_000, value);
+      assertThat(publishedValues).containsExactly(expectedValue);
+    }
+  }
+
+  @Test
+  public void publish_withManyValues() {
     // Arrange
     var topic = getTopic();
 
@@ -77,12 +81,12 @@ public class TimestampedStructPublisherTest {
       TimestampedStructPublisher<Translation2d> publisher = createPublisher();
       long firstFpgaTimestampMicros = 25;
 
-      List<TimestampedObject<Translation2d>> valuesToPublish = new ArrayList<>(3);
+      List<TimestampedValue<Translation2d>> valuesToPublish = new ArrayList<>(3);
       for (int i = 0; i < 3; i++) {
         Translation2d value = new Translation2d(7.35 + i, 0.708);
-        TimestampedObject<Translation2d> object =
-            new TimestampedObject<>(firstFpgaTimestampMicros + i * 10, 0, value);
-        valuesToPublish.add(object);
+        TimestampedValue<Translation2d> valueToPublish =
+            TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMicros + i * 10, value);
+        valuesToPublish.add(valueToPublish);
       }
       assertThat(subscriber.readQueue()).hasLength(1);
 
@@ -90,16 +94,15 @@ public class TimestampedStructPublisherTest {
       publisher.publish(valuesToPublish);
 
       // Assert
-      List<TimestampedValue> publishedValues = TimestampedValue.fromSubscriberQueue(subscriber);
-      List<TimestampedValue> expectedValues =
-          valuesToPublish.stream().map(TimestampedValue::fromTimestampedObject).toList();
+      List<TimestampedValue<Translation2d>> publishedValues =
+          TimestampedValue.fromSubscriberQueue(subscriber);
 
-      assertThat(publishedValues).containsExactlyElementsIn(expectedValues);
+      assertThat(publishedValues).containsExactlyElementsIn(valuesToPublish);
     }
   }
 
   @Test
-  public void publish_withNoPoses_withStalePreviousPose() {
+  public void publish_withEmptyList_withStalePreviousValue() {
     // Arrange
     var topic = getTopic();
 
@@ -108,10 +111,10 @@ public class TimestampedStructPublisherTest {
       TimestampedStructPublisher<Translation2d> publisher = createPublisher();
       long firstFpgaTimestampMicros = 25;
       Translation2d value = new Translation2d(7.35, 0.708);
-      TimestampedObject<Translation2d> object =
-          new TimestampedObject<>(firstFpgaTimestampMicros, 0, value);
+      TimestampedValue<Translation2d> valueToPublish =
+          TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMicros, value);
       assertThat(subscriber.readQueue()).hasLength(1);
-      publisher.publish(List.of(object));
+      publisher.publish(List.of(valueToPublish));
       assertThat(subscriber.readQueue()).hasLength(1);
       fakeClock.setFpgaTimestampMicros(firstFpgaTimestampMicros);
       fakeClock.incrementFpgaTimestampMicros(PUBLISHED_VALUE_VALID_MICROS + 1);
@@ -120,18 +123,17 @@ public class TimestampedStructPublisherTest {
       publisher.publish(List.of());
 
       // Assert
-      List<TimestampedValue> publishedValues = TimestampedValue.fromSubscriberQueue(subscriber);
-      assertThat(publishedValues).hasSize(1);
-      TimestampedValue publishedValue = publishedValues.get(0);
-      TimestampedValue expectedPose =
-          new TimestampedValue(
-              Translation2d.kZero, firstFpgaTimestampMicros + EXPECTED_UPDATE_FREQUENCY_MICROS);
-      assertThat(publishedValues).containsExactly(expectedPose);
+      List<TimestampedValue<Translation2d>> publishedValues =
+          TimestampedValue.fromSubscriberQueue(subscriber);
+      TimestampedValue<Translation2d> expectedValue =
+          TimestampedValue.withFpgaTimestampMicros(
+              firstFpgaTimestampMicros + EXPECTED_UPDATE_FREQUENCY_MICROS, Translation2d.kZero);
+      assertThat(publishedValues).containsExactly(expectedValue);
     }
   }
 
   @Test
-  public void publish_withNoPoses_withNonStalePreviousPose() {
+  public void publish_withEmptyList_withNonStalePreviousValue() {
     // Arrange
     var topic = getTopic();
 
@@ -141,10 +143,10 @@ public class TimestampedStructPublisherTest {
       long firstFpgaTimestampMicros = 25;
 
       Translation2d value = new Translation2d(7.35, 0.708);
-      TimestampedObject<Translation2d> object =
-          new TimestampedObject<>(firstFpgaTimestampMicros, 0, value);
+      TimestampedValue<Translation2d> valueToPublish =
+          TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMicros, value);
       assertThat(subscriber.readQueue()).hasLength(1);
-      publisher.publish(List.of(object));
+      publisher.publish(List.of(valueToPublish));
       assertThat(subscriber.readQueue()).hasLength(1);
       fakeClock.setFpgaTimestampMicros(firstFpgaTimestampMicros);
       fakeClock.incrementFpgaTimestampMicros(PUBLISHED_VALUE_VALID_MICROS - 1);
@@ -153,7 +155,8 @@ public class TimestampedStructPublisherTest {
       publisher.publish(List.of());
 
       // Assert
-      List<TimestampedValue> publishedValues = TimestampedValue.fromSubscriberQueue(subscriber);
+      List<TimestampedValue<Translation2d>> publishedValues =
+          TimestampedValue.fromSubscriberQueue(subscriber);
       assertThat(publishedValues).isEmpty();
     }
   }
@@ -166,6 +169,7 @@ public class TimestampedStructPublisherTest {
   private static class FakeClock implements Supplier<Double> {
     private double fpgaTimestampSeconds = 2.0;
 
+    @Override
     public Double get() {
       return fpgaTimestampSeconds;
     }
@@ -176,19 +180,6 @@ public class TimestampedStructPublisherTest {
 
     void incrementFpgaTimestampMicros(double micros) {
       fpgaTimestampSeconds += Units.Seconds.convertFrom(micros, Units.Microseconds);
-    }
-  }
-
-  private record TimestampedValue(Translation2d value, long timestamp) {
-
-    static TimestampedValue fromTimestampedObject(TimestampedObject<Translation2d> object) {
-      return new TimestampedValue(object.value, object.timestamp);
-    }
-
-    static List<TimestampedValue> fromSubscriberQueue(StructSubscriber<Translation2d> subscriber) {
-      return Arrays.stream(subscriber.readQueue())
-          .map(TimestampedValue::fromTimestampedObject)
-          .toList();
     }
   }
 }
