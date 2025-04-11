@@ -102,6 +102,7 @@ public class PhotonVisionPosePublisherTest {
   }
 
   private static class FakeClock implements Supplier<Double> {
+    @Override
     public Double get() {
       return 2.0;
     }
