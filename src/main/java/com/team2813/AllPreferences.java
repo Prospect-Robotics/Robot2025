@@ -1,8 +1,9 @@
 package com.team2813;
 
 import edu.wpi.first.wpilibj.Preferences;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
 
 /**
  * Holder for all values stored in {@link Preferences} for the robot.
@@ -11,13 +12,35 @@ import java.util.function.DoubleSupplier;
  * edited, the updated values are persisted across reboots.
  */
 public class AllPreferences {
+  private static final Map<Key, String> LEGACY_BOOLEAN_PREFERENCES =
+      Map.of(
+          Key.USE_PHOTON_VISION_LOCATION,
+          "subsystems.Drive.DriveConfiguration.usePhotonVisionLocation");
+
+  private static final Set<String> REMOVED_PREFERENCES =
+      Set.of("USE_LIMELIGHT_LOCATION", "DRIVE_ADD_LIMELIGHT_MEASUREMENT");
+
+  static synchronized void migrateLegacyPreferences() {
+    for (var entry : LEGACY_BOOLEAN_PREFERENCES.entrySet()) {
+      String oldKey = entry.getKey().name();
+      String newKey = entry.getValue();
+      if (Preferences.containsKey(oldKey)) {
+        if (!Preferences.containsKey(newKey)) {
+          boolean value = Preferences.getBoolean(oldKey, false);
+          Preferences.initBoolean(newKey, value);
+        }
+        Preferences.remove(oldKey);
+      }
+    }
+    for (var key : REMOVED_PREFERENCES) {
+      if (Preferences.containsKey(key)) {
+        Preferences.remove(key);
+      }
+    }
+  }
 
   public static BooleanSupplier useAutoAlignWaypoints() {
     return booleanPref(Key.USE_AUTO_ALIGN_WAYPOINTS, true);
-  }
-
-  public static BooleanSupplier usePhotonVisionLocation() {
-    return booleanPref(Key.USE_PHOTON_VISION_LOCATION, false);
   }
 
   private static BooleanSupplier booleanPref(Key key, boolean defaultValue) {
@@ -26,14 +49,6 @@ public class AllPreferences {
       Preferences.initBoolean(name, defaultValue);
     }
     return () -> Preferences.getBoolean(name, defaultValue);
-  }
-
-  private static DoubleSupplier doublePref(Key key, double defaultValue) {
-    String name = key.name();
-    if (!Preferences.containsKey(name)) {
-      Preferences.initDouble(name, defaultValue);
-    }
-    return () -> Preferences.getDouble(name, defaultValue);
   }
 
   private enum Key {
