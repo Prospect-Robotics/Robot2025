@@ -15,6 +15,7 @@ import org.junit.Test;
 
 /** Tests for {@link TimestampedStructPublisher}. */
 public class TimestampedStructPublisherTest {
+  private static final long MICROSECONDS_PER_SECOND = 1_000_000;
   private static final Translation2d DEFAULT_VALUE = new Translation2d(28, 13);
   private static final String TABLE_NAME = "gearHeads";
   private static final String TOPIC_NAME = "championships";
@@ -113,9 +114,10 @@ public class TimestampedStructPublisherTest {
       Translation2d value = new Translation2d(7.35, 0.708);
       TimestampedValue<Translation2d> valueToPublish =
           TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMicros, value);
-      assertThat(subscriber.readQueue()).hasLength(1);
+      assertThat(subscriber.readQueue()).hasLength(1); // queued by constructor
       publisher.publish(List.of(valueToPublish));
       assertThat(subscriber.readQueue()).hasLength(1);
+      // Advance the clock so that the previously-published data will be considered stale.
       fakeClock.setFpgaTimestampMicros(firstFpgaTimestampMicros);
       fakeClock.incrementFpgaTimestampMicros(PUBLISHED_VALUE_VALID_MICROS + 1);
 
@@ -145,9 +147,11 @@ public class TimestampedStructPublisherTest {
       Translation2d value = new Translation2d(7.35, 0.708);
       TimestampedValue<Translation2d> valueToPublish =
           TimestampedValue.withFpgaTimestampMicros(firstFpgaTimestampMicros, value);
-      assertThat(subscriber.readQueue()).hasLength(1);
+      assertThat(subscriber.readQueue()).hasLength(1); // queued by constructor
       publisher.publish(List.of(valueToPublish));
       assertThat(subscriber.readQueue()).hasLength(1);
+      // Advance the clock, but not as far so that the previously-published data would be considered
+      // stale.
       fakeClock.setFpgaTimestampMicros(firstFpgaTimestampMicros);
       fakeClock.incrementFpgaTimestampMicros(PUBLISHED_VALUE_VALID_MICROS - 1);
 
@@ -174,12 +178,12 @@ public class TimestampedStructPublisherTest {
       return fpgaTimestampSeconds;
     }
 
-    void setFpgaTimestampMicros(long micros) {
-      fpgaTimestampSeconds = Units.Seconds.convertFrom(micros, Units.Microseconds);
+    void setFpgaTimestampMicros(double micros) {
+      fpgaTimestampSeconds = micros / MICROSECONDS_PER_SECOND;
     }
 
     void incrementFpgaTimestampMicros(double micros) {
-      fpgaTimestampSeconds += Units.Seconds.convertFrom(micros, Units.Microseconds);
+      fpgaTimestampSeconds += micros / MICROSECONDS_PER_SECOND;
     }
   }
 }

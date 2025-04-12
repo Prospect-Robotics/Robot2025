@@ -13,7 +13,7 @@ import java.util.Objects;
  *
  * @param <T> type of the value to publish.
  */
-public final class TimestampedValue<T> {
+final class TimestampedValue<T> {
   private final long networkTablesTimestamp;
   private final T value;
 
