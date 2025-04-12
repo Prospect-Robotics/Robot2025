@@ -2,7 +2,6 @@ package com.team2813.vision;
 
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.networktables.StructTopic;
-import edu.wpi.first.networktables.TimestampedObject;
 import edu.wpi.first.wpilibj.TimedRobot;
 import java.util.List;
 import java.util.function.Supplier;
@@ -36,13 +35,9 @@ final class TimestampedStructPublisher<S> {
     publishedZeroValue = true;
   }
 
-  /**
-   * Publishes the values to network tables.
-   *
-   * @param values Timestamped data, with the timestamps in FPGA millis.
-   */
-  public void publish(List<TimestampedObject<S>> values) {
-    if (values.isEmpty()) {
+  /** Publishes the values to network tables. */
+  public void publish(List<TimestampedValue<S>> timestampedValues) {
+    if (timestampedValues.isEmpty()) {
       if (!publishedZeroValue) {
         long currentTimeMicros = currentTimeMicros();
         long microsSinceLastUpdate = currentTimeMicros - lastUpdateTimeMicros;
@@ -53,10 +48,10 @@ final class TimestampedStructPublisher<S> {
         }
       }
     } else {
-      for (TimestampedObject<S> object : values) {
-        long timestampMicros = object.timestamp;
+      for (var timestampedValue : timestampedValues) {
+        long timestampMicros = timestampedValue.networkTablesTimestampMicros();
         lastUpdateTimeMicros = Math.max(lastUpdateTimeMicros, timestampMicros);
-        publisher.set(object.value, timestampMicros);
+        publisher.set(timestampedValue.value(), timestampMicros);
       }
       publishedZeroValue = false;
     }
