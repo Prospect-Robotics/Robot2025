@@ -1,6 +1,9 @@
 package com.team2813.vision;
 
+import static com.team2813.vision.VisionUtil.getTableForCamera;
+
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
@@ -17,8 +20,8 @@ public final class PhotonVisionPosePublisher {
   }
 
   PhotonVisionPosePublisher(PhotonCamera camera, Supplier<Double> fpgaTimestampSupplier) {
-    StructTopic<Pose3d> topic =
-        camera.getCameraTable().getStructTopic("poseEstimate", Pose3d.struct);
+    NetworkTable table = getTableForCamera(camera);
+    StructTopic<Pose3d> topic = table.getStructTopic("poseEstimate", Pose3d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose3d.kZero, fpgaTimestampSupplier);
   }
 
