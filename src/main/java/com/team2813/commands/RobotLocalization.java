@@ -5,10 +5,10 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -27,6 +27,45 @@ import org.json.simple.parser.ParseException;
 
 public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
   private static final Limelight limelight = Limelight.getDefaultLimelight();
+  private final AutoAlignConfiguration config;
+
+  public record AutoAlignConfiguration(boolean useAutoAlignWaypoints) {
+
+    /** Creates a builder for {@code AutoAlignConfiguration} with default values. */
+    public static AutoAlignConfiguration.Builder builder() {
+      return new AutoBuilder_RobotLocalization_AutoAlignConfiguration_Builder()
+          .useAutoAlignWaypoints(true);
+    }
+
+    /** Creates an instance from preference values stored in the robot's flash memory. */
+    public static AutoAlignConfiguration fromPreferences() {
+      AutoAlignConfiguration defaultConfig = builder().build();
+      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+    }
+
+    @com.google.auto.value.AutoBuilder
+    interface Builder {
+      Builder useAutoAlignWaypoints(boolean enabled);
+
+      AutoAlignConfiguration build();
+    }
+  }
+
+  public RobotLocalization(NetworkTableInstance networkTableInstance) {
+    this(networkTableInstance, AutoAlignConfiguration.fromPreferences());
+  }
+
+  RobotLocalization(NetworkTableInstance networkTableInstance, AutoAlignConfiguration config) {
+    this.config = config;
+
+    lastPosePublisher =
+        networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
+    limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
+    hasDataPublisher =
+        LimelightPosePublisher.getNetworkTable(networkTableInstance)
+            .getBooleanTopic("hasData")
+            .publish();
+  }
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
@@ -93,8 +132,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> lastPosePublisher;
 
   /**
    * Creates a command from the current position to the nearest target.
@@ -127,16 +165,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.followPath(path);
   }
 
-  public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
-      return createPath(drivePosSupplier, positions());
-    } else {
-      return createPathfindCommand();
-    }
-  }
-
   public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, leftPositions());
     } else {
       // TODO: be able to use left ones only
@@ -145,7 +175,7 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
   }
 
   public Command getRightAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, rightPositions());
     } else {
       // TODO: be able to use right ones only
@@ -168,12 +198,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
 
-  private final LimelightPosePublisher limelightPosePublisher =
-      new LimelightPosePublisher(NetworkTableInstance.getDefault());
-  private final BooleanPublisher hasDataPublisher =
-      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
-          .getBooleanTopic("hasData")
-          .publish();
+  private final LimelightPosePublisher limelightPosePublisher;
+  private final BooleanPublisher hasDataPublisher;
 
   public void updateDashboard() {
     hasDataPublisher.accept(limelight.getJsonDump().isPresent());
