@@ -110,8 +110,9 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   public void setDrivePose(Pose2d pose) {
+    Pose3d pose3d = new Pose3d(pose);
     for (CameraData cameraData : cameraDatas) {
-      cameraData.cameraPosePublisher.set(new Pose3d(pose).plus(cameraData.robotToCamera));
+      cameraData.cameraPosePublisher.set(pose3d.plus(cameraData.robotToCamera));
     }
   }
 
