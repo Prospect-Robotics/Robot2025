@@ -315,6 +315,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       simVisionSystem.addAprilTags(aprilTagFieldLayout);
       photonPoseEstimator.addToSim(
           simVisionSystem, cameraName -> SimCameraProperties.PERFECT_90DEG());
+
+      localization.addToSim(networkTableInstance, simVisionSystem, aprilTagFieldLayout);
     } else {
       simDrivetrain = null;
       simVisionSystem = null;

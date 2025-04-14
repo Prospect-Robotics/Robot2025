@@ -23,11 +23,24 @@ public final class PhotonVisionPosePublisher {
     this(camera, fieldTags, Timer::getFPGATimestamp);
   }
 
+  public PhotonVisionPosePublisher(
+      PhotonCamera camera, AprilTagFieldLayout fieldTags, String topicName) {
+    this(camera, fieldTags, topicName, Timer::getFPGATimestamp);
+  }
+
   PhotonVisionPosePublisher(
       PhotonCamera camera, AprilTagFieldLayout fieldTags, Supplier<Double> fpgaTimestampSupplier) {
+    this(camera, fieldTags, "poseEstimate", fpgaTimestampSupplier);
+  }
+
+  PhotonVisionPosePublisher(
+      PhotonCamera camera,
+      AprilTagFieldLayout fieldTags,
+      String topicName,
+      Supplier<Double> fpgaTimestampSupplier) {
     this.fieldTags = fieldTags;
     NetworkTable table = getTableForCamera(camera);
-    StructTopic<Pose3d> topic = table.getStructTopic("poseEstimate", Pose3d.struct);
+    StructTopic<Pose3d> topic = table.getStructTopic(topicName, Pose3d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose3d.kZero, fpgaTimestampSupplier);
     topic = table.getStructTopic("aprilTagPose", Pose3d.struct);
     tagPublisher = new TimestampedStructPublisher<>(topic, Pose3d.kZero, fpgaTimestampSupplier);

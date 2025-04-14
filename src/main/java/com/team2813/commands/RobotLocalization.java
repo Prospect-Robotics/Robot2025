@@ -1,5 +1,6 @@
 package com.team2813.commands;
 
+import com.ctre.phoenix6.Utils;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -12,13 +13,14 @@ import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
+import com.team2813.vision.PhotonVisionPosePublisher;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
@@ -28,22 +30,71 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
+  private static final Transform3d robotToCameraTransform =
+      new Transform3d(0.3074096, 0, 0.1613016332, Rotation3d.kZero);
+  private PhotonCamera simCamera = null;
+  private PhotonPoseEstimator simPoseEstimator = null;
 
   public Optional<BotPoseEstimate> calculateBotPoseEstimateBlue() {
-    LocationalData locationalData = limelight.getLocationalData();
-    hasDataPublisher.accept(locationalData.isValid());
+    final Optional<BotPoseEstimate> optionalEstimate;
+    if (simCamera != null && simPoseEstimator != null) {
+      optionalEstimate = getSimulatedPose();
+    } else {
+      LocationalData locationalData = limelight.getLocationalData();
+      hasDataPublisher.accept(locationalData.isValid());
 
-    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
-    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+      Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
+      visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
 
-    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
+      optionalEstimate = botPoseEstimateBlue(locationalData);
+    }
+
     limelightPosePublisher.publish(optionalEstimate);
-
     return optionalEstimate;
+  }
+
+  private Optional<BotPoseEstimate> getSimulatedPose() {
+    Optional<EstimatedRobotPose> estimatedRobotPose =
+        simCamera.getAllUnreadResults().stream()
+            .map(simPoseEstimator::update)
+            .flatMap(Optional::stream)
+            .reduce((first, second) -> second); // get last
+
+    estimatedRobotPose.ifPresent(
+        estimatedPose -> simLimelightPosePublisher.publish(List.of(estimatedPose)));
+    return estimatedRobotPose.map(RobotLocalization::toBotPoseEstimate);
+  }
+
+  private static BotPoseEstimate toBotPoseEstimate(EstimatedRobotPose pose) {
+    return new BotPoseEstimate(
+        pose.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(pose.timestampSeconds));
+  }
+
+  public void addToSim(
+      NetworkTableInstance ntInstance,
+      VisionSystemSim simVisionSystem,
+      AprilTagFieldLayout fieldTags) {
+    simCamera = new PhotonCamera(ntInstance, LimelightPosePublisher.CAMERA_NAME);
+    SimCameraProperties cameraProp = SimCameraProperties.PERFECT_90DEG();
+    simVisionSystem.addCamera(new PhotonCameraSim(simCamera, cameraProp), robotToCameraTransform);
+
+    simPoseEstimator =
+        new PhotonPoseEstimator(
+            fieldTags,
+            PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_RIO,
+            robotToCameraTransform);
+    simLimelightPosePublisher =
+        new PhotonVisionPosePublisher(simCamera, fieldTags, "poseEstimate3D");
   }
 
   private static Optional<BotPoseEstimate> botPoseEstimateBlue(LocationalData locationalData) {
@@ -171,6 +222,8 @@ public class RobotLocalization {
 
   private final LimelightPosePublisher limelightPosePublisher =
       new LimelightPosePublisher(NetworkTableInstance.getDefault());
+  private PhotonVisionPosePublisher simLimelightPosePublisher = null;
+
   private final BooleanPublisher hasDataPublisher =
       LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
           .getBooleanTopic("hasData")

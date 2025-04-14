@@ -12,6 +12,7 @@
             "/Drive",
             "/photonvision/capt-barnacles",
             "/photonvision/professor-inkling",
+            "/photonvision/limelight",
             "/Vision/capt-barnacles",
             "/Vision/professor-inkling",
             "/Vision/limelight"
@@ -89,7 +90,7 @@
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#ff8c00",
+                      "color": "#00ff00",
                       "size": "normal"
                     }
                   },
@@ -99,7 +100,7 @@
                     "logType": "Pose3d[]",
                     "visible": false,
                     "options": {
-                      "color": "#00ff00",
+                      "color": "#ff00ff",
                       "size": "normal"
                     }
                   },
