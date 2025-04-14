@@ -26,8 +26,6 @@ import com.google.auto.value.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
-import com.team2813.lib2813.limelight.Limelight;
-import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
@@ -47,7 +45,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -296,8 +293,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     actualState =
         networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
-    visibleTargetPoses =
-        networkTable.getStructArrayTopic("visible target poses", Pose3d.struct).publish();
     modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
 
     setDefaultCommand(createDefaultCommand());
@@ -459,20 +454,23 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   public void addVisionMeasurement(BotPoseEstimate estimate) {
     double estimateTimestamp = estimate.timestampSeconds();
     if (estimateTimestamp > lastVisionEstimateTime) {
-      drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp, LIMELIGHT_STD_DEVS);
-      lastVisionEstimateTime = estimateTimestamp;
+      // Per the JavaDoc for addVisionMeasurement(), only add vision measurements that are already
+      // within one meter or so of the current odometry pose estimate.
+      Pose2d drivePose = getPose();
+      var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
+      if (Math.abs(distance) <= config.maxLimelightDifferenceMeters()) {
+        drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp, LIMELIGHT_STD_DEVS);
+        lastVisionEstimateTime = estimateTimestamp;
+      }
     }
   }
 
   private final StructArrayPublisher<SwerveModuleState> expectedState;
   private final StructArrayPublisher<SwerveModuleState> actualState;
   private final StructPublisher<Pose2d> currentPose;
-  private final StructArrayPublisher<Pose3d> visibleTargetPoses;
   private final DoubleArrayPublisher modulePositions;
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
-
-  private static final Pose3d[] EMPTY_LIST = new Pose3d[0];
 
   private final DoublePublisher ambiguityPublisher =
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
@@ -505,17 +503,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
-    Limelight limelight = Limelight.getDefaultLimelight();
-    LocationalData locationalData = limelight.getLocationalData();
-
-    // If the limelight has a position that isn't too far from the drive's current estimated
-    // position, send it to SwerveDrivetrain.addVisionMeasurement().
+    // If the limelight has a position, send it to SwerveDrivetrain.addVisionMeasurement().
     //
     // Note: we call limelightLocation() even if config.addLimelightMeasurement is false so
     // the position is published to network tables, which allows us to view the limelight's
     // pose estimate in AdvantageScope.
-    Optional<BotPoseEstimate> limelightEstimate =
-        localization.limelightLocation(this::getPose, config);
+    Optional<BotPoseEstimate> limelightEstimate = localization.limelightLocation();
     if (config.addLimelightMeasurement) {
       limelightEstimate.ifPresent(this::addVisionMeasurement);
     }
@@ -524,11 +517,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedState.set(drivetrain.getState().ModuleTargets);
     actualState.set(drivetrain.getState().ModuleStates);
     photonPoseEstimator.update(this::handlePhotonPose);
-    Pose2d pose = getPose();
-    currentPose.set(pose);
-    photonPoseEstimator.setDrivePose(pose);
-    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
-    visibleTargetPoses.accept(visibleAprilTagPoses.toArray(EMPTY_LIST));
+    Pose2d drivePose = getPose();
+    currentPose.set(drivePose);
+    photonPoseEstimator.setDrivePose(drivePose);
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
   }
@@ -540,8 +531,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     simDrivetrain.periodic();
-    Pose2d pose = simDrivetrain.getPose();
-    simVisionSystem.update(pose);
+    Pose2d drivePose = simDrivetrain.getPose();
+    simVisionSystem.update(drivePose);
   }
 
   public void enableSlowMode(boolean enable) {
