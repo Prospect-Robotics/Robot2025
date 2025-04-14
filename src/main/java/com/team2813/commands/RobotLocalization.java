@@ -20,6 +20,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
@@ -67,8 +71,8 @@ public class RobotLocalization {
             .publish();
   }
 
-  public Optional<BotPoseEstimate> limelightLocation(
-      Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
+  /** Gets the position estimate from the Limelight relative to the Blue origin. */
+  public Optional<BotPoseEstimate> limelightLocation() {
     LocationalData locationalData = limelight.getLocationalData();
     hasDataPublisher.accept(locationalData.isValid());
 
@@ -78,16 +82,7 @@ public class RobotLocalization {
     Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
     limelightPosePublisher.publish(optionalEstimate);
 
-    // TODO(kcooney): Consider moving this logic to Drive.java.
-    return optionalEstimate.filter(
-        estimate -> {
-          // Per the JavaDoc for addVisionMeasurement(), only add vision measurements
-          // that are already within one meter or so of the current odometry pose
-          // estimate.
-          Pose2d drivePose = odometryPoseSupplier.get();
-          var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
-          return Math.abs(distance) <= driveConfig.maxLimelightDifferenceMeters();
-        });
+    return optionalEstimate;
   }
 
   private static Optional<BotPoseEstimate> botPoseEstimateBlue(LocationalData locationalData) {
