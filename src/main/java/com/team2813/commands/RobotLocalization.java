@@ -1,8 +1,10 @@
 package com.team2813.commands;
 
+import static com.team2813.vision.CameraConstants.LIMELIGHT_CAMERA_NAME;
 import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
 
+import com.ctre.phoenix6.Utils;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -16,9 +18,11 @@ import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import com.team2813.vision.VisionNetworkTables;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -33,6 +37,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
@@ -42,6 +52,8 @@ public class RobotLocalization {
   private final LimelightPosePublisher limelightPosePublisher;
   private final BooleanPublisher hasDataPublisher;
   private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
+  private PhotonCamera simCamera = null;
+  private PhotonPoseEstimator simPoseEstimator = null;
 
   /** Holder for all configuration for {@link RobotLocalization}. */
   public record Configuration(boolean useAutoAlignWaypoints) {
@@ -73,6 +85,10 @@ public class RobotLocalization {
 
   /** Gets the position estimate from the Limelight relative to the Blue origin. */
   public Optional<BotPoseEstimate> limelightLocation() {
+    if (simCamera != null && simPoseEstimator != null) {
+      return getSimulatedPose();
+    }
+
     LocationalData locationalData = limelight.getLocationalData();
     hasDataPublisher.accept(locationalData.isValid());
 
@@ -85,8 +101,41 @@ public class RobotLocalization {
     return optionalEstimate;
   }
 
+  private Optional<BotPoseEstimate> getSimulatedPose() {
+    return simCamera.getAllUnreadResults().stream()
+        .map(simPoseEstimator::update)
+        .flatMap(Optional::stream)
+        .reduce((first, second) -> second) // get last
+        .map(RobotLocalization::toBotPoseEstimate);
+  }
+
+  private static BotPoseEstimate toBotPoseEstimate(EstimatedRobotPose pose) {
+    return new BotPoseEstimate(
+        pose.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(pose.timestampSeconds));
+  }
+
+  public void addToSim(
+      NetworkTableInstance ntInstance,
+      VisionSystemSim simVisionSystem,
+      AprilTagFieldLayout aprilTagFieldLayout) {
+    simCamera = new PhotonCamera(ntInstance, LIMELIGHT_CAMERA_NAME);
+    SimCameraProperties cameraProp = SimCameraProperties.PERFECT_90DEG();
+    Transform3d robotToCameraTransform = getRobotToCameraTransform();
+    simVisionSystem.addCamera(new PhotonCameraSim(simCamera, cameraProp), robotToCameraTransform);
+
+    simPoseEstimator =
+        new PhotonPoseEstimator(
+            aprilTagFieldLayout,
+            PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_RIO,
+            robotToCameraTransform);
+  }
+
   private static Optional<BotPoseEstimate> botPoseEstimateBlue(LocationalData locationalData) {
     return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
+  }
+
+  private static Transform3d getRobotToCameraTransform() {
+    return Transform3d.kZero;
   }
 
   private static List<Pose2d> positions() {
