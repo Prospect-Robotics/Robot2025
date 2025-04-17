@@ -45,10 +45,21 @@ public class RobotLocalization {
   private PhotonCamera simCamera = null;
   private PhotonPoseEstimator simPoseEstimator = null;
 
-  public Optional<BotPoseEstimate> calculateBotPoseEstimateBlue() {
+  /**
+   * Gets the estimated location (with the blue driver station as the origin) from the Limelight.
+   */
+  public Optional<BotPoseEstimate> limelightLocation() {
     final Optional<BotPoseEstimate> optionalEstimate;
     if (simCamera != null && simPoseEstimator != null) {
-      optionalEstimate = getSimulatedPose();
+      Optional<EstimatedRobotPose> simulatedPose = getSimulatedPose();
+      simulatedPose.ifPresent(
+          pose -> {
+            simLimelightPosePublisher.publish(List.of(pose));
+            List<Pose3d> visibleAprilTagPoses = getSimulatedVisibleAprilTagPoses(pose);
+            visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+          });
+
+      optionalEstimate = simulatedPose.map(RobotLocalization::toBotPoseEstimate);
     } else {
       LocationalData locationalData = limelight.getLocationalData();
       hasDataPublisher.accept(locationalData.isValid());
@@ -63,16 +74,18 @@ public class RobotLocalization {
     return optionalEstimate;
   }
 
-  private Optional<BotPoseEstimate> getSimulatedPose() {
-    Optional<EstimatedRobotPose> estimatedRobotPose =
-        simCamera.getAllUnreadResults().stream()
-            .map(simPoseEstimator::update)
-            .flatMap(Optional::stream)
-            .reduce((first, second) -> second); // get last
+  private Optional<EstimatedRobotPose> getSimulatedPose() {
+    return simCamera.getAllUnreadResults().stream()
+        .map(simPoseEstimator::update)
+        .flatMap(Optional::stream)
+        .reduce((first, second) -> second); // get last
+  }
 
-    estimatedRobotPose.ifPresent(
-        estimatedPose -> simLimelightPosePublisher.publish(List.of(estimatedPose)));
-    return estimatedRobotPose.map(RobotLocalization::toBotPoseEstimate);
+  private List<Pose3d> getSimulatedVisibleAprilTagPoses(EstimatedRobotPose pose) {
+    return pose.targetsUsed.stream()
+        .map(target -> simPoseEstimator.getFieldTags().getTagPose(target.fiducialId))
+        .flatMap(Optional::stream)
+        .toList();
   }
 
   private static BotPoseEstimate toBotPoseEstimate(EstimatedRobotPose pose) {
@@ -80,7 +93,7 @@ public class RobotLocalization {
         pose.estimatedPose.toPose2d(), Utils.fpgaToCurrentTime(pose.timestampSeconds));
   }
 
-  public void addToSim(
+  public void addToSimulator(
       NetworkTableInstance ntInstance,
       VisionSystemSim simVisionSystem,
       AprilTagFieldLayout fieldTags) {

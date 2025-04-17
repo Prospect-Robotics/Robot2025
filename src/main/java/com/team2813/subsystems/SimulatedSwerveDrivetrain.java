@@ -15,9 +15,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import java.util.Arrays;
 
 final class SimulatedSwerveDrivetrain extends SimSwerveDrivetrain {
-  private final SwerveDrivetrain<?, ?, ?> drivetrain;
-  private final StructPublisher<Pose2d> simCurrentPose;
-  private final SwerveDrivePoseEstimator poseEstimator;
+  private final SwerveDrivetrain<?, ?, ?> realDrivetrain;
+  private final StructPublisher<Pose2d> simCurrentPosePublisher;
+  private final SwerveDrivePoseEstimator nonCorrectedPoseEstimator;
   private Pose2d simPose;
   private double lastSimUpdateSeconds;
 
@@ -26,13 +26,14 @@ final class SimulatedSwerveDrivetrain extends SimSwerveDrivetrain {
       SwerveDrivetrain<?, ?, ?> drivetrain,
       SwerveModuleConstants<?, ?, ?>... moduleConstants) {
     super(drivetrain.getModuleLocations(), drivetrain.getPigeon2().getSimState(), moduleConstants);
-    this.drivetrain = drivetrain;
+    this.realDrivetrain = drivetrain;
     simPose = drivetrain.getState().Pose;
-    this.simCurrentPose = networkTable.getStructTopic("simulated pose", Pose2d.struct).publish();
+    this.simCurrentPosePublisher =
+        networkTable.getStructTopic("simulated pose", Pose2d.struct).publish();
 
     Rotation2d gyroAngle = drivetrain.getPigeon2().getRotation2d();
     SwerveModulePosition[] modulePositions = getModulePositions(drivetrain);
-    poseEstimator =
+    nonCorrectedPoseEstimator =
         new SwerveDrivePoseEstimator(
             drivetrain.getKinematics(), gyroAngle, modulePositions, drivetrain.getState().Pose);
   }
@@ -51,9 +52,10 @@ final class SimulatedSwerveDrivetrain extends SimSwerveDrivetrain {
    */
   public void resetPose(Pose2d pose) {
     simPose = pose;
-    poseEstimator.resetPose(pose);
+    nonCorrectedPoseEstimator.resetPose(pose);
   }
 
+  /** Gets the robot position, excluding corrections from vision. ( */
   public Pose2d getPose() {
     return simPose;
   }
@@ -64,15 +66,16 @@ final class SimulatedSwerveDrivetrain extends SimSwerveDrivetrain {
       lastSimUpdateSeconds = now;
     }
     update(
-        now - lastSimUpdateSeconds, RobotController.getBatteryVoltage(), drivetrain.getModules());
+        now - lastSimUpdateSeconds,
+        RobotController.getBatteryVoltage(),
+        realDrivetrain.getModules());
     lastSimUpdateSeconds = now;
 
-    // TODO: Revisit this. Should be able to get data from the simulator...
-    Rotation2d gyroAngle = drivetrain.getState().Pose.getRotation();
-    SwerveModulePosition[] wheelPositions = getModulePositions(drivetrain);
+    Rotation2d gyroAngle = realDrivetrain.getState().Pose.getRotation();
+    SwerveModulePosition[] wheelPositions = getModulePositions(realDrivetrain);
 
-    poseEstimator.update(gyroAngle, wheelPositions);
-    simPose = poseEstimator.getEstimatedPosition();
-    simCurrentPose.set(simPose);
+    nonCorrectedPoseEstimator.update(gyroAngle, wheelPositions);
+    simPose = nonCorrectedPoseEstimator.getEstimatedPosition();
+    simCurrentPosePublisher.set(simPose);
   }
 }

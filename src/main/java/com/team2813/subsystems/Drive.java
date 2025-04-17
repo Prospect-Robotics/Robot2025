@@ -316,7 +316,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       photonPoseEstimator.addToSim(
           simVisionSystem, cameraName -> SimCameraProperties.PERFECT_90DEG());
 
-      localization.addToSim(networkTableInstance, simVisionSystem, aprilTagFieldLayout);
+      localization.addToSimulator(networkTableInstance, simVisionSystem, aprilTagFieldLayout);
     } else {
       simDrivetrain = null;
       simVisionSystem = null;
@@ -506,7 +506,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Note: we call limelightLocation() even if config.addLimelightMeasurement is false so
     // the position is published to network tables, which allows us to view the limelight's
     // pose estimate in AdvantageScope.
-    Optional<BotPoseEstimate> limelightEstimate = localization.calculateBotPoseEstimateBlue();
+    Optional<BotPoseEstimate> limelightEstimate = localization.limelightLocation();
     if (config.addLimelightMeasurement) {
       limelightEstimate.ifPresent(this::addVisionMeasurement);
     }
