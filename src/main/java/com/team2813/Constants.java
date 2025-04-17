@@ -85,6 +85,7 @@ public final class Constants {
     public static final Trigger MANUAL_GROUND_INTAKE = OPERATOR_CONTROLLER.circle();
     public static final Trigger MANUAL_GROUND_UP = OPERATOR_CONTROLLER.povLeft();
     public static final Trigger MANUAL_GROUND_DOWN = OPERATOR_CONTROLLER.povRight();
+    public static final Trigger MANUAL_GROUND_STOW = OPERATOR_CONTROLLER.share();
   }
 
   private Constants() {
