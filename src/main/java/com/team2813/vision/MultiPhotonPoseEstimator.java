@@ -67,7 +67,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     }
   }
 
-  public void addToSim(
+  public void addToSimulator(
       VisionSystemSim simVisionSystem, Function<String, SimCameraProperties> propertyFactory) {
     cameraDatas.forEach(
         estimatorData -> {

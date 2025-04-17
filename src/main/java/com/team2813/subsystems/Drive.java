@@ -326,10 +326,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       // See https://docs.photonvision.org/en/latest/docs/simulation/simulation-java.html
       simVisionSystem = new VisionSystemSim("main");
       simVisionSystem.addAprilTags(aprilTagFieldLayout);
-      photonPoseEstimator.addToSim(
+      photonPoseEstimator.addToSimulator(
           simVisionSystem, cameraName -> SimCameraProperties.PERFECT_90DEG());
 
-      localization.addToSim(networkTableInstance, simVisionSystem, aprilTagFieldLayout);
+      localization.addToSimulator(networkTableInstance, simVisionSystem, aprilTagFieldLayout);
     } else {
       simDrivetrain = null;
       simVisionSystem = null;
