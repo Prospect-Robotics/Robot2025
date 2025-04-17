@@ -46,6 +46,11 @@ public class GroundIntake extends SubsystemBase {
     isActive = true;
   }
 
+  public void fastOuttakeCoral() {
+    groundIntakeMotor.set(ControlMode.VOLTAGE, 12);
+    isActive = true;
+  }
+
   /** Stops the intake wheels entirely. */
   public void stopGroundIntakeMotor() {
     groundIntakeMotor.set(ControlMode.DUTY_CYCLE, 0);

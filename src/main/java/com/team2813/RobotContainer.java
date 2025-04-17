@@ -502,6 +502,10 @@ public class RobotContainer implements AutoCloseable {
         new InstantCommand(
             () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
             groundIntakePivot));
+    MANUAL_FAST_GROUND_OUTTAKE.onTrue(
+        new InstantCommand(groundIntake::fastOuttakeCoral, groundIntake));
+    MANUAL_FAST_GROUND_OUTTAKE.onFalse(
+        new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake));
   }
 
   private static final Pose2d botposeBlueOrig =
