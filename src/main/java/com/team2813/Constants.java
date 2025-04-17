@@ -62,7 +62,7 @@ public final class Constants {
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
 
     public static final Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
-    public static final Trigger CATCH_CORAL = DRIVER_CONTROLLER.R1();
+    public static final Trigger CATCH_CORAL = DRIVER_CONTROLLER.R2();
   }
 
   public static final class OperatorConstants {
@@ -85,6 +85,7 @@ public final class Constants {
     public static final Trigger MANUAL_GROUND_INTAKE = OPERATOR_CONTROLLER.circle();
     public static final Trigger MANUAL_GROUND_UP = OPERATOR_CONTROLLER.povLeft();
     public static final Trigger MANUAL_GROUND_DOWN = OPERATOR_CONTROLLER.povRight();
+    public static final Trigger MANUAL_GROUND_STOW = OPERATOR_CONTROLLER.share();
   }
 
   private Constants() {
