@@ -52,16 +52,17 @@ public final class Constants {
 
     public static final CommandPS4Controller DRIVER_CONTROLLER = new CommandPS4Controller(0);
     public static final Trigger SYSID_RUN = DRIVER_CONTROLLER.cross().and(() -> false);
-    public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.R3();
-    public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R2();
+    public static final Trigger SLOWMODE_BUTTON = DRIVER_CONTROLLER.L1();
+    public static final Trigger PLACE_CORAL = DRIVER_CONTROLLER.R1();
     public static final Trigger RESET_POSE = DRIVER_CONTROLLER.triangle();
 
-    public static Trigger AUTO_ALIGN_LEFT = DRIVER_CONTROLLER.L1();
-    public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.R1();
+    public static Trigger AUTO_ALIGN_LEFT = DRIVER_CONTROLLER.povUp();
+    public static Trigger AUTO_ALIGN_RIGHT = DRIVER_CONTROLLER.povDown();
 
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
 
     public static final Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
+    public static final Trigger CATCH_CORAL = DRIVER_CONTROLLER.R2();
   }
 
   public static final class OperatorConstants {
@@ -79,6 +80,12 @@ public final class Constants {
     public static final Trigger CLIMB_DOWN = OPERATOR_CONTROLLER.povDown();
     public static final Trigger CLIMB_UP = OPERATOR_CONTROLLER.povUp();
     public static final Trigger SLOW_OUTTAKE = OPERATOR_CONTROLLER.R2();
+
+    public static final Trigger MANUAL_GROUND_OUTTAKE = OPERATOR_CONTROLLER.square();
+    public static final Trigger MANUAL_GROUND_INTAKE = OPERATOR_CONTROLLER.circle();
+    public static final Trigger MANUAL_GROUND_UP = OPERATOR_CONTROLLER.povLeft();
+    public static final Trigger MANUAL_GROUND_DOWN = OPERATOR_CONTROLLER.povRight();
+    public static final Trigger MANUAL_GROUND_STOW = OPERATOR_CONTROLLER.share();
   }
 
   private Constants() {
