@@ -5,6 +5,8 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.google.auto.value.AutoBuilder;
+import com.team2813.lib2813.preferences.PreferencesInjector;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -14,15 +16,42 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.function.BooleanSupplier;
 
 public class Robot extends TimedRobot {
+  private final LoggingConfig loggingConfig;
+
   private static final BuildConstantsPublisher m_buildConstantsPublisher =
       new BuildConstantsPublisher(NetworkTableInstance.getDefault());
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
 
+  public record LoggingConfig(boolean debugLogging, BooleanSupplier alwaysEnable) {
+    /** Creates a builder for {@link LoggingConfig} with the default values */
+    public static Builder builder() {
+      return new AutoBuilder_Robot_LoggingConfig_Builder().debugLogging(false);
+    }
+
+    public static LoggingConfig fromPreferences() {
+      LoggingConfig defaultConfig = builder().build();
+      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+    }
+
+    @AutoBuilder
+    public interface Builder {
+      Builder debugLogging(boolean enabled);
+
+      LoggingConfig build();
+    }
+  }
+
   public Robot() {
+    this(LoggingConfig.fromPreferences());
+  }
+
+  public Robot(LoggingConfig loggingConfig) {
+    this.loggingConfig = loggingConfig;
     AllPreferences.migrateLegacyPreferences();
     m_robotContainer =
         new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
@@ -35,13 +64,23 @@ public class Robot extends TimedRobot {
     DataLogManager.logNetworkTables(true);
     DriverStation.startDataLog(DataLogManager.getLog());
     SignalLogger.enableAutoLogging(true);
-    String eventName = DriverStation.getEventName();
-    if (eventName == null || eventName.isBlank()) {
+    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      startLogs();
       SignalLogger.start();
     }
     CameraServer.startAutomaticCapture();
     // Publish build constants to NetworkTables.
     m_buildConstantsPublisher.publish();
+  }
+  
+  private void startLogs() {
+    DataLogManager.start("/U/logs");
+    DataLogManager.logNetworkTables(true);
+    DriverStation.startDataLog(DataLogManager.getLog());
+  }
+  
+  private void stopLogs() {
+    DataLogManager.stop();
   }
 
   @Override
@@ -50,7 +89,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      stopLogs();
+    }
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -60,6 +103,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      startLogs();
+    }
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -78,6 +124,9 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    if (!loggingConfig.debugLogging && DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      startLogs();
+    }
   }
 
   @Override
@@ -88,6 +137,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    if (!loggingConfig.debugLogging && DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      startLogs();
+    }
     CommandScheduler.getInstance().cancelAll();
   }
 
