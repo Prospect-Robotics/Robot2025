@@ -14,11 +14,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
-import com.team2813.commands.ElevatorDefaultCommand;
-import com.team2813.commands.LockFunctionCommand;
-import com.team2813.commands.ManuelIntakePivot;
-import com.team2813.commands.RobotCommands;
-import com.team2813.commands.RobotLocalization;
+import com.team2813.commands.*;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.subsystems.*;
@@ -413,27 +409,7 @@ public class RobotContainer implements AutoCloseable {
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                 groundIntakePivot)));
 
-    OUTTAKE_BUTTON.onTrue(
-        new SequentialCommandGroup(
-            new ParallelCommandGroup(
-                new InstantCommand(intake::outakeCoral, intake),
-                new ParallelCommandGroup(
-                    new InstantCommand(
-                        () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
-                        groundIntakePivot)),
-                new SequentialCommandGroup(
-                    new WaitCommand(0.13),
-                    new InstantCommand(groundIntake::outtakeCoral, groundIntake))),
-            new WaitCommand(0.25),
-            new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake),
-            new ParallelCommandGroup(
-                new SequentialCommandGroup(
-                    new WaitCommand(0.25),
-                    new InstantCommand(
-                        () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
-                        groundIntakePivot)),
-                new SequentialCommandGroup(
-                    new WaitCommand(0.15), new InstantCommand(intake::stopIntakeMotor, intake)))));
+    OUTTAKE_BUTTON.onTrue(new OuttakeCommand(intake, groundIntake, groundIntakePivot));
     CATCH_CORAL.onTrue(
         new ParallelCommandGroup(
             new InstantCommand(
