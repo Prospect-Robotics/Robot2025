@@ -183,11 +183,13 @@ public class RobotContainer implements AutoCloseable {
         "BumpAlgaeHigh",
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.TOP),
-                        elevator)
-                    .withTimeout(SECONDS_2),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.05),
+                    new LockFunctionCommand(
+                            elevator::atPosition,
+                            () -> elevator.setSetpoint(Elevator.Position.TOP),
+                            elevator)
+                        .withTimeout(SECONDS_2)),
                 new LockFunctionCommand(
                         intakePivot::atPosition,
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
