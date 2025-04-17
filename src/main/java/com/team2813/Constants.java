@@ -62,7 +62,7 @@ public final class Constants {
     public static Trigger SETPOSE = DRIVER_CONTROLLER.circle();
 
     public static final Trigger GROUND_CORAL_INTAKE = DRIVER_CONTROLLER.L2();
-    public static final Trigger CATCH_CORAL = DRIVER_CONTROLLER.R1();
+    public static final Trigger CATCH_CORAL = DRIVER_CONTROLLER.R2();
   }
 
   public static final class OperatorConstants {
