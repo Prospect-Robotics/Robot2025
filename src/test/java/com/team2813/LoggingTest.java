@@ -3,6 +3,7 @@ package com.team2813;
 import static com.google.common.truth.Truth.assertThat;
 
 import edu.wpi.first.hal.AllianceStationID;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import java.io.File;
@@ -20,7 +21,9 @@ public class LoggingTest {
   @Rule public final TemporaryFolder fakeRoborioSystem = new TemporaryFolder();
   public final FakeShuffleboardTabs shuffleboardTabs = new FakeShuffleboardTabs();
   @Rule public final NetworkTableResource networkTableResource = new NetworkTableResource();
-  @Rule public final LoggingResource loggingResource = new LoggingResource();
+
+  @Rule
+  public final StaticClassResource loggingResource = new StaticClassResource(DataLogManager.class);
 
   private File getLogDirectory() throws IOException {
     return fakeRoborioSystem.newFolder("U", "logs");

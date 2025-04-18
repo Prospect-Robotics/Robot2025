@@ -1,6 +1,5 @@
 package com.team2813;
 
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -8,7 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.rules.ExternalResource;
 
-public class LoggingResource extends ExternalResource {
+public class StaticClassResource extends ExternalResource {
+
+  private final Class<?> theClass;
+
+  public StaticClassResource(Class<?> theClass) {
+    this.theClass = theClass;
+  }
 
   private List<DefaultValue> values;
 
@@ -17,8 +22,9 @@ public class LoggingResource extends ExternalResource {
   @Override
   protected void before() throws Exception {
     List<DefaultValue> values = new ArrayList<>();
-    for (Field field : DataLogManager.class.getDeclaredFields()) {
-      if (!Modifier.isFinal(field.getModifiers())) {
+    for (Field field : theClass.getDeclaredFields()) {
+      int modifiers = field.getModifiers();
+      if (!Modifier.isFinal(modifiers) && Modifier.isStatic(modifiers)) {
         field.setAccessible(true);
         values.add(new DefaultValue(field, field.get(null)));
       }
