@@ -17,9 +17,10 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 public class LoggingTest {
-  @Rule public TemporaryFolder fakeRoborioSystem = new TemporaryFolder();
+  @Rule public final TemporaryFolder fakeRoborioSystem = new TemporaryFolder();
   public final FakeShuffleboardTabs shuffleboardTabs = new FakeShuffleboardTabs();
   @Rule public final NetworkTableResource networkTableResource = new NetworkTableResource();
+  @Rule public final LoggingResource loggingResource = new LoggingResource();
 
   private File getLogDirectory() throws IOException {
     return fakeRoborioSystem.newFolder("U", "logs");
@@ -29,7 +30,8 @@ public class LoggingTest {
   public void defaultEmptyDirectory() throws Exception {
     File logDirectory = getLogDirectory();
     assertThat(logDirectory.listFiles()).isEmpty();
-    Robot.LoggingConfig config = Robot.LoggingConfig.builder().logFolder(logDirectory).build();
+    Robot.LoggingConfig config =
+        Robot.LoggingConfig.builder().logFolder(logDirectory).debugLogging(false).build();
     try (Robot robot =
         new Robot(config, shuffleboardTabs, networkTableResource.getNetworkTableInstance())) {
       robot.robotInit();
