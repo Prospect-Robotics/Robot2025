@@ -92,7 +92,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       PhotonPoseEstimator estimator =
           new PhotonPoseEstimator(
               builder.fieldTags, builder.poseStrategy, cameraConfig.robotToCamera);
-      var estimatedPosePublisher = new PhotonVisionPosePublisher(camera);
+      var estimatedPosePublisher = new PhotonVisionPosePublisher(camera, builder.fieldTags);
       NetworkTable table = getTableForCamera(camera);
       var cameraPosePublisher = table.getStructTopic("cameraPose", Pose3d.struct).publish();
 

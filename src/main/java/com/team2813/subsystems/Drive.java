@@ -527,8 +527,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     visibleTargetPoses.accept(visibleAprilTagPoses.toArray(EMPTY_LIST));
 
     modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
-
-    localization.updateDashboard();
   }
 
   @Override
