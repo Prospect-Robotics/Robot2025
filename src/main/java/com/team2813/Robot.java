@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+import java.io.File;
 import java.util.function.BooleanSupplier;
 
 public class Robot extends TimedRobot {
@@ -24,13 +26,14 @@ public class Robot extends TimedRobot {
   private static final BuildConstantsPublisher m_buildConstantsPublisher =
       new BuildConstantsPublisher(NetworkTableInstance.getDefault());
   private Command m_autonomousCommand;
+  private boolean logsStarted = false;
 
   private final RobotContainer m_robotContainer;
 
-  public record LoggingConfig(boolean debugLogging, BooleanSupplier alwaysEnable) {
+  public record LoggingConfig(boolean debugLogging, String logFolder) {
     /** Creates a builder for {@link LoggingConfig} with the default values */
     public static Builder builder() {
-      return new AutoBuilder_Robot_LoggingConfig_Builder().debugLogging(false);
+      return new AutoBuilder_Robot_LoggingConfig_Builder().debugLogging(false).logFolder("/U/logs");
     }
 
     public static LoggingConfig fromPreferences() {
@@ -41,6 +44,21 @@ public class Robot extends TimedRobot {
     @AutoBuilder
     public interface Builder {
       Builder debugLogging(boolean enabled);
+      
+      Builder logFolder(String logFolder);
+      
+      /**
+       * Sets the log folder
+       * @param logFolder the log folder
+       * @throws IllegalArgumentException if {@code logFolder} is not a directory
+       * @return {@code this} for chaining
+       */
+      default Builder logFolder(File logFolder) {
+        if (!logFolder.isDirectory()) {
+          throw new IllegalArgumentException(String.format("File with path: \"%s\" is not a directory!", logFolder.getPath()));
+        }
+        return logFolder(logFolder.getPath());
+      }
 
       LoggingConfig build();
     }
@@ -49,22 +67,24 @@ public class Robot extends TimedRobot {
   public Robot() {
     this(LoggingConfig.fromPreferences());
   }
-
+  
   public Robot(LoggingConfig loggingConfig) {
+    this(loggingConfig, new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
+  }
+
+  Robot(LoggingConfig loggingConfig, ShuffleboardTabs shuffleboardTabs, NetworkTableInstance networkTableInstance) {
     this.loggingConfig = loggingConfig;
     AllPreferences.migrateLegacyPreferences();
     m_robotContainer =
-        new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
+        new RobotContainer(shuffleboardTabs, networkTableInstance);
   }
 
   @Override
   public void robotInit() {
-    SignalLogger.setPath("/U/logs");
-    DataLogManager.start("/U/logs");
-    DataLogManager.logNetworkTables(true);
-    DriverStation.startDataLog(DataLogManager.getLog());
+    SignalLogger.setPath(loggingConfig.logFolder);
     SignalLogger.enableAutoLogging(true);
-    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
+    // won't have match type by now, so no need to check
+    if (loggingConfig.debugLogging) {
       startLogs();
       SignalLogger.start();
     }
@@ -74,13 +94,10 @@ public class Robot extends TimedRobot {
   }
   
   private void startLogs() {
-    DataLogManager.start("/U/logs");
+    DataLogManager.start(loggingConfig.logFolder);
     DataLogManager.logNetworkTables(true);
     DriverStation.startDataLog(DataLogManager.getLog());
-  }
-  
-  private void stopLogs() {
-    DataLogManager.stop();
+    logsStarted = true;
   }
 
   @Override
@@ -89,23 +106,21 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {
-    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
-      stopLogs();
-    }
-  }
+  public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    // logs will have already started
+    if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {
+    
+    }
+  }
 
   @Override
   public void disabledExit() {}
 
   @Override
   public void autonomousInit() {
-    if (loggingConfig.debugLogging || DriverStation.getMatchType() != DriverStation.MatchType.None) {
-      startLogs();
-    }
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     if (m_autonomousCommand != null) {
@@ -124,9 +139,6 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
-    if (!loggingConfig.debugLogging && DriverStation.getMatchType() != DriverStation.MatchType.None) {
-      startLogs();
-    }
   }
 
   @Override
@@ -137,9 +149,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    if (!loggingConfig.debugLogging && DriverStation.getMatchType() != DriverStation.MatchType.None) {
-      startLogs();
-    }
     CommandScheduler.getInstance().cancelAll();
   }
 
@@ -159,5 +168,11 @@ public class Robot extends TimedRobot {
     public void selectTab(String title) {
       Shuffleboard.selectTab(title);
     }
+  }
+  
+  @Override
+  public void close() {
+    super.close();
+    m_robotContainer.close();
   }
 }
