@@ -113,7 +113,9 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
     // logs will have already started
-    if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {}
+    if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {
+      startLogs();
+    }
   }
 
   @Override
@@ -174,5 +176,7 @@ public class Robot extends TimedRobot {
   public void close() {
     super.close();
     m_robotContainer.close();
+    SignalLogger.stop();
+    DataLogManager.stop();
   }
 }
