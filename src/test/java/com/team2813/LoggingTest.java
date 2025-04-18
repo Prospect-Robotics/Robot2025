@@ -8,6 +8,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -42,7 +43,8 @@ public class LoggingTest {
       robot.robotInit();
       robot.disabledInit();
       robot.disabledPeriodic();
-      assertThat(logDirectory.listFiles()).isNotEmpty();
+      // Should have TBD WPILog file and hoot file; length 2
+      assertThat(logDirectory.listFiles()).hasLength(2);
     }
   }
 }
