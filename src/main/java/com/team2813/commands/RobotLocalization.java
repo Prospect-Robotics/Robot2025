@@ -9,28 +9,36 @@ import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
-public class RobotLocalization { // TODO: consider making this a subsystem so we can use periodic()
+public class RobotLocalization {
+  private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
-    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue();
+    LocationalData locationalData = limelight.getLocationalData();
+    hasDataPublisher.accept(locationalData.isValid());
+
+    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
+    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+
+    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
     limelightPosePublisher.publish(optionalEstimate);
 
     // TODO(kcooney): Consider moving this logic to Drive.java.
@@ -45,8 +53,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
         });
   }
 
-  private Optional<BotPoseEstimate> botPoseEstimateBlue() {
-    return limelight.getLocationalData().getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
+  private static Optional<BotPoseEstimate> botPoseEstimateBlue(LocationalData locationalData) {
+    return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
   }
 
   private static List<Pose2d> positions() {
@@ -174,8 +182,8 @@ public class RobotLocalization { // TODO: consider making this a subsystem so we
       LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
           .getBooleanTopic("hasData")
           .publish();
-
-  public void updateDashboard() {
-    hasDataPublisher.accept(limelight.getJsonDump().isPresent());
-  }
+  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher =
+      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
+          .getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct)
+          .publish();
 }

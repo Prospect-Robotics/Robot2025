@@ -3,6 +3,8 @@ package com.team2813.vision;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.team2813.NetworkTableResource;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.*;
@@ -110,7 +112,9 @@ public class PhotonVisionPosePublisherTest {
 
   protected PhotonVisionPosePublisher createPublisher() {
     var camera = new PhotonCamera(networkTable.getNetworkTableInstance(), CAMERA_NAME);
-    return new PhotonVisionPosePublisher(camera, fakeClock);
+    AprilTagFieldLayout fieldTags =
+        AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+    return new PhotonVisionPosePublisher(camera, fieldTags, fakeClock);
   }
 
   private record TimestampedPose(Pose3d pose, long timestamp) {

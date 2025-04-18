@@ -12,9 +12,9 @@
             "/Drive",
             "/photonvision/capt-barnacles",
             "/photonvision/professor-inkling",
-            "/Vision",
             "/Vision/capt-barnacles",
-            "/Vision/professor-inkling"
+            "/Vision/professor-inkling",
+            "/Vision/limelight"
           ]
         },
         "tabs": {
@@ -61,7 +61,7 @@
                     "type": "ghost",
                     "logKey": "NT:/Drive/simulated pose",
                     "logType": "Pose2d",
-                    "visible": true,
+                    "visible": false,
                     "options": {
                       "color": "#00ffff"
                     }
@@ -75,21 +75,31 @@
                   },
                   {
                     "type": "vision",
-                    "logKey": "NT:/photonvision/capt-barnacles/targetPose",
-                    "logType": "Transform3d",
+                    "logKey": "NT:/Vision/capt-barnacles/aprilTagPose",
+                    "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#0000ff",
+                      "color": "#00ffff",
                       "size": "normal"
                     }
                   },
                   {
                     "type": "vision",
-                    "logKey": "NT:/photonvision/professor-inkling/targetPose",
-                    "logType": "Transform3d",
+                    "logKey": "NT:/Vision/professor-inkling/aprilTagPose",
+                    "logType": "Pose3d",
                     "visible": true,
                     "options": {
                       "color": "#ff8c00",
+                      "size": "normal"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/Vision/limelight/visibleAprilTagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": false,
+                    "options": {
+                      "color": "#00ff00",
                       "size": "normal"
                     }
                   },
@@ -108,7 +118,16 @@
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#0000ff"
+                      "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/Vision/limelight/poseEstimate",
+                    "logType": "Pose2d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00"
                     }
                   }
                 ],
