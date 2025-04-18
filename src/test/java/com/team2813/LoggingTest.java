@@ -2,6 +2,7 @@ package com.team2813;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import java.io.File;
@@ -96,6 +97,7 @@ public class LoggingTest {
       robot.disabledPeriodic();
       assertThat(logDirectory.listFiles()).isEmpty();
       DriverStationSim.setEventName("GALILEO");
+      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
       DriverStationSim.setMatchNumber(1);
       DriverStationSim.setMatchType(DriverStation.MatchType.Qualification);
       DriverStationSim.setFmsAttached(true);

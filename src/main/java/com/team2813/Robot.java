@@ -115,6 +115,7 @@ public class Robot extends TimedRobot {
     // logs will have already started
     if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {
       startLogs();
+      SignalLogger.start();
     }
   }
 
