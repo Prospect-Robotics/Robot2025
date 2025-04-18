@@ -89,7 +89,7 @@
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#ff8c00",
+                      "color": "#ff00ff",
                       "size": "normal"
                     }
                   },
@@ -105,20 +105,20 @@
                   },
                   {
                     "type": "ghost",
-                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
-                    "logType": "Pose3d",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff8c00"
-                    }
-                  },
-                  {
-                    "type": "ghost",
                     "logKey": "NT:/Vision/capt-barnacles/poseEstimate",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
                       "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff"
                     }
                   },
                   {
