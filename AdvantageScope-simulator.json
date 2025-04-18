@@ -90,7 +90,7 @@
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#00ff00",
+                      "color": "#ff00ff",
                       "size": "normal"
                     }
                   },
@@ -100,17 +100,8 @@
                     "logType": "Pose3d[]",
                     "visible": false,
                     "options": {
-                      "color": "#ff00ff",
+                      "color": "#00ff00",
                       "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
-                    "logType": "Pose3d",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff8c00"
                     }
                   },
                   {
@@ -120,6 +111,15 @@
                     "visible": true,
                     "options": {
                       "color": "#00ffff"
+                    }
+                  },
+                  {
+                    "type": "ghost",
+                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#ff00ff"
                     }
                   },
                   {
