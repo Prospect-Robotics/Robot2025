@@ -16,9 +16,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
 import java.io.File;
-import java.util.function.BooleanSupplier;
 
 public class Robot extends TimedRobot {
   private final LoggingConfig loggingConfig;
@@ -44,18 +42,20 @@ public class Robot extends TimedRobot {
     @AutoBuilder
     public interface Builder {
       Builder debugLogging(boolean enabled);
-      
+
       Builder logFolder(String logFolder);
-      
+
       /**
        * Sets the log folder
+       *
        * @param logFolder the log folder
        * @throws IllegalArgumentException if {@code logFolder} is not a directory
        * @return {@code this} for chaining
        */
       default Builder logFolder(File logFolder) {
         if (!logFolder.isDirectory()) {
-          throw new IllegalArgumentException(String.format("File with path: \"%s\" is not a directory!", logFolder.getPath()));
+          throw new IllegalArgumentException(
+              String.format("File with path: \"%s\" is not a directory!", logFolder.getPath()));
         }
         return logFolder(logFolder.getPath());
       }
@@ -67,16 +67,18 @@ public class Robot extends TimedRobot {
   public Robot() {
     this(LoggingConfig.fromPreferences());
   }
-  
+
   public Robot(LoggingConfig loggingConfig) {
     this(loggingConfig, new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
   }
 
-  Robot(LoggingConfig loggingConfig, ShuffleboardTabs shuffleboardTabs, NetworkTableInstance networkTableInstance) {
+  Robot(
+      LoggingConfig loggingConfig,
+      ShuffleboardTabs shuffleboardTabs,
+      NetworkTableInstance networkTableInstance) {
     this.loggingConfig = loggingConfig;
     AllPreferences.migrateLegacyPreferences();
-    m_robotContainer =
-        new RobotContainer(shuffleboardTabs, networkTableInstance);
+    m_robotContainer = new RobotContainer(shuffleboardTabs, networkTableInstance);
   }
 
   @Override
@@ -92,7 +94,7 @@ public class Robot extends TimedRobot {
     // Publish build constants to NetworkTables.
     m_buildConstantsPublisher.publish();
   }
-  
+
   private void startLogs() {
     DataLogManager.start(loggingConfig.logFolder);
     DataLogManager.logNetworkTables(true);
@@ -111,9 +113,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {
     // logs will have already started
-    if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {
-    
-    }
+    if (!logsStarted && DriverStation.getMatchType() != DriverStation.MatchType.None) {}
   }
 
   @Override
@@ -169,7 +169,7 @@ public class Robot extends TimedRobot {
       Shuffleboard.selectTab(title);
     }
   }
-  
+
   @Override
   public void close() {
     super.close();

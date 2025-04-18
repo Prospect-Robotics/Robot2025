@@ -1,45 +1,44 @@
 package com.team2813;
 
-import edu.wpi.first.networktables.NetworkTableInstance;
-import org.checkerframework.checker.units.qual.N;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import static com.google.common.truth.Truth.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-
-import static com.google.common.truth.Truth.assertThat;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class LoggingTest {
   @Rule public TemporaryFolder fakeRoborioSystem = new TemporaryFolder();
   public final FakeShuffleboardTabs shuffleboardTabs = new FakeShuffleboardTabs();
   @Rule public final NetworkTableResource networkTableResource = new NetworkTableResource();
-  
+
   private File getLogDirectory() throws IOException {
     return fakeRoborioSystem.newFolder("U", "logs");
   }
-  
+
   @Test
   public void defaultEmptyDirectory() throws Exception {
     File logDirectory = getLogDirectory();
     assertThat(logDirectory.listFiles()).isEmpty();
     Robot.LoggingConfig config = Robot.LoggingConfig.builder().logFolder(logDirectory).build();
-    try (Robot robot = new Robot(config, shuffleboardTabs, networkTableResource.getNetworkTableInstance())) {
+    try (Robot robot =
+        new Robot(config, shuffleboardTabs, networkTableResource.getNetworkTableInstance())) {
       robot.robotInit();
       robot.disabledInit();
       robot.disabledPeriodic();
       assertThat(logDirectory.listFiles()).isEmpty();
     }
   }
-  
+
   @Test
   public void containsLogsOnDebug() throws Exception {
     File logDirectory = getLogDirectory();
     assertThat(logDirectory.listFiles()).isEmpty();
-    Robot.LoggingConfig config = Robot.LoggingConfig.builder().logFolder(logDirectory).debugLogging(true).build();
-    try (Robot robot = new Robot(config, shuffleboardTabs, networkTableResource.getNetworkTableInstance())) {
+    Robot.LoggingConfig config =
+        Robot.LoggingConfig.builder().logFolder(logDirectory).debugLogging(true).build();
+    try (Robot robot =
+        new Robot(config, shuffleboardTabs, networkTableResource.getNetworkTableInstance())) {
       robot.robotInit();
       robot.disabledInit();
       robot.disabledPeriodic();
