@@ -95,24 +95,24 @@ public class DriverStationSimResource extends ExternalResource {
       this.replayNumber = OptionalInt.of(replayNumber);
       return this;
     }
-  }
 
-  private void performModification(ModificationBuilder modification) {
-    modification.enabled.ifPresent(DriverStationSim::setEnabled);
-    modification.autonomous.ifPresent(DriverStationSim::setAutonomous);
-    modification.test.ifPresent(DriverStationSim::setTest);
-    modification.eStop.ifPresent(DriverStationSim::setEStop);
-    modification.fmsAttached.ifPresent(DriverStationSim::setFmsAttached);
-    modification.dsAttached.ifPresent(DriverStationSim::setDsAttached);
-    modification.allianceStationId.ifPresent(DriverStationSim::setAllianceStationId);
-    modification.matchTime.ifPresent(DriverStationSim::setMatchTime);
-    modification.sendError.ifPresent(DriverStationSim::setSendError);
-    modification.sendConsoleLine.ifPresent(DriverStationSim::setSendConsoleLine);
-    modification.eventName.ifPresent(DriverStationSim::setEventName);
-    modification.matchType.ifPresent(DriverStationSim::setMatchType);
-    modification.matchNumber.ifPresent(DriverStationSim::setMatchNumber);
-    modification.replayNumber.ifPresent(DriverStationSim::setMatchNumber);
-    DriverStationSim.notifyNewData();
+    private void perform() {
+      this.enabled.ifPresent(DriverStationSim::setEnabled);
+      this.autonomous.ifPresent(DriverStationSim::setAutonomous);
+      this.test.ifPresent(DriverStationSim::setTest);
+      this.eStop.ifPresent(DriverStationSim::setEStop);
+      this.fmsAttached.ifPresent(DriverStationSim::setFmsAttached);
+      this.dsAttached.ifPresent(DriverStationSim::setDsAttached);
+      this.allianceStationId.ifPresent(DriverStationSim::setAllianceStationId);
+      this.matchTime.ifPresent(DriverStationSim::setMatchTime);
+      this.sendError.ifPresent(DriverStationSim::setSendError);
+      this.sendConsoleLine.ifPresent(DriverStationSim::setSendConsoleLine);
+      this.eventName.ifPresent(DriverStationSim::setEventName);
+      this.matchType.ifPresent(DriverStationSim::setMatchType);
+      this.matchNumber.ifPresent(DriverStationSim::setMatchNumber);
+      this.replayNumber.ifPresent(DriverStationSim::setMatchNumber);
+      DriverStationSim.notifyNewData();
+    }
   }
 
   @Override
