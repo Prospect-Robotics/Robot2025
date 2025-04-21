@@ -31,7 +31,11 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     SignalLogger.setPath("/U/logs");
-    DataLogManager.start("/U/logs");
+    // Use the default log directory for simulation because `/U/...` is typically not a valid root
+    // on
+    // the simulation host machine (usually, a Windows laptop).
+    DataLogManager.start(isSimulation() ? "" : "/U/logs");
+    System.out.println("DataLogManager.getLogDir: " + DataLogManager.getLogDir());
     DataLogManager.logNetworkTables(true);
     DriverStation.startDataLog(DataLogManager.getLog());
     SignalLogger.enableAutoLogging(true);
@@ -40,8 +44,9 @@ public class Robot extends TimedRobot {
       SignalLogger.start();
     }
     CameraServer.startAutomaticCapture();
-    // Publish build constants to NetworkTables.
+    // Publish build constants to the Metadata table on NetworkTables.
     m_buildConstantsPublisher.publish();
+    m_buildConstantsPublisher.log();
   }
 
   @Override
