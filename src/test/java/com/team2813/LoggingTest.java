@@ -92,6 +92,21 @@ public class LoggingTest {
     }
   }
 
+  /**
+   * Run after updating DriverStation to contain the needed match info. After running, both CTRE and
+   * WPILib logging will contain log folders, and WPILib will have the correct name for the match.
+   */
+  private void updateLogFiles() throws InterruptedException {
+    // DataLogManager requires updates from driver station, and this supplies it. Runs a bunch of
+    // times so that it works properly
+    for (int i = 0; i < 1_000; i++) {
+      DriverStationSim.notifyNewData();
+    }
+
+    // sleep to make the hoot file show up
+    Thread.sleep(1_000);
+  }
+
   @Test
   public void noDebugInMatch() throws Exception {
     File logDirectory = getLogDirectory();
@@ -109,24 +124,19 @@ public class LoggingTest {
           .eventName("GALILEO")
           .allianceStationId(AllianceStationID.Blue1)
           .matchType(DriverStation.MatchType.Qualification)
-              .matchNumber(1)
+          .matchNumber(1)
           .fmsAttached(true)
           .dsAttahced(true)
           .perform();
-      
+
       assertThat(DriverStation.getEventName()).isEqualTo("GALILEO");
       assertThat(DriverStation.isFMSAttached()).isTrue();
       assertThat(DriverStation.isDSAttached()).isTrue();
-      
-      // DataLogManager requires updates from driver station, and this supplies it. Runs a bunch of times so that it works properly
-      for (int i = 0; i < 1_000; i++) {
-        robot.disabledPeriodic();
-        DriverStationSim.notifyNewData();
-      }
-      
-      // sleep to make the hoot file show up
-      Thread.sleep(1_000);
-      
+
+      robot.disabledPeriodic();
+
+      updateLogFiles();
+
       System.err.println(Arrays.toString(logDirectory.listFiles()));
       File[] directoryFiles =
           logDirectory.listFiles((file, name) -> name.endsWith(".hoot") | name.endsWith(".wpilog"));
@@ -138,6 +148,10 @@ public class LoggingTest {
           assertThat(filename).endsWith("GALILEO_Q1.wpilog");
           assertThat(filename).startsWith("FRC");
         }
+        // Can't check if .hoot file has correct filename as CTRE does special stuff with
+        // simulation, and does not document the circumstances under which they rename the log.
+        // Since the implementation is all under closed-source c++ code, barring a decompilation, we
+        // can't know how to make it have the right name, or if it is even possible in the first place.
       }
     }
   }
