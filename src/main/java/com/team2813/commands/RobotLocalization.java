@@ -30,6 +30,10 @@ public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final AutoAlignConfiguration config;
+  private final StructPublisher<Pose2d> lastPosePublisher;
+  private final LimelightPosePublisher limelightPosePublisher;
+  private final BooleanPublisher hasDataPublisher;
+  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
 
   public record AutoAlignConfiguration(boolean useAutoAlignWaypoints) {
 
@@ -63,10 +67,11 @@ public class RobotLocalization {
     lastPosePublisher =
         networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
     limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
-    hasDataPublisher =
-        LimelightPosePublisher.getNetworkTable(networkTableInstance)
-            .getBooleanTopic("hasData")
-            .publish();
+    NetworkTable limelightNetworkTable =
+        LimelightPosePublisher.getNetworkTable(networkTableInstance);
+    hasDataPublisher = limelightNetworkTable.getBooleanTopic("hasData").publish();
+    visibleAprilTagPosesPublisher =
+        limelightNetworkTable.getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct).publish();
   }
 
   public Optional<BotPoseEstimate> limelightLocation(
@@ -140,8 +145,6 @@ public class RobotLocalization {
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPosePublisher;
-
   /**
    * Creates a command from the current position to the nearest target.
    *
@@ -213,11 +216,4 @@ public class RobotLocalization {
     PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
-
-  private final LimelightPosePublisher limelightPosePublisher;
-  private final BooleanPublisher hasDataPublisher;
-  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher =
-      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
-          .getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct)
-          .publish();
 }
