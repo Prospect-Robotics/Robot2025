@@ -50,7 +50,7 @@ public class RobotLocalization {
     }
 
     @com.google.auto.value.AutoBuilder
-    interface Builder {
+    public interface Builder {
       Builder useAutoAlignWaypoints(boolean enabled);
 
       AutoAlignConfiguration build();
