@@ -1,5 +1,8 @@
 package com.team2813.commands;
 
+import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
+import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -57,9 +60,11 @@ public class RobotLocalization {
     limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
     NetworkTable limelightNetworkTable =
         VisionNetworkTables.getTableForLimelight(networkTableInstance);
-    hasDataPublisher = limelightNetworkTable.getBooleanTopic("hasData").publish();
+    hasDataPublisher = limelightNetworkTable.getBooleanTopic(HAS_DATA_TOPIC).publish();
     visibleAprilTagPosesPublisher =
-        limelightNetworkTable.getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct).publish();
+        limelightNetworkTable
+            .getStructArrayTopic(VISIBLE_APRIL_TAG_POSES_TOPIC, Pose3d.struct)
+            .publish();
   }
 
   public Optional<BotPoseEstimate> limelightLocation(

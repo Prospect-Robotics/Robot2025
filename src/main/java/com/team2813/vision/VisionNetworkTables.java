@@ -7,6 +7,13 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import org.photonvision.PhotonCamera;
 
 public final class VisionNetworkTables {
+  public static final String HAS_DATA_TOPIC = "hasData";
+  public static final String VISIBLE_APRIL_TAG_POSES_TOPIC = "visibleAprilTagPoses";
+
+  static final String CAMERA_POSE_TOPIC = "cameraPose";
+  static final String POSE_ESTIMATE_TOPIC = "poseEstimate";
+  static final String APRIL_TAG_POSE_TOPIC = "aprilTagPose";
+
   private static final String TABLE_NAME = "Vision";
 
   public static NetworkTable getTableForCamera(NetworkTableInstance ntInstance, String cameraName) {

@@ -1,5 +1,6 @@
 package com.team2813.vision;
 
+import static com.team2813.vision.VisionNetworkTables.POSE_ESTIMATE_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.getTableForLimelight;
 
 import com.ctre.phoenix6.Utils;
@@ -24,7 +25,7 @@ public final class LimelightPosePublisher {
     timestampOffset =
         clocks.fpgaTimestampSupplier().get() - clocks.currentTimestampSupplier().get();
     StructTopic<Pose2d> topic =
-        getTableForLimelight(ntInstance).getStructTopic("poseEstimate", Pose2d.struct);
+        getTableForLimelight(ntInstance).getStructTopic(POSE_ESTIMATE_TOPIC, Pose2d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose2d.kZero, clocks.fpgaTimestampSupplier);
   }
 
