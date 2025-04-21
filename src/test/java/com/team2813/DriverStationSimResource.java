@@ -18,7 +18,7 @@ public class DriverStationSimResource extends ExternalResource {
     private Optional<Boolean> test = Optional.empty();
     private Optional<Boolean> eStop = Optional.empty();
     private Optional<Boolean> fmsAttached = Optional.empty();
-    private Optional<Boolean> dsAttached = Optional.empty();>
+    private Optional<Boolean> dsAttached = Optional.empty();
     private Optional<AllianceStationID> allianceStationId = Optional.empty();
     private OptionalDouble matchTime = OptionalDouble.empty();
     private Optional<Boolean> sendError = Optional.empty();
