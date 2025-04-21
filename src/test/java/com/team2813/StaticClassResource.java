@@ -1,15 +1,12 @@
 package com.team2813;
 
-import edu.wpi.first.wpilibj.simulation.DriverStationSim;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.rules.ExternalResource;
 
-/**
- * Resets the non-final static state of a class to it's initial state after each test
- */
+/** Resets the non-final static state of a class to it's initial state after each test */
 public class StaticClassResource extends ExternalResource {
 
   private final Class<?> theClass;

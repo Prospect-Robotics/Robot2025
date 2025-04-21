@@ -12,7 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
-import java.util.Arrays;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -137,7 +136,6 @@ public class LoggingTest {
 
       updateLogFiles();
 
-      System.err.println(Arrays.toString(logDirectory.listFiles()));
       File[] directoryFiles =
           logDirectory.listFiles((file, name) -> name.endsWith(".hoot") | name.endsWith(".wpilog"));
       assertThat(directoryFiles).hasLength(2);
@@ -151,7 +149,8 @@ public class LoggingTest {
         // Can't check if .hoot file has correct filename as CTRE does special stuff with
         // simulation, and does not document the circumstances under which they rename the log.
         // Since the implementation is all under closed-source c++ code, barring a decompilation, we
-        // can't know how to make it have the right name, or if it is even possible in the first place.
+        // can't know how to make it have the right name, or if it is even possible in the first
+        // place.
       }
     }
   }
