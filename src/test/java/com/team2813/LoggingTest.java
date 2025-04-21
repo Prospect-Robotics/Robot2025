@@ -2,6 +2,7 @@ package com.team2813;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -26,6 +27,8 @@ public class LoggingTest {
 
   @Rule
   public final StaticClassResource loggingResource = new StaticClassResource(DataLogManager.class);
+
+  @Rule public final StaticClassResource autoResource = new StaticClassResource(AutoBuilder.class);
 
   private File getLogDirectory() throws IOException {
     return fakeRoborioSystem.newFolder("U", "logs");

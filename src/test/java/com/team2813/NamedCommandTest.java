@@ -2,6 +2,7 @@ package com.team2813;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class NamedCommandTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
   @Rule public final NetworkTableResource networkTable = new NetworkTableResource();
+  @Rule public final StaticClassResource autoResource = new StaticClassResource(AutoBuilder.class);
 
   @Parameters(name = "{0}")
   public static Collection<?> data() {

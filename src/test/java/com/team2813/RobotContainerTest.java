@@ -1,5 +1,6 @@
 package com.team2813;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,6 +11,7 @@ public final class RobotContainerTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
 
   @Rule public final NetworkTableResource networkTable = new NetworkTableResource();
+  @Rule public final StaticClassResource autoResource = new StaticClassResource(AutoBuilder.class);
 
   @Test
   public void constructorDoesNotRaise() {
