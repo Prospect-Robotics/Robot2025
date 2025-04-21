@@ -44,7 +44,5 @@ public class StaticClassResource extends ExternalResource {
         throw new RuntimeException(e);
       }
     }
-    DriverStationSim.resetData();
-    DriverStationSim.notifyNewData();
   }
 }
