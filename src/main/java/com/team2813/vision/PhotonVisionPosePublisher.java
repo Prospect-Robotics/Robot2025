@@ -1,6 +1,6 @@
 package com.team2813.vision;
 
-import static com.team2813.vision.VisionUtil.getTableForCamera;
+import static com.team2813.vision.VisionNetworkTables.getTableForCamera;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;

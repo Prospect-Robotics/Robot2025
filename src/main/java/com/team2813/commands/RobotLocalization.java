@@ -12,6 +12,7 @@ import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
+import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,7 +56,7 @@ public class RobotLocalization {
         networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
     limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
     NetworkTable limelightNetworkTable =
-        LimelightPosePublisher.getNetworkTable(networkTableInstance);
+        VisionNetworkTables.getTableForLimelight(networkTableInstance);
     hasDataPublisher = limelightNetworkTable.getBooleanTopic("hasData").publish();
     visibleAprilTagPosesPublisher =
         limelightNetworkTable.getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct).publish();
