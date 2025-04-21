@@ -96,7 +96,7 @@ public class DriverStationSimResource extends ExternalResource {
       return this;
     }
 
-    private void perform() {
+    public void perform() {
       this.enabled.ifPresent(DriverStationSim::setEnabled);
       this.autonomous.ifPresent(DriverStationSim::setAutonomous);
       this.test.ifPresent(DriverStationSim::setTest);
@@ -113,6 +113,10 @@ public class DriverStationSimResource extends ExternalResource {
       this.replayNumber.ifPresent(DriverStationSim::setMatchNumber);
       DriverStationSim.notifyNewData();
     }
+  }
+
+  public static ModificationBuilder modificationBuilder() {
+    return new ModificationBuilder();
   }
 
   @Override

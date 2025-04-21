@@ -23,6 +23,9 @@ public class LoggingTest {
   @Rule public final NetworkTableResource networkTableResource = new NetworkTableResource();
 
   @Rule
+  public final DriverStationSimResource driverStationSimResource = new DriverStationSimResource();
+
+  @Rule
   public final StaticClassResource loggingResource = new StaticClassResource(DataLogManager.class);
 
   private File getLogDirectory() throws IOException {
@@ -101,15 +104,29 @@ public class LoggingTest {
       robot.disabledInit();
       robot.disabledPeriodic();
       assertThat(logDirectory.listFiles()).isEmpty();
-      DriverStationSim.setEventName("GALILEO");
-      DriverStationSim.setAllianceStationId(AllianceStationID.Blue1);
-      DriverStationSim.setMatchNumber(1);
-      DriverStationSim.setMatchType(DriverStation.MatchType.Qualification);
-      DriverStationSim.setFmsAttached(true);
-      DriverStationSim.setDsAttached(true);
-      DriverStationSim.notifyNewData();
-      robot.disabledPeriodic();
-      Thread.sleep(1000);
+
+      DriverStationSimResource.modificationBuilder()
+          .eventName("GALILEO")
+          .allianceStationId(AllianceStationID.Blue1)
+          .matchType(DriverStation.MatchType.Qualification)
+              .matchNumber(1)
+          .fmsAttached(true)
+          .dsAttahced(true)
+          .perform();
+      
+      assertThat(DriverStation.getEventName()).isEqualTo("GALILEO");
+      assertThat(DriverStation.isFMSAttached()).isTrue();
+      assertThat(DriverStation.isDSAttached()).isTrue();
+      
+      // DataLogManager requires updates from driver station, and this supplies it. Runs a bunch of times so that it works properly
+      for (int i = 0; i < 1_000; i++) {
+        robot.disabledPeriodic();
+        DriverStationSim.notifyNewData();
+      }
+      
+      // sleep to make the hoot file show up
+      Thread.sleep(1_000);
+      
       System.err.println(Arrays.toString(logDirectory.listFiles()));
       File[] directoryFiles =
           logDirectory.listFiles((file, name) -> name.endsWith(".hoot") | name.endsWith(".wpilog"));
