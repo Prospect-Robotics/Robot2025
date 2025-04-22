@@ -5,16 +5,19 @@ import static com.google.common.truth.Fact.simpleFact;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.common.truth.FailureMetadata;
-import com.google.common.truth.Subject;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+
 import org.junit.Test;
+
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Subject;
+
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class BuildConstantsPublisherTest {
 
@@ -122,26 +125,30 @@ public class BuildConstantsPublisherTest {
     publisher.log();
 
     // Assert.
-    assertThat(outputStream.toString())
-        .containsMatch(
-            // NOTE that [\r\n]+ is used to match both Windows (\r\n) and Unix (\n) line endings.
-            "MavenName:     Robot2025[\r\n]+"
-                // Matches a Git revision number, e.g., "121"
-                + "GitRevision:   [0-9]+[\r\n]+"
-                // Matches a Git revision hash, e.g., 08205a25fe10c6c6c1ea4db2deabb4aaf4617637
-                + "GitSha:        [0-9a-f]+[\r\n]+"
-                // Matches a Git date, e.g., "2023-10-01 12:34:56 PDT"
-                + "GitDate:       \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.+[\r\n]+"
-                // Matches a Git branch name, e.g., "main"
-                + "GitBranch:     .+[\r\n]+"
-                // Matches a build date, e.g., "2023-10-01 12:34:56 PDT"
-                + "BuildDate:     \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.+[\r\n]+"
-                // Matches a Unix timestamp, e.g., "1696175696"
-                + "BuildUnixTime: \\d+[\r\n]+"
-                // Matches a dirty flag, e.g., "0" or "1"
-                + "Dirty:         [01][\r\n]+");
+    try {
 
-    // Restore System.out
-    System.setOut(originalOut);
+      assertThat(outputStream.toString())
+          .containsMatch(
+              // NOTE that \r?\n is used to match both Windows (\r\n) and Unix (\n) line endings.
+              "MavenName:     Robot2025\r?\n"
+                  // Matches a Git revision number, e.g., "121"
+                  + "GitRevision:   [0-9]+\r?\n"
+                  // Matches a Git revision hash, e.g., "08205a25fe10c6c6c1ea4db2deabb4aaf4617637"
+                  // Accepts "NA" for users that have no git installed.
+                  + "GitSha:        (NA|[0-9a-f]{40})\r?\n"
+                  // Matches a Git date, e.g., "2023-10-01 12:34:56 PDT"
+                  + "GitDate:       \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.+\r?\n"
+                  // Matches a Git branch name, e.g., "main"
+                  + "GitBranch:     .+\r?\n"
+                  // Matches a build date, e.g., "2023-10-01 12:34:56 PDT"
+                  + "BuildDate:     \\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.+\r?\n"
+                  // Matches a Unix timestamp, e.g., "1696175696"
+                  + "BuildUnixTime: \\d+\r?\n"
+                  // Matches a dirty flag, e.g., "0" or "1"
+                  + "Dirty:         [01]\r?\n");
+    } finally {
+      // Restore System.out
+      System.setOut(originalOut);
+    }
   }
 }

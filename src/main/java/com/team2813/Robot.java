@@ -31,9 +31,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     SignalLogger.setPath("/U/logs");
-    // Use the default log directory ("") for simulation because "/U/..." is typically not a valid
-    // root on the simulation host machine (usually, a Windows laptop).
-    DataLogManager.start(isSimulation() ? "" : "/U/logs");
+    DataLogManager.start("/U/logs");
     DataLogManager.logNetworkTables(true);
     DriverStation.startDataLog(DataLogManager.getLog());
     SignalLogger.enableAutoLogging(true);
