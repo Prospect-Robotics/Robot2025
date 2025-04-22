@@ -40,8 +40,9 @@ public class Robot extends TimedRobot {
       SignalLogger.start();
     }
     CameraServer.startAutomaticCapture();
-    // Publish build constants to NetworkTables.
+    // Publish build constants to the Metadata table on NetworkTables and print them in system log.
     m_buildConstantsPublisher.publish();
+    m_buildConstantsPublisher.log();
   }
 
   @Override

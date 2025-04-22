@@ -97,4 +97,16 @@ public class BuildConstantsPublisher {
     m_buildUnixTimePublisher.set(BuildConstants.BUILD_UNIX_TIME);
     m_dirtyPublisher.set(BuildConstants.DIRTY);
   }
+
+  /** Logs build constants to the console. */
+  public void log() {
+    System.out.println("MavenName:     " + BuildConstants.MAVEN_NAME);
+    System.out.println("GitRevision:   " + BuildConstants.GIT_REVISION);
+    System.out.println("GitSha:        " + BuildConstants.GIT_SHA);
+    System.out.println("GitDate:       " + BuildConstants.GIT_DATE);
+    System.out.println("GitBranch:     " + BuildConstants.GIT_BRANCH);
+    System.out.println("BuildDate:     " + BuildConstants.BUILD_DATE);
+    System.out.println("BuildUnixTime: " + BuildConstants.BUILD_UNIX_TIME);
+    System.out.println("Dirty:         " + BuildConstants.DIRTY);
+  }
 }
