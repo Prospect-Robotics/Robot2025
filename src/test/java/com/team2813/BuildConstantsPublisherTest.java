@@ -126,7 +126,6 @@ public class BuildConstantsPublisherTest {
 
     // Assert.
     try {
-
       assertThat(outputStream.toString())
           .containsMatch(
               // NOTE that \r?\n is used to match both Windows (\r\n) and Unix (\n) line endings.
