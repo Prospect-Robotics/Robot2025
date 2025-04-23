@@ -15,13 +15,13 @@ public final class RobotContainerTest {
   public void constructorDoesNotRaise() {
     //noinspection EmptyTryBlock
     try (var container =
-        new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {}
+        new RobotContainer(shuffleboard, () -> networkTable.getNetworkTableInstance())) {}
   }
 
   @Test
   public void conBeConstructedMultipleTimes() {
     //noinspection EmptyTryBlock
     try (var container =
-        new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {}
+        new RobotContainer(shuffleboard, () -> networkTable.getNetworkTableInstance())) {}
   }
 }

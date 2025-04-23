@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotContainer implements AutoCloseable {
@@ -50,8 +51,10 @@ public class RobotContainer implements AutoCloseable {
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
-  public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
+  public RobotContainer(
+      ShuffleboardTabs shuffleboard, Supplier<NetworkTableInstance> networkTableInstanceSupplier) {
     var localization = new RobotLocalization();
+    NetworkTableInstance networkTableInstance = networkTableInstanceSupplier.get();
     this.drive = new Drive(networkTableInstance, localization);
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
