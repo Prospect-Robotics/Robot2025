@@ -183,11 +183,13 @@ public class RobotContainer implements AutoCloseable {
         "BumpAlgaeHigh",
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.TOP),
-                        elevator)
-                    .withTimeout(SECONDS_2),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.05),
+                    new LockFunctionCommand(
+                            elevator::atPosition,
+                            () -> elevator.setSetpoint(Elevator.Position.TOP),
+                            elevator)
+                        .withTimeout(SECONDS_2)),
                 new LockFunctionCommand(
                         intakePivot::atPosition,
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
@@ -500,6 +502,10 @@ public class RobotContainer implements AutoCloseable {
         new InstantCommand(
             () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
             groundIntakePivot));
+    MANUAL_FAST_GROUND_OUTTAKE.onTrue(
+        new InstantCommand(groundIntake::fastOuttakeCoral, groundIntake));
+    MANUAL_FAST_GROUND_OUTTAKE.onFalse(
+        new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake));
   }
 
   private static final Pose2d botposeBlueOrig =
