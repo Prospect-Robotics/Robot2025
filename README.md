@@ -17,6 +17,14 @@ You only need to follow the instructions for cloning with one protocol
 If you haven't cloned with HTTPS or SSH before, you need to set them up first.
 See the documentation for the [HTTPS setup](https://github.com/git-ecosystem/git-credential-manager/tree/release), and the [SSH Setup](https://docs.github.com/en/authentication/connecting-to-github-with-ssh).
 
+Before cloning, it is recommended that you set the `submodule.stickyRecursiveClone`
+git config option to `true` to make working with the lib2813 submodule easier (see
+[this StackOverflow answer](https://stackoverflow.com/a/53622660) for details about this option).
+To do this, run the following command from any directory:
+
+```
+git config --global submodule.stickyRecursiveClone true
+```
 
 ### Cloning with HTTPS
 
@@ -30,6 +38,7 @@ git clone --recurse-submodules https://github.com/Prospect-Robotics/Robot2025.gi
 > The `--recurse-submodules` can be omitted to only clone the `Robot2025` repo, and not the `lib2813` submodule.
 > If the `lib2813` submodule is not present, the code will not build.
 
+After the clone process completes, follow the [Post-Clone Setup](#post-clone-setup).
 ### Cloning with SSH
 
 > [!CAUTION]
@@ -48,6 +57,14 @@ git clone git@github.com:Prospect-Robotics/lib2813.git # clone repo with ssh (su
 git submodule init lib2813 # initialize the lib2813 submodule
 git config submodule.lib2813.url git@github.com:Prospect-Robotics/lib2813.git # Set the submodule url to use ssh instead of the default https
 git submodule update # check out the correct commit in the lib2813 submodule
+```
+
+### Post-Clone Setup
+
+After cloning, it is recommended that you run the following in the Robot2025 directory:
+
+```
+git config --local include.path ../.gitconfig
 ```
 
 ## Deploying to the robot
