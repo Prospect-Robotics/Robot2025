@@ -9,7 +9,7 @@ import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
-import com.team2813.lib2813.preferences.PreferencesInjector;
+import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,39 +29,26 @@ import org.json.simple.parser.ParseException;
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
-  private final AutoAlignConfiguration config;
+  private final Configuration config;
   private final StructPublisher<Pose2d> lastPosePublisher;
   private final LimelightPosePublisher limelightPosePublisher;
   private final BooleanPublisher hasDataPublisher;
   private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
 
-  public record AutoAlignConfiguration(boolean useAutoAlignWaypoints) {
-
-    /** Creates a builder for {@code AutoAlignConfiguration} with default values. */
-    public static AutoAlignConfiguration.Builder builder() {
-      return new AutoBuilder_RobotLocalization_AutoAlignConfiguration_Builder()
-          .useAutoAlignWaypoints(true);
-    }
+  /** Holder for all configuration for {@link RobotLocalization}. */
+  public record Configuration(boolean useAutoAlignWaypoints) {
 
     /** Creates an instance from preference values stored in the robot's flash memory. */
-    public static AutoAlignConfiguration fromPreferences() {
-      AutoAlignConfiguration defaultConfig = builder().build();
-      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
-    }
-
-    @com.google.auto.value.AutoBuilder
-    public interface Builder {
-      Builder useAutoAlignWaypoints(boolean enabled);
-
-      AutoAlignConfiguration build();
+    public static Configuration fromPreferences() {
+      return PersistedConfiguration.fromPreferences("RobotLocalization", Configuration.class);
     }
   }
 
   public RobotLocalization(NetworkTableInstance networkTableInstance) {
-    this(networkTableInstance, AutoAlignConfiguration.fromPreferences());
+    this(networkTableInstance, Configuration.fromPreferences());
   }
 
-  RobotLocalization(NetworkTableInstance networkTableInstance, AutoAlignConfiguration config) {
+  RobotLocalization(NetworkTableInstance networkTableInstance, Configuration config) {
     this.config = config;
 
     lastPosePublisher =

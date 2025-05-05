@@ -17,7 +17,7 @@ class AllPreferences {
   private static final Map<Key, String> LEGACY_BOOLEAN_PREFERENCES =
       Map.of(
           Key.USE_AUTO_ALIGN_WAYPOINTS,
-          "commands.RobotLocalization.AutoAlignConfiguration.useAutoAlignWaypoints",
+          "RobotLocalization/useAutoAlignWaypoints",
           Key.USE_PHOTON_VISION_LOCATION,
           "subsystems.Drive.DriveConfiguration.usePhotonVisionLocation");
 
