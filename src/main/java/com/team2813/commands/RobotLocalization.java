@@ -5,11 +5,11 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.team2813.AllPreferences;
 import com.team2813.RobotContainer;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.lib2813.limelight.LocationalData;
+import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -29,6 +29,37 @@ import org.json.simple.parser.ParseException;
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
+  private final Configuration config;
+  private final StructPublisher<Pose2d> lastPosePublisher;
+  private final LimelightPosePublisher limelightPosePublisher;
+  private final BooleanPublisher hasDataPublisher;
+  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
+
+  /** Holder for all configuration for {@link RobotLocalization}. */
+  public record Configuration(boolean useAutoAlignWaypoints) {
+
+    /** Creates an instance from preference values stored in the robot's flash memory. */
+    public static Configuration fromPreferences() {
+      return PersistedConfiguration.fromPreferences("RobotLocalization", Configuration.class);
+    }
+  }
+
+  public RobotLocalization(NetworkTableInstance networkTableInstance) {
+    this(networkTableInstance, Configuration.fromPreferences());
+  }
+
+  RobotLocalization(NetworkTableInstance networkTableInstance, Configuration config) {
+    this.config = config;
+
+    lastPosePublisher =
+        networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
+    limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
+    NetworkTable limelightNetworkTable =
+        LimelightPosePublisher.getNetworkTable(networkTableInstance);
+    hasDataPublisher = limelightNetworkTable.getBooleanTopic("hasData").publish();
+    visibleAprilTagPosesPublisher =
+        limelightNetworkTable.getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct).publish();
+  }
 
   public Optional<BotPoseEstimate> limelightLocation(
       Supplier<Pose2d> odometryPoseSupplier, Drive.DriveConfiguration driveConfig) {
@@ -101,9 +132,6 @@ public class RobotLocalization {
     return arrayOfPos;
   }
 
-  private final StructPublisher<Pose2d> lastPosePublisher =
-      NetworkTableInstance.getDefault().getStructTopic("Auto Align to", Pose2d.struct).publish();
-
   /**
    * Creates a command from the current position to the nearest target.
    *
@@ -136,7 +164,7 @@ public class RobotLocalization {
   }
 
   public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, positions());
     } else {
       return createPathfindCommand();
@@ -144,7 +172,7 @@ public class RobotLocalization {
   }
 
   public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, leftPositions());
     } else {
       // TODO: be able to use left ones only
@@ -153,7 +181,7 @@ public class RobotLocalization {
   }
 
   public Command getRightAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (AllPreferences.useAutoAlignWaypoints().getAsBoolean()) {
+    if (config.useAutoAlignWaypoints) {
       return createPath(drivePosSupplier, rightPositions());
     } else {
       // TODO: be able to use right ones only
@@ -175,15 +203,4 @@ public class RobotLocalization {
     PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
     return AutoBuilder.pathfindThenFollowPath(path, constraints);
   }
-
-  private final LimelightPosePublisher limelightPosePublisher =
-      new LimelightPosePublisher(NetworkTableInstance.getDefault());
-  private final BooleanPublisher hasDataPublisher =
-      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
-          .getBooleanTopic("hasData")
-          .publish();
-  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher =
-      LimelightPosePublisher.getNetworkTable(NetworkTableInstance.getDefault())
-          .getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct)
-          .publish();
 }
