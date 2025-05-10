@@ -1,0 +1,11 @@
+#
+# Recommended git configuration options for this robot.
+#
+# See README.md for details.
+#
+
+[push]
+	recurseSubmodules = check
+	autoSetupRemote = true
+[submodule]
+	recurse = true
