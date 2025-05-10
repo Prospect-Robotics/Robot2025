@@ -46,7 +46,7 @@ final class TimestampedValue<T> {
   /**
    * Gets the network tables timestamp value for this instance.
    *
-   * @return the FPGA timestamp in milliseconds
+   * @return the FPGA timestamp in microseconds
    */
   public long networkTablesTimestampMicros() {
     // Note: Per the WPILib documentation at
