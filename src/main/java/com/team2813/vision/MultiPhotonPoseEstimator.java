@@ -1,6 +1,8 @@
 package com.team2813.vision;
 
-import static com.team2813.vision.VisionUtil.getTableForCamera;
+import static com.team2813.vision.CameraConstants.LIMELIGHT_CAMERA_NAME;
+import static com.team2813.vision.VisionNetworkTables.CAMERA_POSE_TOPIC;
+import static com.team2813.vision.VisionNetworkTables.getTableForCamera;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -50,7 +52,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     }
 
     private Builder addCamera(String name, Transform3d transform, Optional<String> description) {
-      if (name.equals(LimelightPosePublisher.CAMERA_NAME)) {
+      if (name.equals(LIMELIGHT_CAMERA_NAME)) {
         throw new IllegalArgumentException(String.format("Invalid camera name: '%s'", name));
       }
       if (cameraConfigs.put(name, new CameraConfig(transform, description)) != null) {
@@ -94,7 +96,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
               builder.fieldTags, builder.poseStrategy, cameraConfig.robotToCamera);
       var estimatedPosePublisher = new PhotonVisionPosePublisher(camera, builder.fieldTags);
       NetworkTable table = getTableForCamera(camera);
-      var cameraPosePublisher = table.getStructTopic("cameraPose", Pose3d.struct).publish();
+      var cameraPosePublisher = table.getStructTopic(CAMERA_POSE_TOPIC, Pose3d.struct).publish();
 
       cameraDatas.add(
           new CameraData(
