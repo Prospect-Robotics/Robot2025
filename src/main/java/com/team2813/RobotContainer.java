@@ -17,6 +17,7 @@ import com.pathplanner.lib.events.EventTrigger;
 import com.team2813.commands.*;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
+import com.team2813.simulation.MapleSim;
 import com.team2813.subsystems.*;
 import com.team2813.sysid.*;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,6 +35,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
 import org.json.simple.parser.ParseException;
 
 public class RobotContainer implements AutoCloseable {
@@ -47,6 +50,9 @@ public class RobotContainer implements AutoCloseable {
   private final GroundIntake groundIntake = new GroundIntake();
   private final GroundIntakePivot groundIntakePivot;
 
+  //TODO: See if maple sim works well here.
+  public final MapleSim mapleSim;
+
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
@@ -58,6 +64,7 @@ public class RobotContainer implements AutoCloseable {
     this.climb = new Climb(networkTableInstance);
     this.intake = new Intake(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
+    this.mapleSim = new MapleSim(new Arena2025Reefscape());
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
@@ -66,6 +73,7 @@ public class RobotContainer implements AutoCloseable {
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands, localization);
+
   }
 
   /**
