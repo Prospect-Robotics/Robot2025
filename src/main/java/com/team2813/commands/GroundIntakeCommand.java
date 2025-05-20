@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class GroundIntakeCommand extends Command {
-  GroundIntakePivot groundIntakePivot;
-  GroundIntake groundIntake;
+  private final GroundIntakePivot groundIntakePivot;
+  private final GroundIntake groundIntake;
   double startTime;
 
   public GroundIntakeCommand(GroundIntakePivot groundIntakePivot, GroundIntake groundIntake) {

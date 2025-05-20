@@ -440,20 +440,9 @@ public class RobotContainer implements AutoCloseable {
     intakePivot.setDefaultCommand(
         new ManuelIntakePivot(intakePivot, () -> -OPERATOR_CONTROLLER.getLeftY()));
 
-    CLIMB_DOWN.onTrue(
-        new SequentialCommandGroup(
-            new LockFunctionCommand(
-                intakePivot::atPosition,
-                () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
-                intakePivot),
-            new InstantCommand(climb::lower, climb)));
-    CLIMB_DOWN.onFalse(new InstantCommand(climb::stop, climb));
+    CLIMB_DOWN.onTrue(new ClimbDownCommand(climb, intakePivot));
 
-    CLIMB_UP.whileTrue(
-        new SequentialCommandGroup(
-            new LockFunctionCommand(climb::limitSwitchPressed, climb::raise, climb),
-            new InstantCommand(climb::stop, climb)));
-    CLIMB_UP.onFalse(new InstantCommand(climb::stop, climb));
+    CLIMB_UP.whileTrue(new ClimbUpCommand(climb, climb::limitSwitchPressed));
 
     ALGAE_BUMP.whileTrue(
         new SequentialCommandGroup(
