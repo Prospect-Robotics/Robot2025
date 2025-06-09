@@ -1,5 +1,9 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <JavaCodeStyleSettings>
+      <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="15" />
+      <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="14" />
+    </JavaCodeStyleSettings>
     <codeStyleSettings language="JAVA">
       <indentOptions>
         <option name="INDENT_SIZE" value="2" />
