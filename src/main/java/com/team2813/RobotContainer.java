@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
 import org.json.simple.parser.ParseException;
 
@@ -50,7 +49,7 @@ public class RobotContainer implements AutoCloseable {
   private final GroundIntake groundIntake = new GroundIntake();
   private final GroundIntakePivot groundIntakePivot;
 
-  //TODO: See if maple sim works well here.
+  // TODO: See if maple sim works well here.
   public final MapleSim mapleSim;
 
   private final SendableChooser<Command> autoChooser;
@@ -73,7 +72,6 @@ public class RobotContainer implements AutoCloseable {
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
     RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
     configureBindings(autoCommands, localization);
-
   }
 
   /**

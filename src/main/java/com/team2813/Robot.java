@@ -5,7 +5,6 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.team2813.simulation.MapleSim;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -16,8 +15,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
-
-import java.util.Map;
 
 public class Robot extends TimedRobot {
   private static final BuildConstantsPublisher m_buildConstantsPublisher =
@@ -74,13 +71,13 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-//    Consider the following:
-//    CommandScheduler.getInstance().run();
+    //    Consider the following:
+    //    CommandScheduler.getInstance().run();
 
     Arena2025Reefscape.getInstance().simulationPeriodic();
     m_robotContainer.mapleSim.periodic();
 
-    //TODO: Have these positions shown in advantage scope.
+    // TODO: Have these positions shown in advantage scope.
   }
 
   @Override
