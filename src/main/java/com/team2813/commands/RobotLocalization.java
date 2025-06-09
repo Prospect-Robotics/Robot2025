@@ -1,5 +1,8 @@
 package com.team2813.commands;
 
+import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
+import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
@@ -12,6 +15,7 @@ import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
+import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,10 +59,12 @@ public class RobotLocalization {
         networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
     limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
     NetworkTable limelightNetworkTable =
-        LimelightPosePublisher.getNetworkTable(networkTableInstance);
-    hasDataPublisher = limelightNetworkTable.getBooleanTopic("hasData").publish();
+        VisionNetworkTables.getTableForLimelight(networkTableInstance);
+    hasDataPublisher = limelightNetworkTable.getBooleanTopic(HAS_DATA_TOPIC).publish();
     visibleAprilTagPosesPublisher =
-        limelightNetworkTable.getStructArrayTopic("visibleAprilTagPoses", Pose3d.struct).publish();
+        limelightNetworkTable
+            .getStructArrayTopic(VISIBLE_APRIL_TAG_POSES_TOPIC, Pose3d.struct)
+            .publish();
   }
 
   public Optional<BotPoseEstimate> limelightLocation(
@@ -161,14 +167,6 @@ public class RobotLocalization {
             // new GoalEndState(0.0, newPosition.getRotation())
             );
     return AutoBuilder.followPath(path);
-  }
-
-  public Command getAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
-    if (config.useAutoAlignWaypoints) {
-      return createPath(drivePosSupplier, positions());
-    } else {
-      return createPathfindCommand();
-    }
   }
 
   public Command getLeftAutoAlignCommand(Supplier<Pose2d> drivePosSupplier) {
