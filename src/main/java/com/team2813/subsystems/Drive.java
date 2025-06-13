@@ -55,7 +55,7 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
-public class Drive extends SubsystemBase implements AutoCloseable {
+public class Drive extends SubsystemBase implements AutoCloseable, DriveInterface {
   private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private final RobotLocalization localization;
@@ -98,7 +98,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   /**
    * Configurable values for the {@code Drive} subsystem
    *
-   * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
+   * <p>The values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
   public record DriveConfiguration(
@@ -133,6 +133,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     /** Creates an instance from preference values stored in the robot's flash memory. */
+    @SuppressWarnings({"removal"}) // SILENCE FOOL!!
     public static DriveConfiguration fromPreferences() {
       DriveConfiguration defaultConfig = builder().build();
       return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
@@ -217,7 +218,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
         constantCreator =
             new SwerveModuleConstantsFactory<
                     TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
-                // WARNING: TUNE ALL OF THESE THINGS!!!!!!
+                // Un-WARNING: TUNE ALL OF THESE THINGS!!!!!!
                 .withDriveMotorGearRatio(6.75)
                 .withSteerMotorGearRatio(150.0 / 7)
                 .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
@@ -370,7 +371,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   private boolean correctRotation = false;
 
-  // Note: This is used for teleop drive.
+  // Note: This was used for teleop drive — and only once in DefaultDriveCommand.
+
+  /** Sets the speed at which the robot should move. */
   public void drive(double xSpeed, double ySpeed, double rotation) {
     double multiplier = onRed() && correctRotation ? -this.multiplier : this.multiplier;
     drivetrain.setControl(
@@ -386,10 +389,19 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   // Note: This is used for auto drive.
+
+  /**
+   * Sets the speed at which the robot should move. ChassisSpeeds includes both translation and
+   * rotation by default.
+   *
+   * @param demand How fast the robot should translate (X and Y) or rotate.
+   */
   public void drive(ChassisSpeeds demand) {
+
     drivetrain.setControl(applyRobotSpeedsApplier.withSpeeds(demand));
   }
 
+  // BTW: Not used anywhere.
   public void turnToFace(Rotation2d rotation) {
     drivetrain.setControl(fieldCentricFacingAngleApplier.withTargetDirection(rotation));
   }
@@ -411,6 +423,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    *
    * @param rotationRate rotation rate in units as defined by the WPIlib unit library.
    */
+
+  // BTW: This is also used no where in the code.
   public void setRotationVelocity(AngularVelocity rotationRate) {
     drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
   }
