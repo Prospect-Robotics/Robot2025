@@ -19,6 +19,7 @@ import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.limelight.Limelight;
 import com.team2813.simulation.MapleSim;
 import com.team2813.subsystems.*;
+import com.team2813.subsystems.Drive;
 import com.team2813.sysid.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -44,7 +45,7 @@ public class RobotContainer implements AutoCloseable {
   private final Climb climb;
   private final Intake intake;
   private final Elevator elevator;
-  private final Drive drive;
+  private final DriveInterface drive;
   private final IntakePivot intakePivot;
   private final GroundIntake groundIntake = new GroundIntake();
   private final GroundIntakePivot groundIntakePivot;
@@ -57,13 +58,21 @@ public class RobotContainer implements AutoCloseable {
 
   public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
     var localization = new RobotLocalization(networkTableInstance);
-    this.drive = new Drive(networkTableInstance, localization);
+
+    //    this.drive = new Drive(networkTableInstance, localization);
+
+    if (Robot.isReal()) {
+      this.drive = new Drive(networkTableInstance, localization); // Real implementation
+    } else {
+      this.drive = new MapleSimDrive(); // Simulation implementation
+    }
+
     this.elevator = new Elevator(networkTableInstance);
     this.intakePivot = new IntakePivot(networkTableInstance);
     this.climb = new Climb(networkTableInstance);
     this.intake = new Intake(networkTableInstance);
     this.groundIntakePivot = new GroundIntakePivot(networkTableInstance);
-    this.mapleSim = new MapleSim(new Arena2025Reefscape());
+    this.mapleSim = new MapleSim(new Arena2025Reefscape(), networkTableInstance);
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
@@ -244,7 +253,7 @@ public class RobotContainer implements AutoCloseable {
   }
 
   private static SendableChooser<Command> configureAuto(
-      Drive drive,
+      DriveInterface drive,
       Elevator elevator,
       IntakePivot intakePivot,
       Intake intake,

@@ -1,11 +1,12 @@
 package com.team2813.commands;
 
 import com.team2813.subsystems.Drive;
+import com.team2813.subsystems.DriveInterface;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.Supplier;
 
 public final class DefaultDriveCommand extends Command {
-  private final Drive drive;
+  private final DriveInterface drive;
   private final Supplier<Double> xSupplier;
   private final Supplier<Double> ySupplier;
   private final Supplier<Double> rotationSupplier;
@@ -22,6 +23,7 @@ public final class DefaultDriveCommand extends Command {
     addRequirements(drive);
   }
 
+  // Replaces the original drive(x,y, rotation) with the ChassisSpeeds Version.
   @Override
   public void execute() {
     drive.drive(xSupplier.get(), ySupplier.get(), rotationSupplier.get());

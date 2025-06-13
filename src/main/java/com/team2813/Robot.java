@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.Arena2025Reefscape;
 
 public class Robot extends TimedRobot {
@@ -70,15 +71,7 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousPeriodic() {
-    //    Consider the following:
-    //    CommandScheduler.getInstance().run();
-
-    Arena2025Reefscape.getInstance().simulationPeriodic();
-    m_robotContainer.mapleSim.periodic();
-
-    // TODO: Have these positions shown in advantage scope.
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void autonomousExit() {}
@@ -106,6 +99,22 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testExit() {}
+
+  @Override
+  public void simulationInit() {
+    System.out.println(SimulatedArena.getInstance());
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    //    Consider the following:
+    CommandScheduler.getInstance().run();
+
+    Arena2025Reefscape.getInstance().simulationPeriodic();
+    m_robotContainer.mapleSim.periodic();
+
+    // TODO: Have these positions shown in advantage scope.
+  }
 
   private static class RealShuffleboardTabs implements ShuffleboardTabs {
     @Override
