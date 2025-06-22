@@ -64,8 +64,7 @@ public class RobotContainer implements AutoCloseable {
     sysIdRoutineSelector =
         new SysIdRoutineSelector(
             new SubsystemRegistry(Set.of(drive)), RobotContainer::getSysIdRoutines, shuffleboard);
-    RobotCommands autoCommands = new RobotCommands(intake, intakePivot, elevator);
-    configureBindings(autoCommands, localization);
+    configureBindings(localization);
   }
 
   /**
@@ -331,7 +330,7 @@ public class RobotContainer implements AutoCloseable {
     return routines;
   }
 
-  private void configureBindings(RobotCommands autoCommands, RobotLocalization localization) {
+  private void configureBindings(RobotLocalization localization) {
     // Driver
     SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
     SLOWMODE_BUTTON.onFalse(new InstantCommand(() -> drive.enableSlowMode(false), drive));
