@@ -3,7 +3,11 @@ package com.team2813.commands;
 import com.team2813.subsystems.GroundIntake;
 import com.team2813.subsystems.GroundIntakePivot;
 import com.team2813.subsystems.intake.Intake;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public final class OuttakeCommand {
 

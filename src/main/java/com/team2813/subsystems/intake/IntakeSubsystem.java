@@ -15,7 +15,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
 class IntakeSubsystem extends ParameterizedIntakeSubsystem implements Intake {
@@ -53,22 +52,9 @@ class IntakeSubsystem extends ParameterizedIntakeSubsystem implements Intake {
     super.intakeGamePiece();
   }
 
-  void outtakeCoral() {
-    super.outtakeGamePiece();
-  }
-
-  @Override
-  public Subsystem asSubsystem() {
-    return this;
-  }
-
   @Override
   public Command bumpAlgaeCommand() {
     return setMotorDemandCommand(BUMP_VOLTAGE);
-  }
-
-  void bumpAlgae() {
-    setMotorDemand(BUMP_VOLTAGE);
   }
 
   @Override
