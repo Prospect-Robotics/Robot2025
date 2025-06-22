@@ -49,8 +49,9 @@ public class EventTriggerTest {
 
   @Test
   public void eventExists() {
-    try (var container = new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {
-      // The RobotContainer constructor has a side effect of registering named commands.
+    try (var container =
+        RobotContainer.create(shuffleboard, networkTable.getNetworkTableInstance())) {
+      // RobotContainer.create() has a side effect of registering named commands.
       // Sadly, all the methods of NamedCommands are static, so we cannot make this
       // dependency explicit.
       assertThat(pathPlannerMapProvider.getMap().containsKey(eventName)).isTrue();

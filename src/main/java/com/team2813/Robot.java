@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
   public Robot() {
     AllPreferences.migrateLegacyPreferences();
     m_robotContainer =
-        new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
+        RobotContainer.create(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
   }
 
   @Override

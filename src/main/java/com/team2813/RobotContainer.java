@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import java.io.IOException;
 import java.util.Set;
+import javax.inject.Inject;
 import org.json.simple.parser.ParseException;
 
 public class RobotContainer implements AutoCloseable {
@@ -52,18 +53,31 @@ public class RobotContainer implements AutoCloseable {
   private final SendableChooser<Command> autoChooser;
   private final SysIdRoutineSelector sysIdRoutineSelector;
 
-  public RobotContainer(ShuffleboardTabs shuffleboard, NetworkTableInstance networkTableInstance) {
-    Subsystems subsystems = Subsystems.create(networkTableInstance, shuffleboard);
-    drive = subsystems.drive();
-    elevator = subsystems.elevator();
-    intakePivot = subsystems.intakePivot();
-    climb = subsystems.climb();
-    intake = subsystems.intake();
+  static RobotContainer create(ShuffleboardTabs sbInstance, NetworkTableInstance ntInstance) {
+    return DaggerRobotContainerComponent.factory()
+        .createContainer(ntInstance, sbInstance)
+        .robotContainer();
+  }
+
+  @Inject
+  RobotContainer(
+      Drive drive,
+      Elevator elevator,
+      IntakePivot intakePivot,
+      Climb climb,
+      Intake intake,
+      SysIdRoutineSelector sysIdRoutineSelector,
+      NetworkTableInstance networkTableInstance) {
+    this.drive = drive;
+    this.elevator = elevator;
+    this.intakePivot = intakePivot;
+    this.climb = climb;
+    this.intake = intake;
+    this.sysIdRoutineSelector = sysIdRoutineSelector;
     groundIntakePivot = new GroundIntakePivot(networkTableInstance);
     autoChooser =
         configureAuto(drive, elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     SmartDashboard.putData("Auto Routine", autoChooser);
-    sysIdRoutineSelector = subsystems.sysIdSelector();
     configureBindings();
   }
 

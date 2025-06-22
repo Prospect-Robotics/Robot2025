@@ -18,7 +18,7 @@ import java.util.function.DoubleSupplier;
       ElevatorModule.class,
       IntakeModule.class,
     })
-class SubsystemsModule {
+public class SubsystemsModule {
 
   @Provides
   @ElevatorControl
