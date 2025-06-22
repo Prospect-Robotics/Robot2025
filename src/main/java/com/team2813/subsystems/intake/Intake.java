@@ -2,7 +2,6 @@ package com.team2813.subsystems.intake;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 
 public interface Intake extends AutoCloseable {
 
@@ -23,10 +22,6 @@ public interface Intake extends AutoCloseable {
   Command slowOutakeCoralCommand();
 
   Command stopIntakeMotorCommand();
-
-  Subsystem asSubsystem();
-
-  void stopIntakeMotorNow();
 
   @Override
   void close();

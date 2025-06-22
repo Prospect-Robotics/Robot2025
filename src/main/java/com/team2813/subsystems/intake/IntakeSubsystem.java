@@ -16,7 +16,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
@@ -55,33 +54,28 @@ class IntakeSubsystem extends SubsystemBase implements Intake {
   }
 
   @Override
-  public Subsystem asSubsystem() {
-    return this;
-  }
-
-  @Override
   public Command bumpAlgaeCommand() {
-    return new InstantCommand(this::bumpAlgae, this);
+    return new InstantCommand(this::bumpAlgae, this).handleInterrupt(this::stopIntakeMotor);
   }
 
   @Override
   public Command intakeCoralCommand() {
-    return new InstantCommand(this::intakeCoral, this);
+    return new InstantCommand(this::intakeCoral, this).handleInterrupt(this::stopIntakeMotor);
   }
 
   @Override
   public Command outakeCoralCommand() {
-    return new InstantCommand(this::outakeCoral, this);
+    return new InstantCommand(this::outakeCoral, this).handleInterrupt(this::stopIntakeMotor);
   }
 
   @Override
   public Command slowOutakeCoralCommand() {
-    return new InstantCommand(this::slowOuttakeCoral, this);
+    return new InstantCommand(this::slowOuttakeCoral, this).handleInterrupt(this::stopIntakeMotor);
   }
 
   @Override
   public Command stopIntakeMotorCommand() {
-    return new InstantCommand(this::stopIntakeMotorNow, this);
+    return new InstantCommand(this::stopIntakeMotor, this);
   }
 
   // Visible for testing
@@ -105,8 +99,7 @@ class IntakeSubsystem extends SubsystemBase implements Intake {
     isIntaking = false;
   }
 
-  @Override
-  public void stopIntakeMotorNow() {
+  private void stopIntakeMotor() {
     intakeMotor.set(ControlMode.VOLTAGE, 0);
     isIntaking = false;
   }
