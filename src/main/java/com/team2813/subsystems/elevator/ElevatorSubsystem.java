@@ -3,7 +3,6 @@ package com.team2813.subsystems.elevator;
 import static com.team2813.Constants.ELEVATOR_1;
 import static com.team2813.Constants.ELEVATOR_2;
 
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.team2813.commands.LockFunctionCommand;
 import com.team2813.lib2813.control.ControlMode;
@@ -19,7 +18,6 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.*;
-import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 /** This is the Elevator. His name is Pablo. Please be kind to him and say hi. Have a nice day! */
@@ -27,7 +25,6 @@ class ElevatorSubsystem extends MotorSubsystem<ElevatorSubsystem.Position> imple
   private static final Time MOVEMENT_TIMEOUT = Units.Seconds.of(2);
   private final BooleanPublisher atPosition;
   private final DoublePublisher position;
-  private double lastSetpointSetTime;
 
   // You see a message written in blood on the wall...
   // It reads: "THIS CODE WILL LIKELY HAVE TO BE *MAJORLY* REFACTORED
@@ -63,28 +60,8 @@ class ElevatorSubsystem extends MotorSubsystem<ElevatorSubsystem.Position> imple
   }
 
   @Override
-  public Command waitForSetpointCommand() {
-    return new DeferredCommand(
-        () -> {
-          if (atPosition()) {
-            return Commands.none();
-          }
-          double elapsedSecs = Utils.getCurrentTimeSeconds() - lastSetpointSetTime;
-          Time timeout = MOVEMENT_TIMEOUT.minus(Units.Seconds.of(elapsedSecs));
-          return Commands.waitUntil(this::atPosition).withTimeout(timeout);
-        },
-        Set.of(this));
-  }
-
-  @Override
   public Command setSetpointCommand(Position position) {
     return new InstantCommand(() -> setSetpoint(position), this);
-  }
-
-  @Override
-  public void setSetpoint(Position position) {
-    super.setSetpoint(position);
-    lastSetpointSetTime = Utils.getCurrentTimeSeconds();
   }
 
   @Override

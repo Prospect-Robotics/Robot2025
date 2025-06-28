@@ -36,19 +36,9 @@ public interface Elevator {
    */
   Command setSetpointCommand(Position position);
 
-  /**
-   * Returns a command that waits for the elevator to reach the current setpoint.
-   *
-   * <p>If the elevator does not reach the setpoint in a reasonable period of time, the returned
-   * command will cancel itself.
-   */
-  Command waitForSetpointCommand();
-
   Command disableCommand();
 
-  boolean atPosition();
-
-  public enum Position implements Supplier<Angle> {
+  enum Position implements Supplier<Angle> {
     BOTTOM(-0.212500),
     TEST(10),
     TOP(16.358496);
