@@ -2,21 +2,21 @@ package com.team2813.commands;
 
 import com.team2813.subsystems.GroundIntake;
 import com.team2813.subsystems.GroundIntakePivot;
-import com.team2813.subsystems.Intake;
-import edu.wpi.first.wpilibj2.command.*;
+import com.team2813.subsystems.intake.Intake;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
-public class OuttakeCommand extends Command {
-  private final Intake intake;
-  private final GroundIntake groundIntake;
-  private final GroundIntakePivot groundIntakePivot;
-  private final SequentialCommandGroup commandGroup;
+public final class OuttakeCommand {
 
-  public OuttakeCommand(
+  public static Command create(
       Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
-    commandGroup =
+    Command commandGroup =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                new InstantCommand(intake::outakeCoral, intake),
+                intake.outakeCoralCommand(),
                 new ParallelCommandGroup(
                     new InstantCommand(
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
@@ -33,33 +33,12 @@ public class OuttakeCommand extends Command {
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                         groundIntakePivot)),
                 new SequentialCommandGroup(
-                    new WaitCommand(0.15), new InstantCommand(intake::stopIntakeMotor, intake))));
-    this.intake = intake;
-    this.groundIntake = groundIntake;
-    this.groundIntakePivot = groundIntakePivot;
-    addRequirements(intake, groundIntake, groundIntakePivot);
-  }
+                    new WaitCommand(0.15), intake.stopIntakeMotorCommand())));
 
-  @Override
-  public void initialize() {
-    commandGroup.initialize();
-  }
-
-  @Override
-  public void execute() {
-    commandGroup.execute();
-  }
-
-  @Override
-  public boolean isFinished() {
-    return commandGroup.isFinished();
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-    commandGroup.end(interrupted);
-    intake.stopIntakeMotor();
-    groundIntake.stopGroundIntakeMotor();
-    groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
+    return commandGroup.handleInterrupt(
+        () -> {
+          groundIntake.stopGroundIntakeMotor();
+          groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
+        });
   }
 }
