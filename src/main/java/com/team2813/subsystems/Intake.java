@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
-public final class Intake extends IntakeSubsystem {
+public final class Intake extends ParameterizedIntakeSubsystem {
   static final Params PARAMS = Params.builder().setIntakeSpeed(4).setOuttakeSpeed(-3).build();
 
   static final double BUMP_SPEED = -4;

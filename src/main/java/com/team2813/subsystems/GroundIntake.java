@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  *
  * @author spderman333
  */
-public final class GroundIntake extends IntakeSubsystem {
+public final class GroundIntake extends ParameterizedIntakeSubsystem {
   // +rotation = intake, -rotation = outtake.
   static final Params PARAMS = Params.builder().setIntakeSpeed(8).setOuttakeSpeed(-2.75).build();
 
