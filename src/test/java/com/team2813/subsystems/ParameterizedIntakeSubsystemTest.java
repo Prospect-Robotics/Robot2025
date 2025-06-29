@@ -1,0 +1,98 @@
+package com.team2813.subsystems;
+
+import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+
+import com.team2813.CommandTester;
+import com.team2813.CommandTesterExtension;
+import com.team2813.lib2813.control.ControlMode;
+import edu.wpi.first.wpilibj2.command.Command;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Answers;
+
+@ParameterizedClass
+@EnumSource(ControlMode.class)
+@ExtendWith(CommandTesterExtension.class)
+public final class ParameterizedIntakeSubsystemTest {
+  final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
+  private final ParameterizedIntakeSubsystem.Params params;
+
+  public ParameterizedIntakeSubsystemTest(ControlMode controlMode) {
+    params =
+        ParameterizedIntakeSubsystem.Params.builder()
+            .setControlMode(controlMode)
+            .setIntakeDemand(42)
+            .setOuttakeDemand(-3.1415)
+            .build();
+  }
+
+  @Test
+  public void initialState() {
+    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      assertThat(intake.intaking()).isFalse();
+
+      verifyNoInteractions(fakeMotor);
+    }
+  }
+
+  @Test
+  public void intakeItem(CommandTester commandTester) {
+    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      Command command = intake.intakeItemCommand();
+      assertThat(intake.intaking()).isFalse();
+
+      commandTester.runUntilComplete(command);
+
+      assertThat(intake.intaking()).isTrue();
+      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(params.intakeDemand());
+    }
+  }
+
+  @Test
+  public void stopAfterIntakingItem(CommandTester commandTester) {
+    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      Command command = intake.intakeItemCommand();
+      commandTester.runUntilComplete(command);
+      command = intake.stopMotorCommand();
+      assertThat(intake.intaking()).isTrue();
+
+      commandTester.runUntilComplete(command);
+
+      assertThat(intake.intaking()).isFalse();
+      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(0);
+    }
+  }
+
+  @Test
+  public void outtakeItem(CommandTester commandTester) {
+    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      intake.intakeGamePiece();
+      Command command = intake.outtakeItemCommand();
+      assertThat(intake.intaking()).isTrue();
+
+      commandTester.runUntilComplete(command);
+
+      assertThat(intake.intaking()).isFalse();
+      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(params.outtakeDemand());
+    }
+  }
+
+  @Test
+  public void stopAfterOuttakingItem(CommandTester commandTester) {
+    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      intake.intakeGamePiece();
+      Command command = intake.outtakeItemCommand();
+      commandTester.runUntilComplete(command);
+      command = intake.stopMotorCommand();
+
+      commandTester.runUntilComplete(command);
+
+      assertThat(intake.intaking()).isFalse();
+      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(0);
+    }
+  }
+}

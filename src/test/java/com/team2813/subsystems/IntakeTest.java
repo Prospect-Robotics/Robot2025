@@ -1,7 +1,7 @@
 package com.team2813.subsystems;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.team2813.subsystems.Intake.BUMP_SPEED;
+import static com.team2813.subsystems.Intake.BUMP_VOLTAGE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -9,8 +9,6 @@ import static org.mockito.Mockito.when;
 import com.team2813.CommandTester;
 import com.team2813.CommandTesterExtension;
 import com.team2813.IsolatedNetworkTablesExtension;
-import com.team2813.lib2813.control.ControlMode;
-import com.team2813.lib2813.control.PIDMotor;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,16 +20,6 @@ import org.mockito.Answers;
 public final class IntakeTest {
   final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
   final DigitalInput mockBeamBreak = mock(DigitalInput.class);
-
-  abstract static class FakePIDMotor implements PIDMotor {
-    double dutyCycle = 0.0f;
-
-    @Override
-    public void set(ControlMode mode, double demand) {
-      assertThat(mode).isEqualTo(ControlMode.VOLTAGE);
-      this.dutyCycle = demand;
-    }
-  }
 
   @Test
   public void constructRealInstance(NetworkTableInstance ntInstance) {
@@ -57,7 +45,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isTrue();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(Intake.PARAMS.intakeSpeed());
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.intakeDemand());
     }
   }
 
@@ -72,7 +60,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 
@@ -86,7 +74,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(Intake.PARAMS.outtakeSpeed());
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.outtakeDemand());
     }
   }
 
@@ -101,7 +89,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 
@@ -115,7 +103,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(BUMP_SPEED);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(BUMP_VOLTAGE);
     }
   }
 
@@ -129,7 +117,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.dutyCycle).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 

@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** This is the Intake. His name is Joe. Please be kind to him and say hi. Have a nice day! */
-public final class Intake extends IntakeSubsystem {
-  static final Params PARAMS = Params.builder().setIntakeSpeed(4).setOuttakeSpeed(-3).build();
+public final class Intake extends ParameterizedIntakeSubsystem {
+  static final Params PARAMS = Params.builder().setIntakeDemand(4).setOuttakeDemand(-3).build();
 
-  static final double BUMP_SPEED = -4;
+  static final double BUMP_VOLTAGE = -4;
 
   private final DigitalInput beamBreak;
 
@@ -47,11 +47,11 @@ public final class Intake extends IntakeSubsystem {
   }
 
   public Command bumpAlgaeCommand() {
-    return setMotorSpeedCommand(BUMP_SPEED);
+    return setMotorDemandCommand(BUMP_VOLTAGE);
   }
 
   public Command slowOuttakeCoralCommand() {
-    return setMotorSpeedCommand(0.75 * PARAMS.outtakeSpeed());
+    return setMotorDemandCommand(0.75 * PARAMS.outtakeDemand());
   }
 
   public boolean hasCoral() {

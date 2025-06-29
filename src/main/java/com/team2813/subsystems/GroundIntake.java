@@ -12,9 +12,9 @@ import edu.wpi.first.wpilibj2.command.Command;
  *
  * @author spderman333
  */
-public final class GroundIntake extends IntakeSubsystem {
+public final class GroundIntake extends ParameterizedIntakeSubsystem {
   // +rotation = intake, -rotation = outtake.
-  static final Params PARAMS = Params.builder().setIntakeSpeed(8).setOuttakeSpeed(-2.75).build();
+  static final Params PARAMS = Params.builder().setIntakeDemand(8).setOuttakeDemand(-2.75).build();
 
   static final double FAST_OUTTAKE_VOLTAGE = 12;
 
@@ -23,6 +23,6 @@ public final class GroundIntake extends IntakeSubsystem {
   }
 
   public Command fastOuttakeCoralCommand() {
-    return setMotorSpeedCommand(FAST_OUTTAKE_VOLTAGE);
+    return setMotorDemandCommand(FAST_OUTTAKE_VOLTAGE);
   }
 }
