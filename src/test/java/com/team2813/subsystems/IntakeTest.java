@@ -50,7 +50,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isTrue();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(Intake.PARAMS.intakeSpeed());
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.intakeDemand());
     }
   }
 
@@ -66,7 +66,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 
@@ -81,7 +81,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(Intake.PARAMS.outtakeSpeed());
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.outtakeDemand());
     }
   }
 
@@ -97,7 +97,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 
@@ -112,7 +112,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(BUMP_SPEED);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(BUMP_SPEED);
     }
   }
 
@@ -127,7 +127,7 @@ public final class IntakeTest {
       commandTester.runUntilComplete(command);
 
       assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.voltage).isWithin(0.01).of(0);
+      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
     }
   }
 

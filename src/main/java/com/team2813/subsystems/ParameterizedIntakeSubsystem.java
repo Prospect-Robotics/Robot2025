@@ -8,35 +8,41 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseable {
-  protected final PIDMotor intakeMotor;
+  private final PIDMotor intakeMotor;
   private final Params params;
-  private double speed = 0.0;
+  private double demand = 0.0;
 
-  public record Params(double intakeSpeed, double outtakeSpeed) {
+  public record Params(ControlMode controlMode, double intakeDemand, double outtakeDemand) {
 
     public static Params.Builder builder() {
-      return new AutoBuilder_ParameterizedIntakeSubsystem_Params_Builder();
+      return new AutoBuilder_ParameterizedIntakeSubsystem_Params_Builder()
+          .setControlMode(ControlMode.VOLTAGE);
     }
 
     @AutoBuilder
     public interface Builder {
-      Builder setIntakeSpeed(double speed);
+      Builder setControlMode(ControlMode controlMode);
 
-      Builder setOuttakeSpeed(double speed);
+      Builder setIntakeDemand(double demand);
+
+      Builder setOuttakeDemand(double demand);
 
       Params build();
     }
 
     public Params {
-      if (isEssentiallyZero(intakeSpeed)) {
-        throw new IllegalArgumentException("intakeSpeed cannot be zero");
+      if (controlMode == null) {
+        throw new IllegalArgumentException("controlMode cannot be null");
       }
-      if (isEssentiallyZero(outtakeSpeed)) {
-        throw new IllegalArgumentException("outtakeSpeed cannot be zero");
+      if (isEssentiallyZero(intakeDemand)) {
+        throw new IllegalArgumentException("intakeDemand cannot be zero");
       }
-      if (Math.signum(intakeSpeed) == Math.signum(outtakeSpeed)) {
+      if (isEssentiallyZero(outtakeDemand)) {
+        throw new IllegalArgumentException("outtakeDemand cannot be zero");
+      }
+      if (Math.signum(intakeDemand) == Math.signum(outtakeDemand)) {
         throw new IllegalArgumentException(
-            "intakeSpeed should be the opposite sign as outtakeSpeed");
+            "intakeDemand should be the opposite sign of outtakeDemand");
       }
     }
   }
@@ -47,11 +53,11 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
   }
 
   final boolean intaking() {
-    return motorRunning() && Math.signum(params.intakeSpeed) == Math.signum(speed);
+    return motorRunning() && Math.signum(params.intakeDemand) == Math.signum(demand);
   }
 
   private boolean motorRunning() {
-    return !isEssentiallyZero(speed);
+    return !isEssentiallyZero(demand);
   }
 
   public final Command intakeItemCommand() {
@@ -69,36 +75,36 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
   /** Makes intake wheels spin in the intake direction. */
   protected final void intakeGamePiece() {
     // FIXME: Maybe add a check that the wheels are not stalled.
-    setMotorSpeed(params.intakeSpeed);
+    setMotorDemand(params.intakeDemand);
   }
 
   /** Makes intake wheels spin in the outtake direction. */
   protected final void outtakeGamePiece() {
-    setMotorSpeed(params.outtakeSpeed);
+    setMotorDemand(params.outtakeDemand);
   }
 
   /**
-   * Runs the motor at a specified speed.
+   * Runs the motor with the provided demand value.
    *
-   * @param speed Voltage to apply to the motor.
+   * @param demand Demand of the motor. Meaning depends on the {@code ControlMode}.
    */
-  protected final void setMotorSpeed(double speed) {
-    intakeMotor.set(ControlMode.VOLTAGE, speed);
-    this.speed = speed;
+  protected final void setMotorDemand(double demand) {
+    intakeMotor.set(params.controlMode, demand);
+    this.demand = demand;
   }
 
   /**
-   * Returns a command that runs the motor at a specified speed.
+   * Returns a command that runs the motor with the provided demand value.
    *
-   * @param speed Voltage to apply to the motor.
+   * @param demand Demand of the motor. Meaning depends on the {@code ControlMode}.
    */
-  protected final Command setMotorSpeedCommand(double speed) {
-    return new InstantCommand(() -> setMotorSpeed(speed), this);
+  protected final Command setMotorDemandCommand(double demand) {
+    return new InstantCommand(() -> setMotorDemand(demand), this);
   }
 
   /** Stops the motor. */
   public final void stopMotor() {
-    setMotorSpeed(0.0);
+    setMotorDemand(0.0);
   }
 
   @Override

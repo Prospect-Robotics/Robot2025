@@ -8,12 +8,22 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 abstract class FakePIDMotor implements PIDMotor {
-  double voltage = 0.0f;
+  private double demand = 0.0f;
+  private ControlMode controlMode = ControlMode.VOLTAGE;
+
+  double getDemand() {
+    return demand;
+  }
+
+  double getVoltage() {
+    assertThat(controlMode).isEqualTo(ControlMode.VOLTAGE);
+    return demand;
+  }
 
   @Override
-  public void set(ControlMode mode, double voltage) {
-    assertThat(mode).isEqualTo(ControlMode.VOLTAGE);
-    this.voltage = voltage;
+  public void set(ControlMode mode, double demand) {
+    controlMode = mode;
+    this.demand = demand;
   }
 
   @Override
@@ -23,7 +33,7 @@ abstract class FakePIDMotor implements PIDMotor {
 
   @Override
   public AngularVelocity getVelocityMeasure() {
-    return Units.RadiansPerSecond.of(voltage * 20);
+    return Units.RadiansPerSecond.of(demand * 20);
   }
 
   @Override
