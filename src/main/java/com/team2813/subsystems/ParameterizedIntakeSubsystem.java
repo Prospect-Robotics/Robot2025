@@ -41,7 +41,7 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
     }
   }
 
-  protected ParameterizedIntakeSubsystem(PIDMotor intakeMotor, Params params) {
+  public ParameterizedIntakeSubsystem(PIDMotor intakeMotor, Params params) {
     this.intakeMotor = intakeMotor;
     this.params = params;
   }
