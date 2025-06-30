@@ -32,9 +32,8 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void initialState() {
-    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
-      assertThat(intake.intaking()).isFalse();
-
+    try (var ignored = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+      assertMotorIsStopped();
       verifyNoInteractions(fakeMotor);
     }
   }
@@ -43,12 +42,11 @@ public final class ParameterizedIntakeSubsystemTest {
   public void intakeItem(CommandTester commandTester) {
     try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
       Command command = intake.intakeItemCommand();
-      assertThat(intake.intaking()).isFalse();
+      assertMotorIsStopped();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isTrue();
-      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(params.intakeDemand());
+      assertThat(fakeMotor.demand).isWithin(0.01).of(params.intakeDemand());
     }
   }
 
@@ -58,12 +56,11 @@ public final class ParameterizedIntakeSubsystemTest {
       Command command = intake.intakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
-      assertThat(intake.intaking()).isTrue();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(0);
+      assertMotorIsStopped();
     }
   }
 
@@ -72,12 +69,11 @@ public final class ParameterizedIntakeSubsystemTest {
     try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
       intake.intakeGamePiece();
       Command command = intake.outtakeItemCommand();
-      assertThat(intake.intaking()).isTrue();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(params.outtakeDemand());
+      assertThat(fakeMotor.demand).isWithin(0.01).of(params.outtakeDemand());
     }
   }
 
@@ -88,11 +84,19 @@ public final class ParameterizedIntakeSubsystemTest {
       Command command = intake.outtakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getDemand()).isWithin(0.01).of(0);
+      assertMotorIsStopped();
     }
+  }
+
+  private void assertMotorIsStopped() {
+    assertThat(fakeMotor.demand).isWithin(0.01).of(0.0);
+  }
+
+  private void assertMotorIsRunning() {
+    assertThat(fakeMotor.demand).isNotWithin(0.01).of(0.0);
   }
 }

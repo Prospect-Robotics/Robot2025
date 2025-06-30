@@ -22,7 +22,7 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
     super(new TalonFXWrapper(GROUND_INTAKE_WHEEL, InvertType.CLOCKWISE), PARAMS);
   }
 
-  public Command fastOuttakeCoralCommand() {
+  public Command fastOuttakeItemCommand() {
     return setMotorDemandCommand(FAST_OUTTAKE_VOLTAGE);
   }
 }

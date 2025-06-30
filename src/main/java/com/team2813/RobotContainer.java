@@ -118,7 +118,7 @@ public class RobotContainer implements AutoCloseable {
                         intakePivot)
                     .withTimeout(SECONDS_2)),
             // new InstantCommand(intake::outakeCoral, intake),
-            intake.slowOuttakeCoralCommand(),
+            intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(() -> intake.stopMotor(), intake),
@@ -148,7 +148,7 @@ public class RobotContainer implements AutoCloseable {
                     intakePivot)
                 .withTimeout(SECONDS_2),
             // new InstantCommand(intake::outakeCoral, intake),
-            intake.slowOuttakeCoralCommand(),
+            intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 new InstantCommand(() -> intake.stopMotor(), intake),
@@ -480,7 +480,7 @@ public class RobotContainer implements AutoCloseable {
                 () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE), intakePivot),
             new InstantCommand(() -> intake.stopMotor(), intake)));
 
-    SLOW_OUTTAKE.onTrue(intake.slowOuttakeCoralCommand());
+    SLOW_OUTTAKE.onTrue(intake.slowOuttakeItemCommand());
     SLOW_OUTTAKE.onFalse(new InstantCommand(() -> intake.stopMotor(), intake));
 
     MANUAL_GROUND_OUTTAKE.onTrue(groundIntake.outtakeItemCommand());
@@ -499,7 +499,7 @@ public class RobotContainer implements AutoCloseable {
         new InstantCommand(
             () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
             groundIntakePivot));
-    MANUAL_FAST_GROUND_OUTTAKE.onTrue(groundIntake.fastOuttakeCoralCommand());
+    MANUAL_FAST_GROUND_OUTTAKE.onTrue(groundIntake.fastOuttakeItemCommand());
     MANUAL_FAST_GROUND_OUTTAKE.onFalse(new InstantCommand(groundIntake::stopMotor, groundIntake));
   }
 

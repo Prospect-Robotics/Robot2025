@@ -50,7 +50,7 @@ public final class Intake extends ParameterizedIntakeSubsystem {
     return setMotorDemandCommand(BUMP_VOLTAGE);
   }
 
-  public Command slowOuttakeCoralCommand() {
+  public Command slowOuttakeItemCommand() {
     return setMotorDemandCommand(0.75 * PARAMS.outtakeDemand());
   }
 

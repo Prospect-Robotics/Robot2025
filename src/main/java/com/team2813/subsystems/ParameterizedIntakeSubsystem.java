@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseable {
   private final PIDMotor intakeMotor;
   private final Params params;
-  private double demand = 0.0;
 
   public record Params(ControlMode controlMode, double intakeDemand, double outtakeDemand) {
 
@@ -52,14 +51,6 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
     this.params = params;
   }
 
-  final boolean intaking() {
-    return motorRunning() && Math.signum(params.intakeDemand) == Math.signum(demand);
-  }
-
-  private boolean motorRunning() {
-    return !isEssentiallyZero(demand);
-  }
-
   public final Command intakeItemCommand() {
     return new InstantCommand(this::intakeGamePiece, this);
   }
@@ -90,7 +81,6 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
    */
   protected final void setMotorDemand(double demand) {
     intakeMotor.set(params.controlMode, demand);
-    this.demand = demand;
   }
 
   /**

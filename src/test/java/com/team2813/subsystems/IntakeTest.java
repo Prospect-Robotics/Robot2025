@@ -23,15 +23,15 @@ public final class IntakeTest {
 
   @Test
   public void constructRealInstance(NetworkTableInstance ntInstance) {
-    try (Intake intake = new Intake(ntInstance)) {
-      assertThat(intake.intaking()).isFalse();
+    try (Intake ignored = new Intake(ntInstance)) {
+      assertThat(fakeMotor.demand).isWithin(0.01).of(0.0);
     }
   }
 
   @Test
   public void initialState(NetworkTableInstance ntInstance) {
-    try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
-      assertThat(intake.intaking()).isFalse();
+    try (Intake ignored = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
+      assertThat(fakeMotor.demand).isWithin(0.01).of(0.0);
       verifyNoInteractions(fakeMotor);
     }
   }
@@ -40,11 +40,10 @@ public final class IntakeTest {
   public void intakeCoral(NetworkTableInstance ntInstance, CommandTester commandTester) {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
       Command command = intake.intakeItemCommand();
-      assertThat(intake.intaking()).isFalse();
+      assertThat(fakeMotor.demand).isWithin(0.01).of(0.0);
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isTrue();
       assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.intakeDemand());
     }
   }
@@ -55,12 +54,11 @@ public final class IntakeTest {
       Command command = intake.intakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
-      assertThat(intake.intaking()).isTrue();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
+      assertMotorIsStopped();
     }
   }
 
@@ -69,11 +67,10 @@ public final class IntakeTest {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
       intake.intakeGamePiece();
       Command command = intake.outtakeItemCommand();
-      assertThat(intake.intaking()).isTrue();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.outtakeDemand());
     }
   }
@@ -85,11 +82,11 @@ public final class IntakeTest {
       Command command = intake.outtakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
+      assertMotorIsStopped();
     }
   }
 
@@ -98,11 +95,10 @@ public final class IntakeTest {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
       intake.intakeGamePiece();
       Command command = intake.bumpAlgaeCommand();
-      assertThat(intake.intaking()).isTrue();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
       assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(BUMP_VOLTAGE);
     }
   }
@@ -113,11 +109,11 @@ public final class IntakeTest {
       Command command = intake.bumpAlgaeCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
+      assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
-      assertThat(intake.intaking()).isFalse();
-      assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(0);
+      assertMotorIsStopped();
     }
   }
 
@@ -135,5 +131,13 @@ public final class IntakeTest {
       when(mockBeamBreak.get()).thenReturn(true);
       assertThat(intake.hasCoral()).isFalse();
     }
+  }
+
+  private void assertMotorIsStopped() {
+    assertThat(fakeMotor.demand).isWithin(0.01).of(0.0);
+  }
+
+  private void assertMotorIsRunning() {
+    assertThat(fakeMotor.demand).isNotWithin(0.01).of(0.0);
   }
 }
