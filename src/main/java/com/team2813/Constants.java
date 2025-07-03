@@ -2,6 +2,7 @@ package com.team2813;
 
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.function.DoubleSupplier;
 
 public final class Constants {
 
@@ -87,6 +88,8 @@ public final class Constants {
     public static final Trigger MANUAL_GROUND_UP = OPERATOR_CONTROLLER.povLeft();
     public static final Trigger MANUAL_GROUND_DOWN = OPERATOR_CONTROLLER.povRight();
     public static final Trigger MANUAL_GROUND_STOW = OPERATOR_CONTROLLER.share();
+
+    public static final DoubleSupplier MANUAL_INTAKE_PIVOT_POS = OPERATOR_CONTROLLER::getLeftY;
   }
 
   private Constants() {
