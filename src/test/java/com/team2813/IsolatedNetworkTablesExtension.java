@@ -2,7 +2,6 @@ package com.team2813;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
 import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -28,19 +27,16 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  * }</pre>
  */
 public final class IsolatedNetworkTablesExtension
-    implements Extension, AfterEachCallback, BeforeEachCallback, ParameterResolver {
+    implements Extension, AfterEachCallback, ParameterResolver {
   private static final String NETWORK_TABLE_INSTANCE_KEY = "networkTableInstance";
-
-  @Override
-  public void beforeEach(ExtensionContext context) {
-    getStore(context).put(NETWORK_TABLE_INSTANCE_KEY, NetworkTableInstance.create());
-  }
 
   @Override
   public void afterEach(ExtensionContext context) throws Exception {
     var networkTableInstance =
         getStore(context).get(NETWORK_TABLE_INSTANCE_KEY, NetworkTableInstance.class);
-    networkTableInstance.close();
+    if (networkTableInstance != null) {
+      networkTableInstance.close();
+    }
   }
 
   @Override
@@ -54,13 +50,11 @@ public final class IsolatedNetworkTablesExtension
   public NetworkTableInstance resolveParameter(
       ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
-    var networkTableInstance =
-        getStore(extensionContext).get(NETWORK_TABLE_INSTANCE_KEY, NetworkTableInstance.class);
-    if (networkTableInstance == null) {
-      throw new ParameterResolutionException(
-          "Could not resolve " + parameterContext.getParameter());
-    }
-    return networkTableInstance;
+    Store store = getStore(extensionContext);
+    return store.getOrComputeIfAbsent(
+        NETWORK_TABLE_INSTANCE_KEY,
+        key -> NetworkTableInstance.create(),
+        NetworkTableInstance.class);
   }
 
   private Store getStore(ExtensionContext context) {
