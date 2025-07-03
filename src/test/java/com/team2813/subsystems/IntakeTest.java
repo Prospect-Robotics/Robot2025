@@ -4,19 +4,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
-import com.team2813.NetworkTableResource;
+import com.team2813.IsolatedNetworkTablesExtension;
 import com.team2813.lib2813.control.ControlMode;
 import com.team2813.lib2813.control.PIDMotor;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 
-@RunWith(JUnit4.class)
+@ExtendWith(IsolatedNetworkTablesExtension.class)
 public final class IntakeTest {
   final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
-  @Rule public final NetworkTableResource ntResource = new NetworkTableResource();
 
   abstract static class FakePIDMotor implements PIDMotor {
     double dutyCycle = 0.0f;
@@ -29,23 +27,23 @@ public final class IntakeTest {
   }
 
   @Test
-  public void constructRealInstance() {
-    try (Intake intake = new Intake(ntResource.getNetworkTableInstance())) {
+  public void constructRealInstance(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(ntInstance)) {
       assertThat(intake.intaking()).isFalse();
     }
   }
 
   @Test
-  public void initialState() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void initialState(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       assertThat(intake.intaking()).isFalse();
       verifyNoInteractions(fakeMotor);
     }
   }
 
   @Test
-  public void intakeCoral() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void intakeCoral(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.intakeCoral();
 
       assertThat(intake.intaking()).isTrue();
@@ -54,8 +52,8 @@ public final class IntakeTest {
   }
 
   @Test
-  public void stopAfterIntakingCoral() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void stopAfterIntakingCoral(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.intakeCoral();
 
       intake.stopIntakeMotor();
@@ -66,8 +64,8 @@ public final class IntakeTest {
   }
 
   @Test
-  public void outtakeCoral() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void outtakeCoral(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.outakeCoral();
 
       assertThat(intake.intaking()).isFalse();
@@ -76,8 +74,8 @@ public final class IntakeTest {
   }
 
   @Test
-  public void stopAfterOutakingCoral() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void stopAfterOutakingCoral(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.outakeCoral();
 
       intake.stopIntakeMotor();
@@ -88,8 +86,8 @@ public final class IntakeTest {
   }
 
   @Test
-  public void bumpAlgae() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void bumpAlgae(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.bumpAlgae();
 
       assertThat(intake.intaking()).isFalse();
@@ -98,8 +96,8 @@ public final class IntakeTest {
   }
 
   @Test
-  public void stopAfterBumpingAlgae() {
-    try (Intake intake = new Intake(fakeMotor, ntResource.getNetworkTableInstance())) {
+  public void stopAfterBumpingAlgae(NetworkTableInstance ntInstance) {
+    try (Intake intake = new Intake(fakeMotor, ntInstance)) {
       intake.bumpAlgae();
 
       intake.stopIntakeMotor();
