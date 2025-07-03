@@ -11,11 +11,7 @@ import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Supplier;
@@ -24,22 +20,16 @@ import java.util.function.Supplier;
 
 public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Positions> {
 
-  private final DoublePublisher groundIntakePivotPublisher;
-  private final BooleanPublisher atPositionPublisher;
-
   public GroundIntakePivot(NetworkTableInstance networkTableInstance) {
     super(
         new MotorSubsystemConfiguration(pivotMotor())
+            .publishTo(networkTableInstance)
             .controlMode(ControlMode.VOLTAGE)
             // [0.175, 0.2)
             .PID(0.15, 0, 1e-5)
             .rotationUnit(Radians)
             .acceptableError(1.1)
             .startingPosition(Positions.TOP));
-
-    NetworkTable networkTable = networkTableInstance.getTable("GroundIntakePivot");
-    groundIntakePivotPublisher = networkTable.getDoubleTopic("position").publish();
-    atPositionPublisher = networkTable.getBooleanTopic("at position").publish();
   }
 
   private static PIDMotor pivotMotor() {
@@ -57,8 +47,6 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
   @Override
   public void periodic() {
     super.periodic();
-    groundIntakePivotPublisher.set(getPositionMeasure().in(Units.Rotations));
-    atPositionPublisher.set(atPosition());
     if (DriverStation.isEnabled()) {
       enable();
     } else {

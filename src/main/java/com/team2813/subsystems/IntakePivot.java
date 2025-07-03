@@ -7,9 +7,6 @@ import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.encoders.CancoderWrapper;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -24,15 +21,12 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     super(
         new MotorSubsystemConfiguration(
                 pivotMotor(), new CancoderWrapper(com.team2813.Constants.INTAKE_ENCODER))
+            .publishTo(networkTableInstance)
             .acceptableError(0.03)
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)
             .PID(19.875, 0, 0.4));
-    // Logging
-    NetworkTable networkTable = networkTableInstance.getTable("IntakePivot");
-    intakePivotPosition = networkTable.getDoubleTopic("position").publish();
-    atPosition = networkTable.getBooleanTopic("at position").publish();
   }
 
   @Deprecated
@@ -51,16 +45,6 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
     return pivotMotor;
-  }
-
-  private final DoublePublisher intakePivotPosition;
-  private final BooleanPublisher atPosition;
-
-  @Override
-  public void periodic() {
-    super.periodic();
-    intakePivotPosition.set(getPositionMeasure().in(Units.Rotations));
-    atPosition.set(atPosition());
   }
 
   public enum Rotations implements Supplier<Angle> {
