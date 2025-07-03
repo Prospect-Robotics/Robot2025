@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import com.team2813.CommandTester;
 import com.team2813.CommandTesterExtension;
 import com.team2813.lib2813.control.ControlMode;
+import com.team2813.lib2813.control.PIDMotor;
 import edu.wpi.first.wpilibj2.command.Command;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,13 @@ import org.mockito.Answers;
 @EnumSource(ControlMode.class)
 @ExtendWith(CommandTesterExtension.class)
 public final class ParameterizedIntakeSubsystemTest {
+
+  private static class ConcreteParameterizedIntakeSubsystem extends ParameterizedIntakeSubsystem {
+    protected ConcreteParameterizedIntakeSubsystem(PIDMotor intakeMotor, Params params) {
+      super(intakeMotor, params);
+    }
+  }
+
   final FakePIDMotor fakeMotor = mock(FakePIDMotor.class, Answers.CALLS_REAL_METHODS);
   private final ParameterizedIntakeSubsystem.Params params;
 
@@ -32,7 +40,7 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void initialState() {
-    try (var ignored = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+    try (var ignored = new ConcreteParameterizedIntakeSubsystem(fakeMotor, params)) {
       assertMotorIsStopped();
       verifyNoInteractions(fakeMotor);
     }
@@ -40,7 +48,7 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void intakeItem(CommandTester commandTester) {
-    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+    try (var intake = new ConcreteParameterizedIntakeSubsystem(fakeMotor, params)) {
       Command command = intake.intakeItemCommand();
       assertMotorIsStopped();
 
@@ -52,7 +60,7 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void stopAfterIntakingItem(CommandTester commandTester) {
-    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+    try (var intake = new ConcreteParameterizedIntakeSubsystem(fakeMotor, params)) {
       Command command = intake.intakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
@@ -66,7 +74,7 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void outtakeItem(CommandTester commandTester) {
-    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+    try (var intake = new ConcreteParameterizedIntakeSubsystem(fakeMotor, params)) {
       intake.intakeGamePiece();
       Command command = intake.outtakeItemCommand();
       assertMotorIsRunning();
@@ -79,7 +87,7 @@ public final class ParameterizedIntakeSubsystemTest {
 
   @Test
   public void stopAfterOuttakingItem(CommandTester commandTester) {
-    try (var intake = new ParameterizedIntakeSubsystem(fakeMotor, params)) {
+    try (var intake = new ConcreteParameterizedIntakeSubsystem(fakeMotor, params)) {
       intake.intakeGamePiece();
       Command command = intake.outtakeItemCommand();
       commandTester.runUntilComplete(command);

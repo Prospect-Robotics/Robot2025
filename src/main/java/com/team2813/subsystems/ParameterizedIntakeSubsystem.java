@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseable {
+abstract class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseable {
   private final PIDMotor intakeMotor;
   private final Params params;
 
@@ -46,7 +46,7 @@ class ParameterizedIntakeSubsystem extends SubsystemBase implements AutoCloseabl
     }
   }
 
-  public ParameterizedIntakeSubsystem(PIDMotor intakeMotor, Params params) {
+  protected ParameterizedIntakeSubsystem(PIDMotor intakeMotor, Params params) {
     this.intakeMotor = intakeMotor;
     this.params = params;
   }
