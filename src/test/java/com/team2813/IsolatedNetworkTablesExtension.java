@@ -28,12 +28,12 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  */
 public final class IsolatedNetworkTablesExtension
     implements Extension, AfterEachCallback, ParameterResolver {
-  private static final String NETWORK_TABLE_INSTANCE_KEY = "networkTableInstance";
+  private static final StoreKey<NetworkTableInstance> NETWORK_TABLE_INSTANCE_KEY =
+      StoreKey.of(NetworkTableInstance.class);
 
   @Override
   public void afterEach(ExtensionContext context) throws Exception {
-    var networkTableInstance =
-        getStore(context).get(NETWORK_TABLE_INSTANCE_KEY, NetworkTableInstance.class);
+    var networkTableInstance = NETWORK_TABLE_INSTANCE_KEY.get(getStore(context));
     if (networkTableInstance != null) {
       networkTableInstance.close();
     }
@@ -51,10 +51,7 @@ public final class IsolatedNetworkTablesExtension
       ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     Store store = getStore(extensionContext);
-    return store.getOrComputeIfAbsent(
-        NETWORK_TABLE_INSTANCE_KEY,
-        key -> NetworkTableInstance.create(),
-        NetworkTableInstance.class);
+    return NETWORK_TABLE_INSTANCE_KEY.getOrComputeIfAbsent(store, NetworkTableInstance::create);
   }
 
   private Store getStore(ExtensionContext context) {
