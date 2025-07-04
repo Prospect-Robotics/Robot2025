@@ -24,15 +24,14 @@ public class OuttakeCommand extends Command {
                 new SequentialCommandGroup(
                     new WaitCommand(0.13), groundIntake.outtakeItemCommand())),
             new WaitCommand(0.25),
-            new InstantCommand(groundIntake::stopMotor, groundIntake),
+            groundIntake.stopMotorCommand(),
             new ParallelCommandGroup(
                 new SequentialCommandGroup(
                     new WaitCommand(0.25),
                     new InstantCommand(
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                         groundIntakePivot)),
-                new SequentialCommandGroup(
-                    new WaitCommand(0.15), new InstantCommand(() -> intake.stopMotor(), intake))));
+                new SequentialCommandGroup(new WaitCommand(0.15), intake.stopMotorCommand())));
     this.intake = intake;
     this.groundIntake = groundIntake;
     this.groundIntakePivot = groundIntakePivot;
