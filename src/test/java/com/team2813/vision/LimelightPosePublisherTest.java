@@ -3,33 +3,32 @@ package com.team2813.vision;
 import static com.google.common.truth.Truth.assertThat;
 import static com.team2813.vision.TimestampedStructPublisher.PUBLISHED_VALUE_VALID_MICROS;
 
-import com.team2813.NetworkTableResource;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
+import com.team2813.lib2813.testing.junit.jupiter.IsolatedNetworkTablesExtension;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.units.Units;
 import java.util.*;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /** Tests for {@link LimelightPosePublisher}. */
+@ExtendWith(IsolatedNetworkTablesExtension.class)
 public class LimelightPosePublisherTest {
   private static final double FAKE_TIMESTAMP_OFFSET = 0.25;
   private static final Pose2d DEFAULT_POSE = new Pose2d(28, 13, Rotation2d.fromDegrees(45));
   private static final String EXPECTED_TABLE_NAME = "Vision/limelight";
 
-  @Rule public final NetworkTableResource networkTable = new NetworkTableResource();
-
   private final FakeClocks fakeClocks = new FakeClocks();
 
   @Test
-  public void publish_withPose() {
+  public void publish_withPose(NetworkTableInstance ntInstance) {
     // Arrange
-    var topic = getTopic();
+    var topic = getTopic(ntInstance);
 
     try (StructSubscriber<Pose2d> subscriber = topic.subscribe(DEFAULT_POSE)) {
-      LimelightPosePublisher publisher = createPublisher();
+      LimelightPosePublisher publisher = createPublisher(ntInstance);
       long firstFpgaTimestampSeconds = 25;
       Pose2d estimatedPose = new Pose2d(7.35, 0.708, Rotation2d.fromDegrees(30));
       BotPoseEstimate estimate =
@@ -49,12 +48,12 @@ public class LimelightPosePublisherTest {
   }
 
   @Test
-  public void publish_withoutPose() {
+  public void publish_withoutPose(NetworkTableInstance ntInstance) {
     // Arrange
-    var topic = getTopic();
+    var topic = getTopic(ntInstance);
 
     try (StructSubscriber<Pose2d> subscriber = topic.subscribe(DEFAULT_POSE)) {
-      LimelightPosePublisher publisher = createPublisher();
+      LimelightPosePublisher publisher = createPublisher(ntInstance);
       long firstFpgaTimestampSeconds = 25;
       Pose2d estimatedPose = new Pose2d(7.35, 0.708, Rotation2d.fromDegrees(30));
       BotPoseEstimate estimate =
@@ -76,13 +75,12 @@ public class LimelightPosePublisherTest {
     }
   }
 
-  private LimelightPosePublisher createPublisher() {
-    return new LimelightPosePublisher(
-        networkTable.getNetworkTableInstance(), fakeClocks.asClocks());
+  private LimelightPosePublisher createPublisher(NetworkTableInstance ntInstance) {
+    return new LimelightPosePublisher(ntInstance, fakeClocks.asClocks());
   }
 
-  private StructTopic<Pose2d> getTopic() {
-    NetworkTable table = networkTable.getNetworkTableInstance().getTable(EXPECTED_TABLE_NAME);
+  private StructTopic<Pose2d> getTopic(NetworkTableInstance ntInstance) {
+    NetworkTable table = ntInstance.getTable(EXPECTED_TABLE_NAME);
     return table.getStructTopic("poseEstimate", Pose2d.struct);
   }
 

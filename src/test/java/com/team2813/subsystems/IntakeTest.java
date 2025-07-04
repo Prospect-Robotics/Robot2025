@@ -6,8 +6,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.team2813.IsolatedNetworkTablesExtension;
 import com.team2813.lib2813.testing.junit.jupiter.CommandTester;
+import com.team2813.lib2813.testing.junit.jupiter.IsolatedNetworkTablesExtension;
 import com.team2813.lib2813.testing.junit.jupiter.WPILibExtension;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;

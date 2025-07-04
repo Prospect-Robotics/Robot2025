@@ -1,5 +1,6 @@
 package com.team2813;
 
+import com.team2813.lib2813.testing.junit.jupiter.IsolatedNetworkTablesExtension;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
