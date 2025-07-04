@@ -16,24 +16,22 @@ public class OuttakeCommand extends Command {
     commandGroup =
         new SequentialCommandGroup(
             new ParallelCommandGroup(
-                new InstantCommand(intake::outakeCoral, intake),
+                intake.outtakeItemCommand(),
                 new ParallelCommandGroup(
                     new InstantCommand(
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
                         groundIntakePivot)),
                 new SequentialCommandGroup(
-                    new WaitCommand(0.13),
-                    new InstantCommand(groundIntake::outtakeCoral, groundIntake))),
+                    new WaitCommand(0.13), groundIntake.outtakeItemCommand())),
             new WaitCommand(0.25),
-            new InstantCommand(groundIntake::stopGroundIntakeMotor, groundIntake),
+            groundIntake.stopMotorCommand(),
             new ParallelCommandGroup(
                 new SequentialCommandGroup(
                     new WaitCommand(0.25),
                     new InstantCommand(
                         () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                         groundIntakePivot)),
-                new SequentialCommandGroup(
-                    new WaitCommand(0.15), new InstantCommand(intake::stopIntakeMotor, intake))));
+                new SequentialCommandGroup(new WaitCommand(0.15), intake.stopMotorCommand())));
     this.intake = intake;
     this.groundIntake = groundIntake;
     this.groundIntakePivot = groundIntakePivot;
@@ -58,8 +56,8 @@ public class OuttakeCommand extends Command {
   @Override
   public void end(boolean interrupted) {
     commandGroup.end(interrupted);
-    intake.stopIntakeMotor();
-    groundIntake.stopGroundIntakeMotor();
+    intake.stopMotor();
+    groundIntake.stopMotor();
     groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
   }
 }
