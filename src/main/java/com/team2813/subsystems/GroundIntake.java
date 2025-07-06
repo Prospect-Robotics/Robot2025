@@ -18,7 +18,7 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
 
   static final double FAST_OUTTAKE_VOLTAGE = 12;
 
-  public GroundIntake() { // TODO: Ensure this constructor is actually functional.
+  public GroundIntake() {
     super(new TalonFXWrapper(GROUND_INTAKE_WHEEL, InvertType.CLOCKWISE), PARAMS);
   }
 

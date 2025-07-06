@@ -117,7 +117,6 @@ public class RobotContainer implements AutoCloseable {
                         () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                         intakePivot)
                     .withTimeout(SECONDS_2)),
-            // new InstantCommand(intake::outakeCoral, intake),
             intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
@@ -147,7 +146,6 @@ public class RobotContainer implements AutoCloseable {
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
                     intakePivot)
                 .withTimeout(SECONDS_2),
-            // new InstantCommand(intake::outakeCoral, intake),
             intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
