@@ -66,6 +66,15 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DriveConfiguration config;
   private final MultiPhotonPoseEstimator photonPoseEstimator;
 
+  private final StructArrayPublisher<SwerveModuleState> expectedStatePublisher;
+  private final StructArrayPublisher<SwerveModuleState> actualStatePublisher;
+  private final StructPublisher<Pose2d> currentPosePublisher;
+  private final DoubleArrayPublisher modulePositionsPublisher;
+  private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
+      new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
+  private final DoublePublisher ambiguityPublisher =
+      NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
 
@@ -288,12 +297,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
     // Logging
     NetworkTable networkTable = networkTableInstance.getTable("Drive");
-    expectedState =
+    expectedStatePublisher =
         networkTable.getStructArrayTopic("expected state", SwerveModuleState.struct).publish();
-    actualState =
+    actualStatePublisher =
         networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
-    currentPose = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
-    modulePositions = networkTable.getDoubleArrayTopic("module positions").publish();
+    currentPosePublisher = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
+    modulePositionsPublisher = networkTable.getDoubleArrayTopic("module positions").publish();
 
     setDefaultCommand(createDefaultCommand());
 
@@ -465,16 +474,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
   }
 
-  private final StructArrayPublisher<SwerveModuleState> expectedState;
-  private final StructArrayPublisher<SwerveModuleState> actualState;
-  private final StructPublisher<Pose2d> currentPose;
-  private final DoubleArrayPublisher modulePositions;
-  private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
-      new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
-
-  private final DoublePublisher ambiguityPublisher =
-      NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
-
   private void handlePhotonPose(EstimatedRobotPose estimate) {
     if (!config.usePhotonVisionLocation) {
       return;
@@ -514,14 +513,14 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     // Publish data to NetworkTables
-    expectedState.set(drivetrain.getState().ModuleTargets);
-    actualState.set(drivetrain.getState().ModuleStates);
+    expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
+    actualStatePublisher.set(drivetrain.getState().ModuleStates);
     photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d drivePose = getPose();
-    currentPose.set(drivePose);
+    currentPosePublisher.set(drivePose);
     photonPoseEstimator.setDrivePose(drivePose);
 
-    modulePositions.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
+    modulePositionsPublisher.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
   }
 
   @Override
