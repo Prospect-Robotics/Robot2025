@@ -1,27 +1,22 @@
 package com.team2813;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(JUnit4.class)
+@ExtendWith(IsolatedNetworkTablesExtension.class)
 public final class RobotContainerTest {
   private final FakeShuffleboardTabs shuffleboard = new FakeShuffleboardTabs();
 
-  @Rule public final NetworkTableResource networkTable = new NetworkTableResource();
-
   @Test
-  public void constructorDoesNotRaise() {
+  public void constructorDoesNotRaise(NetworkTableInstance ntInstance) {
     //noinspection EmptyTryBlock
-    try (var container =
-        new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {}
+    try (var container = new RobotContainer(shuffleboard, ntInstance)) {}
   }
 
   @Test
-  public void conBeConstructedMultipleTimes() {
+  public void conBeConstructedMultipleTimes(NetworkTableInstance ntInstance) {
     //noinspection EmptyTryBlock
-    try (var container =
-        new RobotContainer(shuffleboard, networkTable.getNetworkTableInstance())) {}
+    try (var container = new RobotContainer(shuffleboard, ntInstance)) {}
   }
 }
