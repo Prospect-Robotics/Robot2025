@@ -5,9 +5,7 @@ import static com.team2813.vision.VisionNetworkTables.CAMERA_POSE_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.getTableForCamera;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -115,6 +113,32 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     Pose3d pose3d = new Pose3d(pose);
     for (CameraData cameraData : cameraDatas) {
       cameraData.cameraPosePublisher.set(pose3d.plus(cameraData.robotToCamera));
+    }
+  }
+
+  public void addHeadingData(double timestampSeconds, Rotation2d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  public void addHeadingData(double timestampSeconds, Rotation3d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  public void resetHeadingData(double timestampSeconds, Rotation2d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.resetHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  public void resetHeadingData(double timestampSeconds, Rotation3d heading) {
+    // FIXME(photonvision): Use resetHeadingData with Rotation3d (when added to PhotonVision)
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.resetHeadingData(timestampSeconds, heading.toRotation2d());
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 

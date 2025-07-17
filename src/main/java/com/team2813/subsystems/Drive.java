@@ -43,6 +43,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
@@ -443,6 +444,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
+      photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
       if (simDrivetrain != null) {
         simDrivetrain.resetPose(pose);
       }
@@ -515,6 +517,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
+    photonPoseEstimator.addHeadingData(Timer.getTimestamp(), drivetrain.getRotation3d());
     photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);
