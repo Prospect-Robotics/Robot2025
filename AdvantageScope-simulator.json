@@ -74,13 +74,12 @@
                     "options": {}
                   },
                   {
-                    "type": "vision",
-                    "logKey": "NT:/Vision/capt-barnacles/aprilTagPose",
+                    "type": "ghost",
+                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
                     "logType": "Pose3d",
                     "visible": true,
                     "options": {
-                      "color": "#00ffff",
-                      "size": "normal"
+                      "color": "#ff8c00"
                     }
                   },
                   {
@@ -94,25 +93,6 @@
                     }
                   },
                   {
-                    "type": "vision",
-                    "logKey": "NT:/Vision/limelight/visibleAprilTagPoses",
-                    "logType": "Pose3d[]",
-                    "visible": false,
-                    "options": {
-                      "color": "#00ff00",
-                      "size": "normal"
-                    }
-                  },
-                  {
-                    "type": "ghost",
-                    "logKey": "NT:/Vision/professor-inkling/poseEstimate",
-                    "logType": "Pose3d",
-                    "visible": true,
-                    "options": {
-                      "color": "#ff8c00"
-                    }
-                  },
-                  {
                     "type": "ghost",
                     "logKey": "NT:/Vision/capt-barnacles/poseEstimate",
                     "logType": "Pose3d",
@@ -122,12 +102,32 @@
                     }
                   },
                   {
+                    "type": "vision",
+                    "logKey": "NT:/Vision/capt-barnacles/aprilTagPose",
+                    "logType": "Pose3d",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ffff",
+                      "size": "normal"
+                    }
+                  },
+                  {
                     "type": "ghost",
                     "logKey": "NT:/Vision/limelight/poseEstimate",
                     "logType": "Pose2d",
                     "visible": true,
                     "options": {
                       "color": "#00ff00"
+                    }
+                  },
+                  {
+                    "type": "vision",
+                    "logKey": "NT:/Vision/limelight/visibleAprilTagPoses",
+                    "logType": "Pose3d[]",
+                    "visible": true,
+                    "options": {
+                      "color": "#00ff00",
+                      "size": "normal"
                     }
                   }
                 ],
