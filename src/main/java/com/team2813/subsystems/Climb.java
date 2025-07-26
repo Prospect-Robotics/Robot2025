@@ -1,5 +1,8 @@
 package com.team2813.subsystems;
 
+import static com.team2813.Constants.CLIMB_1;
+import static com.team2813.Constants.CLIMB_2;
+
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -18,13 +21,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-import static com.team2813.Constants.CLIMB_1;
-import static com.team2813.Constants.CLIMB_2;
 
 /** This is the Climb. Her name is Lisa. Please be kind to her and say hi. Have a nice day! */
 public class Climb extends SubsystemBase implements AutoCloseable {
@@ -85,12 +84,10 @@ public class Climb extends SubsystemBase implements AutoCloseable {
 
   private static final double gearRatio = 1;
 
-  private final DCMotorSim simModel = new DCMotorSim(
-          LinearSystemId.createDCMotorSystem(
-                  DCMotor.getKrakenX60(2), 0.001, gearRatio
-          ),
-          DCMotor.getKrakenX60(2)
-  );
+  private final DCMotorSim simModel =
+      new DCMotorSim(
+          LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(2), 0.001, gearRatio),
+          DCMotor.getKrakenX60(2));
 
   @Override
   public void simulationPeriodic() {
