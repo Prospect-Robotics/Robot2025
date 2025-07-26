@@ -39,11 +39,11 @@ import org.json.simple.parser.ParseException;
 public class RobotContainer implements AutoCloseable {
   private static final DriverStation.Alliance ALLIANCE_USED_IN_PATHS = DriverStation.Alliance.Blue;
 
-  private final Climb climb;
+  public final Climb climb;
   private final Intake intake;
   private final Elevator elevator;
   private final Drive drive;
-  private final IntakePivot intakePivot;
+  public final IntakePivot intakePivot;
   private final GroundIntake groundIntake = new GroundIntake();
   private final GroundIntakePivot groundIntakePivot;
 
