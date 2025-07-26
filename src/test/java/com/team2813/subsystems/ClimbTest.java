@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(IsolatedNetworkTablesExtension.class)
+@ExtendWith({CommandTesterExtension.class, IsolatedNetworkTablesExtension.class})
 public class ClimbTest {
   private final ShuffleboardTabs shuffleboardTabs = new FakeShuffleboardTabs();
 
@@ -31,7 +31,7 @@ public class ClimbTest {
   }
 
   @Test
-  public void extend(NetworkTableInstance ntInstance) {
+  public void extend(NetworkTableInstance ntInstance, CommandTester commandTester) {
     try (RobotContainer robotContainer = new RobotContainer(shuffleboardTabs, ntInstance)) {
       // Setup
       Climb climb = robotContainer.climb;
