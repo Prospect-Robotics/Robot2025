@@ -13,6 +13,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import java.util.function.Supplier;
 
 /**
@@ -43,6 +44,11 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
   @Override
   protected void useOutput(double output, double setPoint) {
     super.useOutput(output, setPoint);
+  }
+
+  @Override
+  public Current getAppliedCurrent() {
+    return motor.getAppliedCurrent();
   }
 
   private static PIDMotor pivotMotor() {
