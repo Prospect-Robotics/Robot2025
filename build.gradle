@@ -139,6 +139,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.14.2'
     testImplementation 'com.google.truth:truth:1.4.4'
+    testImplementation 'com.team2813:testing'
 
     implementation 'com.team2813:lib2813'
     implementation 'com.team2813:limelight'
@@ -152,7 +153,9 @@ test {
 // Simulation configuration (e.g. environment variables).
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
+
 downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
+downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':testing:jar')
 downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':limelight:jar')
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
