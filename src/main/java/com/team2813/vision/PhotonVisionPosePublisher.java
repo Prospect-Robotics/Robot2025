@@ -10,7 +10,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.StructTopic;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.Timer;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.photonvision.EstimatedRobotPose;
@@ -40,7 +40,7 @@ public final class PhotonVisionPosePublisher {
    *
    * @param poseEstimates The estimated locations (with the blue driver station as the origin).
    */
-  public void publish(List<EstimatedRobotPose> poseEstimates) {
+  public void publish(Collection<EstimatedRobotPose> poseEstimates) {
     publisher.publish(
         poseEstimates.stream()
             .map(PhotonVisionPosePublisher::toRobotPoseTimestampedValue)

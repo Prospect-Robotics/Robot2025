@@ -1,7 +1,6 @@
 package com.team2813.commands;
 
 import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
-import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
@@ -17,31 +16,26 @@ import com.team2813.subsystems.Drive;
 import com.team2813.vision.LimelightPosePublisher;
 import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 public class RobotLocalization {
-  private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final Configuration config;
   private final StructPublisher<Pose2d> lastPosePublisher;
   private final LimelightPosePublisher limelightPosePublisher;
   private final BooleanPublisher hasDataPublisher;
-  private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
 
   /** Holder for all configuration for {@link RobotLocalization}. */
   public record Configuration(boolean useAutoAlignWaypoints) {
@@ -65,22 +59,15 @@ public class RobotLocalization {
     NetworkTable limelightNetworkTable =
         VisionNetworkTables.getTableForLimelight(networkTableInstance);
     hasDataPublisher = limelightNetworkTable.getBooleanTopic(HAS_DATA_TOPIC).publish();
-    visibleAprilTagPosesPublisher =
-        limelightNetworkTable
-            .getStructArrayTopic(VISIBLE_APRIL_TAG_POSES_TOPIC, Pose3d.struct)
-            .publish();
   }
 
   /** Gets the position estimate from the Limelight relative to the Blue origin. */
   public Optional<BotPoseEstimate> limelightLocation() {
     LocationalData locationalData = limelight.getLocationalData();
     hasDataPublisher.accept(locationalData.isValid());
-
-    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
-    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+    limelightPosePublisher.publish(locationalData);
 
     Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
-    limelightPosePublisher.publish(optionalEstimate);
 
     return optionalEstimate;
   }
