@@ -115,6 +115,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   public record DriveConfiguration(
       boolean addLimelightMeasurement,
       boolean usePhotonVisionLocation,
+      boolean usePnpDistanceTrigSolveStrategy,
       double maxLimelightDifferenceMeters,
       DoubleSupplier maxRotationsPerSecond,
       DoubleSupplier maxVelocityInMetersPerSecond) {
@@ -133,6 +134,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       return maxVelocityInMetersPerSecond.getAsDouble();
     }
 
+    PhotonPoseEstimator.PoseStrategy poseStrategy() {
+      return usePnpDistanceTrigSolveStrategy
+          ? PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
+          : PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    }
+
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
       return new AutoBuilder_Drive_DriveConfiguration_Builder()
@@ -140,6 +147,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
           .usePhotonVisionLocation(false)
           .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
           .maxVelocityInMetersPerSecond(DEFAULT_MAX_VELOCITY_METERS_PER_SECOND)
+          .usePnpDistanceTrigSolveStrategy(false)
           .maxLimelightDifferenceMeters(1.0);
     }
 
@@ -169,6 +177,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
       Builder maxLimelightDifferenceMeters(double value);
 
+      Builder usePnpDistanceTrigSolveStrategy(boolean enabled);
+
       DriveConfiguration build();
     }
   }
@@ -186,9 +196,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
-                networkTableInstance,
-                aprilTagFieldLayout,
-                PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+                networkTableInstance, aprilTagFieldLayout, config.poseStrategy())
             // should have named our batteries after Octonauts characters >:(
             .addCamera("capt-barnacles", captBarnaclesTransform, "Front PhotonVision camera")
             .addCamera("professor-inkling", professorInklingTransform, "Back PhotonVision camera")
@@ -335,6 +343,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
   }
 
+  private Rotation3d getRotation3d() {
+    if (simDrivetrain != null) {
+      return simDrivetrain.getRotation3d();
+    }
+    return drivetrain.getRotation3d();
+  }
+
   private Command createDefaultCommand() {
     return new DefaultDriveCommand(
         this,
@@ -437,14 +452,16 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   /**
    * Sets the pose, in the blue coordinate system.
    *
-   * <p>This is called when the robot is being controlled by path planner. It assumes that the
+   * <p>This is called by PathPlanner when it starts controlling the robot. It assumes that the
    * passed-in pose is correct.
    */
   public void setPose(Pose2d pose) {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
-      photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
+      if (config.usePnpDistanceTrigSolveStrategy) {
+        photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
+      }
       if (simDrivetrain != null) {
         simDrivetrain.resetPose(pose);
       }
@@ -517,7 +534,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
-    photonPoseEstimator.addHeadingData(Timer.getTimestamp(), drivetrain.getRotation3d());
+    if (config.usePnpDistanceTrigSolveStrategy) {
+      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
+    }
     photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);

@@ -8,6 +8,7 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.StructPublisher;
@@ -74,5 +75,9 @@ final class SimulatedSwerveDrivetrain extends SimSwerveDrivetrain {
     poseEstimator.update(gyroAngle, wheelPositions);
     simPose = poseEstimator.getEstimatedPosition();
     simCurrentPose.set(simPose);
+  }
+
+  public Rotation3d getRotation3d() {
+    return new Rotation3d(simPose.getRotation());
   }
 }
