@@ -63,8 +63,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
   private final RobotLocalization localization;
-  private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
-  private final SimulatedSwerveDrivetrain simDrivetrain;
+  private final Drivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
+  private final SimulatedSwerveDrivetrain<TalonFX, TalonFX, CANcoder> simDrivetrain;
   private final VisionSystemSim simVisionSystem;
   private final DriveConfiguration config;
   private final MultiPhotonPoseEstimator photonPoseEstimator;
@@ -300,8 +300,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 true, // May need to change later.
                 false); // May need to change later.
     SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
-    drivetrain =
-        new SwerveDrivetrain<>(
+    CTRESwerveDriveTrain swerveDrivetrain =
+        new CTRESwerveDriveTrain(
             TalonFX::new, TalonFX::new, CANcoder::new, drivetrainConstants, modules);
 
     // Logging
@@ -316,7 +316,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     setDefaultCommand(createDefaultCommand());
 
     for (int i = 0; i < 4; i++) {
-      drivetrain
+      swerveDrivetrain
           .getModule(i)
           .getDriveMotor()
           .getConfigurator()
@@ -330,7 +330,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Simulation code.
     // See https://docs.wpilib.org/en/stable/docs/software/wpilib-tools/robot-simulation/
     if (RobotBase.isSimulation()) {
-      simDrivetrain = new SimulatedSwerveDrivetrain(networkTable, drivetrain, modules);
+      simDrivetrain = new SimulatedSwerveDrivetrain<>(networkTable, swerveDrivetrain, modules);
+      drivetrain = simDrivetrain;
 
       // See https://docs.photonvision.org/en/latest/docs/simulation/simulation-java.html
       simVisionSystem = new VisionSystemSim("main");
@@ -338,16 +339,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       photonPoseEstimator.addToSim(
           simVisionSystem, cameraName -> SimCameraProperties.PERFECT_90DEG());
     } else {
+      drivetrain = swerveDrivetrain;
       simDrivetrain = null;
       simVisionSystem = null;
     }
-  }
-
-  private Rotation3d getRotation3d() {
-    if (simDrivetrain != null) {
-      return simDrivetrain.getRotation3d();
-    }
-    return drivetrain.getRotation3d();
   }
 
   private Command createDefaultCommand() {
@@ -365,12 +360,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   private double getPosition(int moduleId) {
-    return drivetrain
-        .getModule(moduleId)
-        .getEncoder()
-        .getAbsolutePosition()
-        .getValue()
-        .in(Rotations);
+    SwerveModule<TalonFX, TalonFX, CANcoder> module = drivetrain.getModule(moduleId);
+    return module.getEncoder().getAbsolutePosition().getValue().in(Rotations);
   }
 
   private final ApplyRobotSpeeds applyRobotSpeedsApplier = new ApplyRobotSpeeds();
@@ -462,9 +453,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       if (config.usePnpDistanceTrigSolveStrategy) {
         photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
       }
-      if (simDrivetrain != null) {
-        simDrivetrain.resetPose(pose);
-      }
     } else {
       DriverStation.reportError(
           "setPose() passed null! Possibly unintended behavior may occur!",
@@ -473,7 +461,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
-    return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
+    return drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
@@ -535,7 +523,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
     if (config.usePnpDistanceTrigSolveStrategy) {
-      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
+      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), drivetrain.getRotation3d());
     }
     photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d drivePose = getPose();
@@ -552,7 +540,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     simDrivetrain.periodic();
-    Pose2d drivePose = simDrivetrain.getPose();
+    Pose2d drivePose = simDrivetrain.getSimulatedPose();
     simVisionSystem.update(drivePose);
   }
 
@@ -564,5 +552,23 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   public void close() {
     drivetrain.close();
     photonPoseEstimator.close();
+  }
+
+  private static class CTRESwerveDriveTrain extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder>
+      implements Drivetrain<TalonFX, TalonFX, CANcoder> {
+
+    public CTRESwerveDriveTrain(
+        DeviceConstructor<TalonFX> driveMotorConstructor,
+        DeviceConstructor<TalonFX> steerMotorConstructor,
+        DeviceConstructor<CANcoder> encoderConstructor,
+        SwerveDrivetrainConstants drivetrainConstants,
+        SwerveModuleConstants<?, ?, ?>... modules) {
+      super(
+          driveMotorConstructor,
+          steerMotorConstructor,
+          encoderConstructor,
+          drivetrainConstants,
+          modules);
+    }
   }
 }
