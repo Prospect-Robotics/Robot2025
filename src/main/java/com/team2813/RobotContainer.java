@@ -22,6 +22,7 @@ import com.team2813.sysid.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.LogMessage;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Time;
@@ -30,10 +31,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 import org.json.simple.parser.ParseException;
 
 public class RobotContainer implements AutoCloseable {
@@ -108,14 +111,14 @@ public class RobotContainer implements AutoCloseable {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                        elevator)
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
+                    elevator)
                     .withTimeout(SECONDS_2),
                 new LockFunctionCommand(
-                        intakePivot::atPosition,
-                        () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
-                        intakePivot)
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
+                    intakePivot)
                     .withTimeout(SECONDS_2)),
             intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
@@ -137,14 +140,14 @@ public class RobotContainer implements AutoCloseable {
         "ScoreL3",
         new SequentialCommandGroup(
             new LockFunctionCommand(
-                    elevator::atPosition,
-                    () -> elevator.setSetpoint(Elevator.Position.TOP),
-                    elevator)
+                elevator::atPosition,
+                () -> elevator.setSetpoint(Elevator.Position.TOP),
+                elevator)
                 .withTimeout(SECONDS_2),
             new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
-                    intakePivot)
+                intakePivot::atPosition,
+                () -> intakePivot.setSetpoint(IntakePivot.Rotations.OUTTAKE),
+                intakePivot)
                 .withTimeout(SECONDS_2),
             intake.slowOuttakeItemCommand(),
             new WaitCommand(DROP_CORAL),
@@ -159,14 +162,14 @@ public class RobotContainer implements AutoCloseable {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                        elevator)
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
+                    elevator)
                     .withTimeout(SECONDS_2),
                 new LockFunctionCommand(
-                        intakePivot::atPosition,
-                        () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
-                        intakePivot)
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
+                    intakePivot)
                     .withTimeout(SECONDS_2)),
             intake.outtakeItemCommand(),
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump low algae
@@ -183,14 +186,14 @@ public class RobotContainer implements AutoCloseable {
                 new SequentialCommandGroup(
                     new WaitCommand(0.05),
                     new LockFunctionCommand(
-                            elevator::atPosition,
-                            () -> elevator.setSetpoint(Elevator.Position.TOP),
-                            elevator)
+                        elevator::atPosition,
+                        () -> elevator.setSetpoint(Elevator.Position.TOP),
+                        elevator)
                         .withTimeout(SECONDS_2)),
                 new LockFunctionCommand(
-                        intakePivot::atPosition,
-                        () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
-                        intakePivot)
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
+                    intakePivot)
                     .withTimeout(SECONDS_2)),
             intake.bumpAlgaeCommand(),
             new WaitCommand(SECONDS_1), // TODO: Wait until we bump high algae
@@ -205,14 +208,14 @@ public class RobotContainer implements AutoCloseable {
         new SequentialCommandGroup(
             new ParallelCommandGroup(
                 new LockFunctionCommand(
-                        elevator::atPosition,
-                        () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
-                        elevator)
+                    elevator::atPosition,
+                    () -> elevator.setSetpoint(Elevator.Position.BOTTOM),
+                    elevator)
                     .withTimeout(SECONDS_2),
                 new LockFunctionCommand(
-                        intakePivot::atPosition,
-                        () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
-                        intakePivot)
+                    intakePivot::atPosition,
+                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE),
+                    intakePivot)
                     .withTimeout(SECONDS_2)),
             intake.intakeItemCommand(),
             new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
@@ -260,7 +263,7 @@ public class RobotContainer implements AutoCloseable {
             new PIDConstants(15, 0.0, 0), // Translation PID constants
             new PIDConstants(
                 6.85, 0.0, 1.3) // Rotation PID constants //make lower but 5 doesnt work
-            ),
+        ),
         config, // The robot configuration
         () -> {
           // Boolean supplier that controls when the path will be mirrored for the red alliance
@@ -271,7 +274,7 @@ public class RobotContainer implements AutoCloseable {
               .orElse(false);
         },
         drive // Reference to this subsystem to set requirements
-        );
+    );
     configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
     return AutoBuilder.buildAutoChooser();
   }
@@ -347,33 +350,10 @@ public class RobotContainer implements AutoCloseable {
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
-    AUTO_ALIGN_LEFT.onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(
-                () ->
-                    Limelight.getDefaultLimelight()
-                        .getLocationalData()
-                        .getBotpose()
-                        .map(Pose3d::toPose2d)
-                        .map(RobotContainer::toBotposeBlue)
-                        .ifPresent(drive::setPose)),
-            new WaitCommand(0.02),
-            new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive))));
-
-    AUTO_ALIGN_RIGHT.onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(
-                () ->
-                    Limelight.getDefaultLimelight()
-                        .getLocationalData()
-                        .getBotpose()
-                        .map(Pose3d::toPose2d)
-                        .map(RobotContainer::toBotposeBlue)
-                        .ifPresent(drive::setPose)),
-            new WaitCommand(0.02),
-            new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive))));
+    // TODO: Reimplement with photonvision.
+    AUTO_ALIGN_LEFT.onTrue(new InstantCommand(() -> DriverStation.reportWarning("Attempted to auto align left, but there is no limelight implementation.", false)));
+    // TODO: Reimplement with photonvision.
+    AUTO_ALIGN_RIGHT.onTrue(new InstantCommand(() -> DriverStation.reportWarning("Attempted to auto align right, but there is no limelight implementation.", false)));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(
@@ -467,9 +447,9 @@ public class RobotContainer implements AutoCloseable {
     ALGAE_BUMP.whileTrue(
         new SequentialCommandGroup(
             new LockFunctionCommand(
-                    intakePivot::atPosition,
-                    () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
-                    intakePivot)
+                intakePivot::atPosition,
+                () -> intakePivot.setSetpoint(IntakePivot.Rotations.ALGAE_BUMP),
+                intakePivot)
                 .withTimeout(Units.Seconds.of(2)),
             intake.bumpAlgaeCommand()));
     ALGAE_BUMP.onFalse(
