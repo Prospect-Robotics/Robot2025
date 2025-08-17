@@ -23,7 +23,12 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
-/** TODO - summarize what this class does. */
+/**
+ * A class that manages of one or more Photonvision cameras, their robotToCamera 3D poses and pose
+ * estimators. The class provides an interface to consume the pose estimations from all cameras -
+ * the `update(...)` method. The class also supports adding the camera configurations to robot
+ * simulation.
+ */
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final List<CameraData> cameraDatas = new ArrayList<>();
 
@@ -99,9 +104,10 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   /**
-   * Adds the cameras to the provided simulated vision system.
+   * Adds the current Multi-Photon camera setup to a simulated vision system.
    *
-   * @param propertyFactory Called to get the simulated camera properties for each camera.
+   * @param simVisionSystem The simulated visual system.
+   * @param propertyFactory Functor that creates simulated camera properties.
    */
   public void addToSim(
       VisionSystemSim simVisionSystem, Function<String, SimCameraProperties> propertyFactory) {
