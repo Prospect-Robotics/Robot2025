@@ -546,7 +546,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // provided only so we can compute (relative to drivePose) and publish the camera field-centric
     // poses in network tables. This should be changed, e.g.
     // - the method could be named more descriptively, e.g., `publishCameraPosesRelativeToDrivePose`
-    // - or, we can ask ourselves if we even need this funcitonality here. 
+    // - or, we could ask ourselves if we even need to report these camera poses (vs. the camera
+    //   pose estimations which are already reported by MultiPhotonPoseEstimator anyway).
     photonPoseEstimator.setDrivePose(drivePose);
 
     modulePositionsPublisher.accept(IntStream.range(0, 4).mapToDouble(this::getPosition).toArray());
