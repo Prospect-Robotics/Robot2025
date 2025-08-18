@@ -5,9 +5,7 @@ import static com.team2813.vision.VisionNetworkTables.CAMERA_POSE_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.getTableForCamera;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
@@ -67,6 +65,11 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     }
   }
 
+  /**
+   * Adds the cameras to the provided simulated vision system.
+   *
+   * @param propertyFactory Called to get the simulated camera properties for each camera.
+   */
   public void addToSim(
       VisionSystemSim simVisionSystem, Function<String, SimCameraProperties> propertyFactory) {
     cameraDatas.forEach(
@@ -115,6 +118,56 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     Pose3d pose3d = new Pose3d(pose);
     for (CameraData cameraData : cameraDatas) {
       cameraData.cameraPosePublisher.set(pose3d.plus(cameraData.robotToCamera));
+    }
+  }
+
+  /**
+   * Add robot heading data to buffer. Must be called periodically for the
+   * <b>PNP_DISTANCE_TRIG_SOLVE</b> strategy.
+   *
+   * @param timestampSeconds timestamp of the robot heading data.
+   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
+   *     coordinates.
+   */
+  public void addHeadingData(double timestampSeconds, Rotation2d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  /**
+   * Add robot heading data to buffer. Must be called periodically for the
+   * <b>PNP_DISTANCE_TRIG_SOLVE</b> strategy.
+   *
+   * @param timestampSeconds timestamp of the robot heading data.
+   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
+   *     coordinates.
+   */
+  public void addHeadingData(double timestampSeconds, Rotation3d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  /**
+   * Clears all heading data in the buffer, and adds a new seed. Useful for preventing estimates
+   * from utilizing heading data provided prior to a pose or rotation reset.
+   *
+   * @param timestampSeconds timestamp of the robot heading data.
+   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
+   *     coordinates.
+   */
+  public void resetHeadingData(double timestampSeconds, Rotation2d heading) {
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.resetHeadingData(timestampSeconds, heading);
+    }
+  }
+
+  public void resetHeadingData(double timestampSeconds, Rotation3d heading) {
+    // FIXME(photonvision): Use resetHeadingData with Rotation3d (when added to PhotonVision)
+    for (CameraData cameraData : cameraDatas) {
+      cameraData.estimator.resetHeadingData(timestampSeconds, heading.toRotation2d());
+      cameraData.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 
