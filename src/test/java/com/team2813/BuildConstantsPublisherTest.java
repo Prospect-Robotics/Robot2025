@@ -89,7 +89,7 @@ public class BuildConstantsPublisherTest {
             "BuildUnixTime",
             "BuildDate",
             "Dirty");
-    assertThat(getStringEntryOrEmpty(table, "MavenName")).isEqualTo("Robot2025");
+    assertThat(getStringEntryOrEmpty(table, "MavenName")).isEqualTo("Dr-Womp-Vision-Testing");
 
     assertThat(getIntegerEntryOrDefault(table, "GitRevision", 0)).isGreaterThan(0);
     assertThat(getStringEntryOrEmpty(table, "GitSha")).isNotEmpty();
@@ -126,7 +126,7 @@ public class BuildConstantsPublisherTest {
       assertThat(outputStream.toString())
           .containsMatch(
               // NOTE that \r?\n is used to match both Windows (\r\n) and Unix (\n) line endings.
-              "MavenName:     Robot2025\r?\n"
+              "MavenName:     Dr-Womp-Vision-Testing\r?\n"
                   // Matches a Git revision number, e.g., "121"
                   + "GitRevision:   [0-9]+\r?\n"
                   // Matches a Git revision hash, e.g., "08205a25fe10c6c6c1ea4db2deabb4aaf4617637"
