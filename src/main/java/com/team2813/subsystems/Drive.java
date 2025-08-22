@@ -57,9 +57,26 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
+
+/*
+TODO: The compiled list of lines that MIGHT need changing.
+  78) Max velocity.
+  79) Max rotations per second.
+  97) Wheel radius.
+  102) Distance from robot center to front (and back).
+  103) Distance from robot center to left (and right).
+  106) Replace the camera transforms to the cameras on Dr. Womp
+  219) Change the camera names to the one on Dr. Womp.
+  231) Reset steer offsets.
+  225) Change steer PID values.
+  242) Change drive PID values.
+  255) Change the canID to the canivore on Dr. Womp
+  261) Change the Drive and Steer Gear ratio to what is on Dr. Womp (I think we are using MK4i's so it might not need to be changed).
+ */
+
 public class Drive extends SubsystemBase implements AutoCloseable {
-  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
-  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
+  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6; // TODO: Get max velocity now since we have the camera cage.
+  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2; // TODO: Same here.
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
   private final RobotLocalization localization;
@@ -77,14 +94,17 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
 
   /** This measurement is <em>IN INCHES</em> */
-  private static final double WHEEL_RADIUS_IN = 1.875;
+  private static final double WHEEL_RADIUS_IN = 1.875; // TODO: Change this to Dr. Womp's wheel radius.
 
   private double multiplier = 1;
   private double lastVisionEstimateTime = -1;
 
-  static final double FRONT_DIST = 0.330200;
-  static final double LEFT_DIST = 0.330200;
+  static final double FRONT_DIST = 0.330200; // TODO: Set this for Dr. Womp.
+  static final double LEFT_DIST = 0.330200; //TODO: Set this for Dr. Womp.
 
+  /*
+    TODO: Remove all of the camera transforms and set them with the new cameras.
+   */
   /**
    * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
    * front
@@ -95,7 +115,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
           0.2939800826,
           0.1708140348,
           new Rotation3d(0, -0.1745329252, -0.5235987756));
-
+  // See above note
   /**
    * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
    * back
@@ -103,8 +123,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final Transform3d professorInklingTransform =
       new Transform3d(
           0.0584240386, 0.2979761884, 0.1668812004, new Rotation3d(0, 0, 0.1745329252 + Math.PI));
-
-  // See above comment, do not delete past this line.
 
   /**
    * Configurable values for the {@code Drive} subsystem
@@ -198,16 +216,19 @@ public class Drive extends SubsystemBase implements AutoCloseable {
         new MultiPhotonPoseEstimator.Builder(
                 networkTableInstance, aprilTagFieldLayout, config.poseStrategy())
             // should have named our batteries after Octonauts characters >:(
+            // TODO: Replace these cameras with the ones on Dr. Womp, same as the transforms.
             .addCamera("capt-barnacles", captBarnaclesTransform, "Front PhotonVision camera")
             .addCamera("professor-inkling", professorInklingTransform, "Back PhotonVision camera")
             .build();
     this.config = config;
 
+    // TODO: Retune these.
     double FLSteerOffset = 0.22021484375;
     double FRSteerOffset = 1.917236;
     double BLSteerOffset = -0.367919921875;
     double BRSteerOffset = -0.258544921875;
 
+    // TODO: consider retuning PID if we want to.
     Slot0Configs steerGains =
         new Slot0Configs()
             .withKP(50)
@@ -218,6 +239,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .withKA(0.084645); // Tune this.
 
     // l: 0 h: 10
+    // TODO: consider retuning PID if we want to.
     Slot0Configs driveGains =
         new Slot0Configs()
             .withKP(2.5)
@@ -230,12 +252,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     SwerveDrivetrainConstants drivetrainConstants =
         new SwerveDrivetrainConstants()
             .withPigeon2Id(PIGEON_ID)
-            .withCANBusName("swerve"); // README: tweak to actual pigeon and CanBusName
+            .withCANBusName("swerve"); // TODO: tweak to actual pigeon and CanBusName
 
     SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constantCreator =
             new SwerveModuleConstantsFactory<
                     TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
+                // TODO: Yes, remember this.
                 // WARNING: TUNE ALL OF THESE THINGS!!!!!!
                 .withDriveMotorGearRatio(6.75)
                 .withSteerMotorGearRatio(150.0 / 7)
@@ -479,6 +502,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
 
+  // Note: We might want to look in here for Dr. Womp
   public void addVisionMeasurement(BotPoseEstimate estimate) {
     double estimateTimestamp = estimate.timestampSeconds();
     if (estimateTimestamp > lastVisionEstimateTime) {
