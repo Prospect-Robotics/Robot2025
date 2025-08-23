@@ -60,14 +60,14 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 /*
 TODO: The compiled list of lines that MIGHT need changing.
-  78) Max velocity.
-  79) Max rotations per second.
-  97) Wheel radius.
-  102) Distance from robot center to front (and back).
-  103) Distance from robot center to left (and right).
+  78) Max velocity. - later
+  79) Max rotations per second. -later
+  97) Wheel radius. [DONE]
+  102) Distance from robot center to front (and back). [DONE]
+  103) Distance from robot center to left (and right). [DONE]
   106) Replace the camera transforms to the cameras on Dr. Womp
   219) Change the camera names to the one on Dr. Womp.
-  231) Reset steer offsets.
+  231) Reset steer offsets. [DONE]
   225) Change steer PID values.
   242) Change drive PID values.
   255) Change the canID to the canivore on Dr. Womp
@@ -75,7 +75,8 @@ TODO: The compiled list of lines that MIGHT need changing.
  */
 
 public class Drive extends SubsystemBase implements AutoCloseable {
-  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6; // TODO: Get max velocity now since we have the camera cage.
+  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND =
+      6; // TODO: Get max velocity now since we have the camera cage.
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2; // TODO: Same here.
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
@@ -94,17 +95,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
 
   /** This measurement is <em>IN INCHES</em> */
-  private static final double WHEEL_RADIUS_IN = 1.875; // TODO: Change this to Dr. Womp's wheel radius.
+  private static final double WHEEL_RADIUS_IN =
+      1.537; // TODO: Change this to Dr. Womp's wheel radius. [DONE]
 
   private double multiplier = 1;
   private double lastVisionEstimateTime = -1;
 
-  static final double FRONT_DIST = 0.330200; // TODO: Set this for Dr. Womp.
-  static final double LEFT_DIST = 0.330200; //TODO: Set this for Dr. Womp.
+  static final double FRONT_DIST = 0.4064; // TODO: Set this for Dr. Womp. [DONE]
+  static final double LEFT_DIST = 0.3302; // TODO: Set this for Dr. Womp. [DONE]
 
   /*
-    TODO: Remove all of the camera transforms and set them with the new cameras.
-   */
+   TODO: Remove all of the camera transforms and set them with the new cameras.
+  */
   /**
    * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
    * front
@@ -115,6 +117,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
           0.2939800826,
           0.1708140348,
           new Rotation3d(0, -0.1745329252, -0.5235987756));
+
   // See above note
   /**
    * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
@@ -222,11 +225,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .build();
     this.config = config;
 
-    // TODO: Retune these.
-    double FLSteerOffset = 0.22021484375;
-    double FRSteerOffset = 1.917236;
-    double BLSteerOffset = -0.367919921875;
-    double BRSteerOffset = -0.258544921875;
+    // TODO: Retune these. [DONE]
+    double FLSteerOffset = -0.240234;
+    double FRSteerOffset = -0.011475;
+    double BLSteerOffset = -0.108887;
+    double BRSteerOffset = -0.148438;
 
     // TODO: consider retuning PID if we want to.
     Slot0Configs steerGains =
@@ -252,7 +255,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     SwerveDrivetrainConstants drivetrainConstants =
         new SwerveDrivetrainConstants()
             .withPigeon2Id(PIGEON_ID)
-            .withCANBusName("swerve"); // TODO: tweak to actual pigeon and CanBusName
+            .withCANBusName("swerve"); // TODO: tweak to actual pigeon and CanBusName [DONE]
 
     SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constantCreator =
@@ -283,9 +286,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FLSteerOffset,
                 FRONT_DIST,
                 LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false); 
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         frontRight =
             constantCreator.createModuleConstants(
@@ -295,9 +298,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FRSteerOffset,
                 FRONT_DIST,
                 -LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false); 
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backLeft =
             constantCreator.createModuleConstants(
@@ -307,9 +310,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BLSteerOffset,
                 -FRONT_DIST,
                 LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false); 
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backRight =
             constantCreator.createModuleConstants(
@@ -319,9 +322,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BRSteerOffset,
                 -FRONT_DIST,
                 -LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false); 
     SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
     drivetrain =
         new SwerveDrivetrain<>(
