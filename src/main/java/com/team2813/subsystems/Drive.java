@@ -288,7 +288,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 LEFT_DIST,
                 false,
                 true,
-                false); 
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         frontRight =
             constantCreator.createModuleConstants(
@@ -300,7 +300,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 -LEFT_DIST,
                 false,
                 true,
-                false); 
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backLeft =
             constantCreator.createModuleConstants(
@@ -312,7 +312,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 LEFT_DIST,
                 false,
                 true,
-                false); 
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backRight =
             constantCreator.createModuleConstants(
@@ -324,7 +324,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 -LEFT_DIST,
                 false,
                 true,
-                false); 
+                false);
     SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
     drivetrain =
         new SwerveDrivetrain<>(
