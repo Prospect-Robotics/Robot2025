@@ -1,8 +1,22 @@
 package com.team2813.subsystems;
 
-import static com.team2813.Constants.*;
+import static com.team2813.Constants.BACK_LEFT_DRIVE_ID;
+import static com.team2813.Constants.BACK_LEFT_ENCODER_ID;
+import static com.team2813.Constants.BACK_LEFT_STEER_ID;
+import static com.team2813.Constants.BACK_RIGHT_DRIVE_ID;
+import static com.team2813.Constants.BACK_RIGHT_ENCODER_ID;
+import static com.team2813.Constants.BACK_RIGHT_STEER_ID;
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
+import static com.team2813.Constants.FRONT_LEFT_DRIVE_ID;
+import static com.team2813.Constants.FRONT_LEFT_ENCODER_ID;
+import static com.team2813.Constants.FRONT_LEFT_STEER_ID;
+import static com.team2813.Constants.FRONT_RIGHT_DRIVE_ID;
+import static com.team2813.Constants.FRONT_RIGHT_ENCODER_ID;
+import static com.team2813.Constants.FRONT_RIGHT_STEER_ID;
+import static com.team2813.Constants.PIGEON_ID;
 import static com.team2813.lib2813.util.ControlUtils.deadband;
+import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.Utils;
@@ -33,12 +47,21 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -104,28 +127,15 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   static final double FRONT_DIST = 0.4064; // TODO: Set this for Dr. Womp. [DONE]
   static final double LEFT_DIST = 0.3302; // TODO: Set this for Dr. Womp. [DONE]
 
-  /*
-   TODO: Remove all of the camera transforms and set them with the new cameras.
-  */
-  /**
-   * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
-   * front
-   */
-  private static final Transform3d captBarnaclesTransform =
+  private static final Transform3d leftColorTransform =
       new Transform3d(
-          0.1688157406,
-          0.2939800826,
-          0.1708140348,
-          new Rotation3d(0, -0.1745329252, -0.5235987756));
+          new Translation3d(Centimeters.of(31), Centimeters.of(21), Centimeters.of(20)),
+          new Rotation3d(Degrees.of(0), Degrees.of(-30), Degrees.of(-30)));
 
-  // See above note
-  /**
-   * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
-   * back
-   */
-  private static final Transform3d professorInklingTransform =
+  private static final Transform3d rightColorTransform =
       new Transform3d(
-          0.0584240386, 0.2979761884, 0.1668812004, new Rotation3d(0, 0, 0.1745329252 + Math.PI));
+          new Translation3d(Centimeters.of(29), Centimeters.of(-23), Centimeters.of(13)),
+          new Rotation3d(Degrees.of(0), Degrees.of(-20), Degrees.of(30)));
 
   /**
    * Configurable values for the {@code Drive} subsystem
@@ -220,8 +230,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 networkTableInstance, aprilTagFieldLayout, config.poseStrategy())
             // should have named our batteries after Octonauts characters >:(
             // TODO: Replace these cameras with the ones on Dr. Womp, same as the transforms.
-            .addCamera("capt-barnacles", captBarnaclesTransform, "Front PhotonVision camera")
-            .addCamera("professor-inkling", professorInklingTransform, "Back PhotonVision camera")
+            .addCamera("left_color", leftColorTransform, "Left PhotonVision camera")
+            .addCamera("right_color", rightColorTransform, "Right PhotonVision camera")
             .build();
     this.config = config;
 
