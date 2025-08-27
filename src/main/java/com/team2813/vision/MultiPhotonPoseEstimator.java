@@ -24,10 +24,11 @@ import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
 /**
- * A class that manages of one or more Photonvision cameras, their robotToCamera 3D poses and pose
- * estimators. The class provides an interface to consume the pose estimations from all cameras -
- * the `update(...)` method. The class also supports adding the camera configurations to robot
- * simulation.
+ * Provides estimated robot positions, in field pose, from multiple PhotonVision cameras.
+ *
+ * <p>This class manages one or more PhotonVision cameras, and provides an API (@link #update()) to
+ * provide an updated estimated robot pose by combining readings from AprilTags visible from the
+ * cameras. It also supports adding camera configurations to PhotonVision's simulated vision system.
  */
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final List<CameraData> cameraDatas = new ArrayList<>();
@@ -205,56 +206,6 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     Pose3d pose3d = new Pose3d(pose);
     for (CameraData cameraData : cameraDatas) {
       cameraData.cameraPosePublisher.set(pose3d.plus(cameraData.robotToCamera));
-    }
-  }
-
-  /**
-   * Add robot heading data to buffer. Must be called periodically for the
-   * <b>PNP_DISTANCE_TRIG_SOLVE</b> strategy.
-   *
-   * @param timestampSeconds timestamp of the robot heading data.
-   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
-   *     coordinates.
-   */
-  public void addHeadingData(double timestampSeconds, Rotation2d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
-    }
-  }
-
-  /**
-   * Add robot heading data to buffer. Must be called periodically for the
-   * <b>PNP_DISTANCE_TRIG_SOLVE</b> strategy.
-   *
-   * @param timestampSeconds timestamp of the robot heading data.
-   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
-   *     coordinates.
-   */
-  public void addHeadingData(double timestampSeconds, Rotation3d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
-    }
-  }
-
-  /**
-   * Clears all heading data in the buffer, and adds a new seed. Useful for preventing estimates
-   * from utilizing heading data provided prior to a pose or rotation reset.
-   *
-   * @param timestampSeconds timestamp of the robot heading data.
-   * @param heading Field-relative robot heading at given timestamp. Standard WPILIB field
-   *     coordinates.
-   */
-  public void resetHeadingData(double timestampSeconds, Rotation2d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.resetHeadingData(timestampSeconds, heading);
-    }
-  }
-
-  public void resetHeadingData(double timestampSeconds, Rotation3d heading) {
-    // FIXME(photonvision): Use resetHeadingData with Rotation3d (when added to PhotonVision)
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.resetHeadingData(timestampSeconds, heading.toRotation2d());
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 
