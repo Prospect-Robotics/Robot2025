@@ -83,18 +83,10 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 /*
 TODO: The compiled list of lines that MIGHT need changing.
-  78) Max velocity. - later
-  79) Max rotations per second. -later
-  97) Wheel radius. [DONE]
-  102) Distance from robot center to front (and back). [DONE]
-  103) Distance from robot center to left (and right). [DONE]
-  106) Replace the camera transforms to the cameras on Dr. Womp
-  219) Change the camera names to the one on Dr. Womp.
-  231) Reset steer offsets. [DONE]
-  225) Change steer PID values.
-  242) Change drive PID values.
-  255) Change the canID to the canivore on Dr. Womp
-  261) Change the Drive and Steer Gear ratio to what is on Dr. Womp (I think we are using MK4i's so it might not need to be changed).
+  Max velocity. - later
+  Max rotations per second. -later
+  Change steer PID values.
+  Change drive PID values.
  */
 
 public class Drive extends SubsystemBase implements AutoCloseable {
@@ -118,14 +110,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
 
   /** This measurement is <em>IN INCHES</em> */
-  private static final double WHEEL_RADIUS_IN =
-      1.537; // TODO: Change this to Dr. Womp's wheel radius. [DONE]
+  private static final double WHEEL_RADIUS_IN = 1.537;
 
   private double multiplier = 1;
   private double lastVisionEstimateTime = -1;
 
-  static final double FRONT_DIST = 0.4064; // TODO: Set this for Dr. Womp. [DONE]
-  static final double LEFT_DIST = 0.3302; // TODO: Set this for Dr. Womp. [DONE]
+  static final double FRONT_DIST = 0.4064;
+  static final double LEFT_DIST = 0.3302;
 
   private static final Transform3d leftColorTransform =
       new Transform3d(
@@ -228,14 +219,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
                 networkTableInstance, aprilTagFieldLayout, config.poseStrategy())
-            // should have named our batteries after Octonauts characters >:(
-            // TODO: Replace these cameras with the ones on Dr. Womp, same as the transforms.
             .addCamera("left_color", leftColorTransform, "Left PhotonVision camera")
             .addCamera("right_color", rightColorTransform, "Right PhotonVision camera")
             .build();
     this.config = config;
 
-    // TODO: Retune these. [DONE]
     double FLSteerOffset = -0.240234;
     double FRSteerOffset = -0.011475;
     double BLSteerOffset = -0.108887;
@@ -263,16 +251,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .withKA(0); // Tune this.
 
     SwerveDrivetrainConstants drivetrainConstants =
-        new SwerveDrivetrainConstants()
-            .withPigeon2Id(PIGEON_ID)
-            .withCANBusName("swerve"); // TODO: tweak to actual pigeon and CanBusName [DONE]
+        new SwerveDrivetrainConstants().withPigeon2Id(PIGEON_ID).withCANBusName("swerve");
 
     SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constantCreator =
             new SwerveModuleConstantsFactory<
                     TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
-                // TODO: Yes, remember this.
-                // WARNING: TUNE ALL OF THESE THINGS!!!!!!
                 .withDriveMotorGearRatio(6.75)
                 .withSteerMotorGearRatio(150.0 / 7)
                 .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
