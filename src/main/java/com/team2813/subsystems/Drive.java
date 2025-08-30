@@ -1,8 +1,22 @@
 package com.team2813.subsystems;
 
-import static com.team2813.Constants.*;
+import static com.team2813.Constants.BACK_LEFT_DRIVE_ID;
+import static com.team2813.Constants.BACK_LEFT_ENCODER_ID;
+import static com.team2813.Constants.BACK_LEFT_STEER_ID;
+import static com.team2813.Constants.BACK_RIGHT_DRIVE_ID;
+import static com.team2813.Constants.BACK_RIGHT_ENCODER_ID;
+import static com.team2813.Constants.BACK_RIGHT_STEER_ID;
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
+import static com.team2813.Constants.FRONT_LEFT_DRIVE_ID;
+import static com.team2813.Constants.FRONT_LEFT_ENCODER_ID;
+import static com.team2813.Constants.FRONT_LEFT_STEER_ID;
+import static com.team2813.Constants.FRONT_RIGHT_DRIVE_ID;
+import static com.team2813.Constants.FRONT_RIGHT_ENCODER_ID;
+import static com.team2813.Constants.FRONT_RIGHT_STEER_ID;
+import static com.team2813.Constants.PIGEON_ID;
 import static com.team2813.lib2813.util.ControlUtils.deadband;
+import static edu.wpi.first.units.Units.Centimeters;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.Utils;
@@ -25,7 +39,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
-import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
@@ -33,12 +46,21 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.*;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -47,7 +69,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
@@ -57,9 +78,19 @@ import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** This is the Drive. His name is Gary. Please be kind to him and say hi. Have a nice day! */
+
+/*
+TODO: The compiled list of lines that MIGHT need changing.
+  Max velocity. - later
+  Max rotations per second. -later
+  Change steer PID values.
+  Change drive PID values.
+ */
+
 public class Drive extends SubsystemBase implements AutoCloseable {
-  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND = 6;
-  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
+  private static final double DEFAULT_MAX_VELOCITY_METERS_PER_SECOND =
+      6; // TODO: Get max velocity now since we have the camera cage.
+  private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2; // TODO: Same here.
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
   private final RobotLocalization localization;
@@ -77,34 +108,23 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
 
   /** This measurement is <em>IN INCHES</em> */
-  private static final double WHEEL_RADIUS_IN = 1.875;
+  private static final double WHEEL_RADIUS_IN = 1.537;
 
   private double multiplier = 1;
   private double lastVisionEstimateTime = -1;
 
-  static final double FRONT_DIST = 0.330200;
-  static final double LEFT_DIST = 0.330200;
+  static final double FRONT_DIST = 0.4064;
+  static final double LEFT_DIST = 0.3302;
 
-  /**
-   * The transformation for the {@code captain-barnacles} PhotonVision camera. This camera faces the
-   * front
-   */
-  private static final Transform3d captBarnaclesTransform =
+  private static final Transform3d leftColorTransform =
       new Transform3d(
-          0.1688157406,
-          0.2939800826,
-          0.1708140348,
-          new Rotation3d(0, -0.1745329252, -0.5235987756));
+          new Translation3d(Centimeters.of(31), Centimeters.of(21), Centimeters.of(20)),
+          new Rotation3d(Degrees.of(0), Degrees.of(-30), Degrees.of(-30)));
 
-  /**
-   * The transformation for the {@code professor-inking} PhotonVision camera. This camera faces the
-   * back
-   */
-  private static final Transform3d professorInklingTransform =
+  private static final Transform3d rightColorTransform =
       new Transform3d(
-          0.0584240386, 0.2979761884, 0.1668812004, new Rotation3d(0, 0, 0.1745329252 + Math.PI));
-
-  // See above comment, do not delete past this line.
+          new Translation3d(Centimeters.of(29), Centimeters.of(-23), Centimeters.of(13)),
+          new Rotation3d(Degrees.of(0), Degrees.of(-20), Degrees.of(30)));
 
   /**
    * Configurable values for the {@code Drive} subsystem
@@ -197,17 +217,17 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
                 networkTableInstance, aprilTagFieldLayout, config.poseStrategy())
-            // should have named our batteries after Octonauts characters >:(
-            .addCamera("capt-barnacles", captBarnaclesTransform, "Front PhotonVision camera")
-            .addCamera("professor-inkling", professorInklingTransform, "Back PhotonVision camera")
+            .addCamera("left_color", leftColorTransform, "Left PhotonVision camera")
+            .addCamera("right_color", rightColorTransform, "Right PhotonVision camera")
             .build();
     this.config = config;
 
-    double FLSteerOffset = 0.22021484375;
-    double FRSteerOffset = 1.917236;
-    double BLSteerOffset = -0.367919921875;
-    double BRSteerOffset = -0.258544921875;
+    double FLSteerOffset = -0.240234;
+    double FRSteerOffset = -0.011475;
+    double BLSteerOffset = -0.108887;
+    double BRSteerOffset = -0.148438;
 
+    // TODO: consider retuning PID if we want to.
     Slot0Configs steerGains =
         new Slot0Configs()
             .withKP(50)
@@ -218,6 +238,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .withKA(0.084645); // Tune this.
 
     // l: 0 h: 10
+    // TODO: consider retuning PID if we want to.
     Slot0Configs driveGains =
         new Slot0Configs()
             .withKP(2.5)
@@ -228,15 +249,12 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .withKA(0); // Tune this.
 
     SwerveDrivetrainConstants drivetrainConstants =
-        new SwerveDrivetrainConstants()
-            .withPigeon2Id(PIGEON_ID)
-            .withCANBusName("swerve"); // README: tweak to actual pigeon and CanBusName
+        new SwerveDrivetrainConstants().withPigeon2Id(PIGEON_ID).withCANBusName("swerve");
 
     SwerveModuleConstantsFactory<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         constantCreator =
             new SwerveModuleConstantsFactory<
                     TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>()
-                // WARNING: TUNE ALL OF THESE THINGS!!!!!!
                 .withDriveMotorGearRatio(6.75)
                 .withSteerMotorGearRatio(150.0 / 7)
                 .withWheelRadius(Units.Inches.of(WHEEL_RADIUS_IN))
@@ -260,9 +278,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FLSteerOffset,
                 FRONT_DIST,
                 LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         frontRight =
             constantCreator.createModuleConstants(
@@ -272,9 +290,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 FRSteerOffset,
                 FRONT_DIST,
                 -LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backLeft =
             constantCreator.createModuleConstants(
@@ -284,9 +302,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BLSteerOffset,
                 -FRONT_DIST,
                 LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false);
     SwerveModuleConstants<TalonFXConfiguration, TalonFXConfiguration, CANcoderConfiguration>
         backRight =
             constantCreator.createModuleConstants(
@@ -296,9 +314,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BRSteerOffset,
                 -FRONT_DIST,
                 -LEFT_DIST,
-                true, // May need to change later.
-                true, // May need to change later.
-                false); // May need to change later.
+                false,
+                true,
+                false);
     SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
     drivetrain =
         new SwerveDrivetrain<>(
@@ -479,20 +497,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
 
-  public void addVisionMeasurement(BotPoseEstimate estimate) {
-    double estimateTimestamp = estimate.timestampSeconds();
-    if (estimateTimestamp > lastVisionEstimateTime) {
-      // Per the JavaDoc for addVisionMeasurement(), only add vision measurements that are already
-      // within one meter or so of the current odometry pose estimate.
-      Pose2d drivePose = getPose();
-      var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
-      if (Math.abs(distance) <= config.maxLimelightDifferenceMeters()) {
-        drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp, LIMELIGHT_STD_DEVS);
-        lastVisionEstimateTime = estimateTimestamp;
-      }
-    }
-  }
-
   private void handlePhotonPose(EstimatedRobotPose estimate) {
     if (!config.usePhotonVisionLocation) {
       return;
@@ -526,10 +530,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Note: we call limelightLocation() even if config.addLimelightMeasurement is false so
     // the position is published to network tables, which allows us to view the limelight's
     // pose estimate in AdvantageScope.
-    Optional<BotPoseEstimate> limelightEstimate = localization.limelightLocation();
-    if (config.addLimelightMeasurement) {
-      limelightEstimate.ifPresent(this::addVisionMeasurement);
-    }
 
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
