@@ -39,7 +39,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.google.auto.value.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
-import com.team2813.lib2813.limelight.BotPoseEstimate;
 import com.team2813.lib2813.preferences.PreferencesInjector;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
@@ -70,7 +69,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
@@ -499,21 +497,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
 
-  // Note: We might want to look in here for Dr. Womp
-  public void addVisionMeasurement(BotPoseEstimate estimate) {
-    double estimateTimestamp = estimate.timestampSeconds();
-    if (estimateTimestamp > lastVisionEstimateTime) {
-      // Per the JavaDoc for addVisionMeasurement(), only add vision measurements that are already
-      // within one meter or so of the current odometry pose estimate.
-      Pose2d drivePose = getPose();
-      var distance = drivePose.getTranslation().getDistance(estimate.pose().getTranslation());
-      if (Math.abs(distance) <= config.maxLimelightDifferenceMeters()) {
-        drivetrain.addVisionMeasurement(estimate.pose(), estimateTimestamp, LIMELIGHT_STD_DEVS);
-        lastVisionEstimateTime = estimateTimestamp;
-      }
-    }
-  }
-
   private void handlePhotonPose(EstimatedRobotPose estimate) {
     if (!config.usePhotonVisionLocation) {
       return;
@@ -547,10 +530,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Note: we call limelightLocation() even if config.addLimelightMeasurement is false so
     // the position is published to network tables, which allows us to view the limelight's
     // pose estimate in AdvantageScope.
-    Optional<BotPoseEstimate> limelightEstimate = localization.limelightLocation();
-    if (config.addLimelightMeasurement) {
-      limelightEstimate.ifPresent(this::addVisionMeasurement);
-    }
 
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
