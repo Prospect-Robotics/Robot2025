@@ -45,7 +45,7 @@ public class Climb extends SubsystemBase implements AutoCloseable {
 
   public void raise() {
     if (!limitSwitchPressed()) {
-      climbMotor1.set(ControlMode.VOLTAGE, -6);
+      climbMotor1.set(ControlMode.VOLTAGE, -5);
     }
   }
 
