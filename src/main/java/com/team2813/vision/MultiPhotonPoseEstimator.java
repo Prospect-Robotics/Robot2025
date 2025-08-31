@@ -158,7 +158,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       PhotonPoseEstimator estimator,
       Transform3d robotToCamera,
       PhotonVisionPosePublisher robotPosePublisher,
-      StructPublisher<Pose3d> cameraPosePublisher) {
+      StructPublisher<Pose3d> cameraPosePublisher)
+      implements AutoCloseable {
 
     /**
      * Publishes the estimated drive pose calculated from this camera.
@@ -167,6 +168,12 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
      */
     void publishEstimatedDrivePose(Pose3d pose) {
       cameraPosePublisher.set(pose.plus(robotToCamera));
+    }
+
+    @Override
+    public void close() {
+      // TODO: Close publishers
+      camera.close();
     }
   }
 
@@ -201,7 +208,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     // information, like the camera name, to be part of the final topic path. Using template paths
     // might be a good middle ground.)
     //
-    // Note that some of the current code can be simplified when we remove the PhotonVision code
+    // Note that some of the current code can be simplified when we remove the Limelight code
     // (since VisionNetworkTable.getTableForLimelight() could be removed, allowing us to remove
     // some of the levels of function calls).
 
@@ -325,9 +332,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
 
   @Override
   public void close() {
-    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
-      cameraWrapper.camera.close();
-    }
+    cameraWrappers.forEach(PhotonCameraWrapper::close);
     cameraWrappers.clear();
   }
 }
