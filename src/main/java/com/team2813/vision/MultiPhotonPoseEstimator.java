@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -35,40 +36,41 @@ import org.photonvision.simulation.VisionSystemSim;
  * AprilTags visible from the cameras. It also supports adding camera configurations to
  * PhotonVision's simulated vision system.
  *
- * <p>Note that, when we are dealing with 2D and 3D poses, the we follow the transformation
- * conventions established by WPILib and PhotonVision:
+ * <p>Note that, when we are dealing with 2D and 3D poses, we follow the transformation conventions
+ * established by WPILib and PhotonVision:
  * https://docs.photonvision.org/en/latest/docs/apriltag-pipelines/coordinate-systems.html
  *
  * <p>Furthermore note that the global robot pose or any of the camera global poses are also
- * referred to as "field-centric pose". In our librarires, field-centric poses are always specified
+ * referred to as "field-centric pose". In our libraries, field-centric poses are always specified
  * relative to the blue origin per
  * https://docs.wpilib.org/en/stable/docs/software/basic-programming/coordinate-system.html#always-blue-origin
  */
 public class MultiPhotonPoseEstimator implements AutoCloseable {
-  private final List<CameraData> cameraDatas = new ArrayList<>();
+  private final List<PhotonCameraWrapper> cameraWrappers;
 
   public static class Builder {
     private final Map<String, CameraConfig> cameraConfigs = new HashMap<>();
-    private final AprilTagFieldLayout fieldTags;
+    private final AprilTagFieldLayout aprilTagFieldLayout;
     private final NetworkTableInstance ntInstance;
-    private final PhotonPoseEstimator.PoseStrategy poseStrategy;
+    private final PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy;
 
     /**
      * MultiPhotonPoseEstimator builder constructor.
      *
      * @param ntInstance Network table instance used to log the pose of AprilTag detections as well
      *     as pose estimates.
-     * @param fieldTags WPILib field description (dimensions) including AprilTag 3D locations.
-     * @param poseStrategy Posing strategy (for instance, multi tag PnP, closest to camera tag,
-     *     etc.)
+     * @param aprilTagFieldLayout WPILib field description (dimensions) including AprilTag 3D
+     *     locations.
+     * @param poseEstimatorStrategy Posing strategy (for instance, multi tag PnP, closest to camera
+     *     tag, etc.)
      */
     public Builder(
         NetworkTableInstance ntInstance,
-        AprilTagFieldLayout fieldTags,
-        PhotonPoseEstimator.PoseStrategy poseStrategy) {
-      this.fieldTags = fieldTags;
+        AprilTagFieldLayout aprilTagFieldLayout,
+        PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy) {
       this.ntInstance = ntInstance;
-      this.poseStrategy = poseStrategy;
+      this.aprilTagFieldLayout = aprilTagFieldLayout;
+      this.poseEstimatorStrategy = poseEstimatorStrategy;
     }
 
     /**
@@ -127,75 +129,95 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    */
   public void addToSim(
       VisionSystemSim simVisionSystem, Function<String, SimCameraProperties> propertyFactory) {
-    cameraDatas.forEach(
-        estimatorData -> {
-          SimCameraProperties cameraProp = propertyFactory.apply(estimatorData.camera.getName());
-          PhotonCameraSim simCamera = new PhotonCameraSim(estimatorData.camera(), cameraProp);
-          simVisionSystem.addCamera(simCamera, estimatorData.estimator.getRobotToCameraTransform());
+    cameraWrappers.forEach(
+        cameraWrapper -> {
+          SimCameraProperties cameraProp = propertyFactory.apply(cameraWrapper.camera.getName());
+          PhotonCameraSim simCamera = new PhotonCameraSim(cameraWrapper.camera(), cameraProp);
+          simVisionSystem.addCamera(simCamera, cameraWrapper.estimator.getRobotToCameraTransform());
         });
   }
 
-  /** A camera that is connected to PhotonVision. */
+  /** Configuration for a camera that is connected to PhotonVision. */
   private record CameraConfig(Transform3d robotToCamera, Optional<String> description) {}
 
   /**
-   * Holds configuration for a camera for the Builder.
+   * Wrapper containing a PhotonVision camera, pose estimator and publishers.
    *
    * @param camera A camera connected to PhotonVision.
    * @param estimator A pose estimator configured for this camera.
    * @param robotToCamera The 3D fixed pose of the camera relative to the robot. Intuitively, this
    *     field describes where on the robot the camera is mounted.
-   * @param publisher A publisher reporting PhotonVision pose detections to NetworkTables during the
-   *     robot runtime.
+   * @param robotPosePublisher A publisher reporting PhotonVision pose detections to NetworkTables
+   *     during the robot runtime.
    * @param cameraPosePublisher A publisher reporting the position of the camera in field-centric
    *     coordinates. In other words, this is the pose most recently set by {@link @setDrivePose}
    *     with the camera's own robotToCamera pose appended to it.
    */
-  private record CameraData(
+  private record PhotonCameraWrapper(
       PhotonCamera camera,
       PhotonPoseEstimator estimator,
       Transform3d robotToCamera,
-      PhotonVisionPosePublisher publisher,
-      StructPublisher<Pose3d> cameraPosePublisher) {}
+      PhotonVisionPosePublisher robotPosePublisher,
+      StructPublisher<Pose3d> cameraPosePublisher) {
+
+    /**
+     * Publishes the estimated drive pose calculated from this camera.
+     *
+     * @param pose 3D field-centric (relative to blue origin) pose of the drive train.
+     */
+    void publishEstimatedDrivePose(Pose3d pose) {
+      cameraPosePublisher.set(pose.plus(robotToCamera));
+    }
+  }
 
   /** Creates an instance using values from a {@code Builder}. */
   private MultiPhotonPoseEstimator(Builder builder) {
-    for (var entry : builder.cameraConfigs.entrySet()) {
-      String cameraName = entry.getKey();
-      CameraConfig cameraConfig = entry.getValue();
+    cameraWrappers =
+        builder.cameraConfigs.entrySet().stream()
+            .map(entry -> createCameraWrapperFromConfig(builder, entry.getKey(), entry.getValue()))
+            .collect(Collectors.toCollection(ArrayList::new));
+  }
 
-      PhotonCamera camera = new PhotonCamera(builder.ntInstance, cameraName);
-      PhotonPoseEstimator estimator =
-          new PhotonPoseEstimator(
-              builder.fieldTags, builder.poseStrategy, cameraConfig.robotToCamera);
-      // A NetworkTables publisher, preconfigured to post timestamped pose estimates from `camera`.
-      var estimatedPosePublisher = new PhotonVisionPosePublisher(camera, builder.fieldTags);
-      // Gets a NetworkTables subtable, dedicated to `camera`.
-      // It will typically be nested under `photonvision/Vision/<camera_name>`
-      // (TODO(vdikov): consider restructuring how the topics under which we publish in network
-      // tables are more explicitly listed somewhere, e.g., in a constants file of sorts. Right now,
-      // the actual path under which we publish is constructed across multiple levels of function
-      // calls, so if a software developer needs to track where a specific value they observe in,
-      // say, Advantage Scope is reported from, they have to trace through all these function
-      // calls. In contrast, the easiest paths to track from one system back to the code are the
-      // hard-coded paths - but that's not really an option here either, since we need dynamic
-      // information, like the camera name, to be part of the final topic path. Using template paths
-      // might be a good middle ground.)
-      NetworkTable table = getTableForCamera(camera);
-      var cameraPosePublisher = table.getStructTopic(CAMERA_POSE_TOPIC, Pose3d.struct).publish();
+  /**
+   * Creates a {@link PhotonCameraWrapper} instance for a camera with the given name and
+   * configuration.
+   *
+   * <p>The returned value is used to get pose estimates from the camera.
+   */
+  private static PhotonCameraWrapper createCameraWrapperFromConfig(
+      Builder builder, String cameraName, CameraConfig cameraConfig) {
+    PhotonCamera camera = new PhotonCamera(builder.ntInstance, cameraName);
+    PhotonPoseEstimator estimator =
+        new PhotonPoseEstimator(
+            builder.aprilTagFieldLayout, builder.poseEstimatorStrategy, cameraConfig.robotToCamera);
 
-      // Add the camera data to camera datas for the lifetime of the multi-photon pose estimator.
-      cameraDatas.add(
-          new CameraData(
-              camera,
-              estimator,
-              cameraConfig.robotToCamera,
-              estimatedPosePublisher,
-              cameraPosePublisher));
+    // (TODO(vdikov): consider restructuring how the topics under which we publish in network
+    // tables are more explicitly listed somewhere, e.g., in a constants file of sorts. Right now,
+    // the actual path under which we publish is constructed across multiple levels of function
+    // calls, so if a software developer needs to track where a specific value they observe in,
+    // say, Advantage Scope is reported from, they have to trace through all these function
+    // calls. In contrast, the easiest paths to track from one system back to the code are the
+    // hard-coded paths - but that's not really an option here either, since we need dynamic
+    // information, like the camera name, to be part of the final topic path. Using template paths
+    // might be a good middle ground.)
+    //
+    // Note that some of the current code can be simplified when we remove the PhotonVision code
+    // (since VisionNetworkTable.getTableForLimelight() could be removed, allowing us to remove
+    // some of the levels of function calls).
 
-      cameraConfig.description.ifPresent(
-          description -> table.getEntry("description").setString(description));
-    }
+    // Create NetworkTables publishers for 1) the position of the camera relative to the robot and
+    // 2) the estimated position provided by the camera.
+    NetworkTable table = getTableForCamera(camera);
+    StructPublisher<Pose3d> cameraPosePublisher =
+        table.getStructTopic(CAMERA_POSE_TOPIC, Pose3d.struct).publish();
+    var estimatedPosePublisher = new PhotonVisionPosePublisher(camera, builder.aprilTagFieldLayout);
+
+    // If the caller provided a description for this camera, publish it to the camera network table.
+    cameraConfig.description.ifPresent(
+        description -> table.getEntry("description").setString(description));
+
+    return new PhotonCameraWrapper(
+        camera, estimator, cameraConfig.robotToCamera, estimatedPosePublisher, cameraPosePublisher);
   }
 
   /**
@@ -220,8 +242,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    */
   public void setDrivePose(Pose2d pose) {
     Pose3d pose3d = new Pose3d(pose);
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.cameraPosePublisher.set(pose3d.plus(cameraData.robotToCamera));
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.publishEstimatedDrivePose(pose3d);
     }
   }
 
@@ -234,8 +256,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    *     coordinates.
    */
   public void addHeadingData(double timestampSeconds, Rotation2d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 
@@ -248,8 +270,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    *     coordinates.
    */
   public void addHeadingData(double timestampSeconds, Rotation3d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 
@@ -262,16 +284,17 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    *     coordinates.
    */
   public void resetHeadingData(double timestampSeconds, Rotation2d heading) {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.resetHeadingData(timestampSeconds, heading);
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.estimator.resetHeadingData(timestampSeconds, heading);
     }
   }
 
   public void resetHeadingData(double timestampSeconds, Rotation3d heading) {
-    // FIXME(photonvision): Use resetHeadingData with Rotation3d (when added to PhotonVision)
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.estimator.resetHeadingData(timestampSeconds, heading.toRotation2d());
-      cameraData.estimator.addHeadingData(timestampSeconds, heading);
+    // TODO: Use PhotonPoseEstimator.resetHeadingData(double, Rotation2d) once we use a version of
+    // PhotonVision that includes it (see  https://github.com/PhotonVision/photonvision/pull/2013).
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.estimator.resetHeadingData(timestampSeconds, heading.toRotation2d());
+      cameraWrapper.estimator.addHeadingData(timestampSeconds, heading);
     }
   }
 
@@ -288,23 +311,23 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
    * @param apply Callback to consume unread photonevision robot-pose estimations.
    */
   public void update(Consumer<? super EstimatedRobotPose> apply) {
-    for (CameraData cameraData : cameraDatas) {
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
       List<EstimatedRobotPose> poses =
-          cameraData.camera.getAllUnreadResults().stream()
-              .map(cameraData.estimator::update)
+          cameraWrapper.camera.getAllUnreadResults().stream()
+              .map(cameraWrapper.estimator::update)
               .flatMap(Optional::stream)
               .toList();
 
       poses.forEach(apply);
-      cameraData.publisher.publish(poses);
+      cameraWrapper.robotPosePublisher.publish(poses);
     }
   }
 
   @Override
   public void close() {
-    for (CameraData cameraData : cameraDatas) {
-      cameraData.camera.close();
+    for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
+      cameraWrapper.camera.close();
     }
-    cameraDatas.clear();
+    cameraWrappers.clear();
   }
 }
