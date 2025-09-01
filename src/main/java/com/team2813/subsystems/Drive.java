@@ -106,6 +106,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositionsPublisher;
   private final DoublePublisher ambiguityPublisher =
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+  private final StructPublisher<Rotation3d> anglePublisher;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.537;
@@ -330,6 +331,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
         networkTable.getStructArrayTopic("actual state", SwerveModuleState.struct).publish();
     currentPosePublisher = networkTable.getStructTopic("current pose", Pose2d.struct).publish();
     modulePositionsPublisher = networkTable.getDoubleArrayTopic("module positions").publish();
+    anglePublisher = networkTable.getStructTopic("pigeon angle", Rotation3d.struct).publish();
 
     setDefaultCommand(createDefaultCommand());
 
@@ -534,9 +536,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
+    Rotation3d rotation = getRotation3d();
     if (config.usePnpDistanceTrigSolveStrategy) {
-      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
+      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), rotation);
     }
+    anglePublisher.set(rotation);
     photonPoseEstimator.update(this::handlePhotonPose);
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);
