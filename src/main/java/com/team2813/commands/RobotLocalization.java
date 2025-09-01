@@ -69,20 +69,22 @@ public class RobotLocalization {
 
   /** TODO: Dummy method, implement sometime. */
   public void visionLocation() {
-//    LocationalData locationalData = limelight.getLocationalData();
-//    hasDataPublisher.accept(locationalData.isValid());
-//
-//    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
-//    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
-//
-//    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
-//    limelightPosePublisher.publish(optionalEstimate);
-//
-//    return optionalEstimate;
+    //    LocationalData locationalData = limelight.getLocationalData();
+    //    hasDataPublisher.accept(locationalData.isValid());
+    //
+    //    Collection<Pose3d> visibleAprilTagPoses =
+    // locationalData.getVisibleAprilTagPoses().values();
+    //    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+    //
+    //    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
+    //    limelightPosePublisher.publish(optionalEstimate);
+    //
+    //    return optionalEstimate;
   }
+
   // TODO: Dummy method, implement sometime.
-  private static void botPoseEstimateBlue(/*LocationalData locationalData*/) {
-//    return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
+  private static void botPoseEstimateBlue(/*LocationalData locationalData*/ ) {
+    //    return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
   }
 
   private static List<Pose2d> positions() {
