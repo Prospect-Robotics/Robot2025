@@ -26,7 +26,7 @@ import com.google.auto.value.AutoBuilder;
 import com.team2813.commands.DefaultDriveCommand;
 import com.team2813.commands.RobotLocalization;
 import com.team2813.lib2813.limelight.BotPoseEstimate;
-import com.team2813.lib2813.preferences.PreferencesInjector;
+import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -65,7 +65,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final SimulatedSwerveDrivetrain simDrivetrain;
   private final VisionSystemSim simVisionSystem;
-  private final DriveConfiguration config;
+  private final Configuration config;
   private final MultiPhotonPoseEstimator photonPoseEstimator;
 
   private final StructArrayPublisher<SwerveModuleState> expectedStatePublisher;
@@ -111,7 +111,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
    * starting with {@code "subsystems.Drive.DriveConfiguration."}.
    */
-  public record DriveConfiguration(
+  public record Configuration(
       boolean addLimelightMeasurement,
       boolean usePhotonVisionLocation,
       boolean usePnpDistanceTrigSolveStrategy,
@@ -119,7 +119,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       DoubleSupplier maxRotationsPerSecond,
       DoubleSupplier maxVelocityInMetersPerSecond) {
 
-    public DriveConfiguration {
+    public Configuration {
       if (maxLimelightDifferenceMeters <= 0) {
         throw new IllegalArgumentException("maxLimelightDifferenceMeters must be positive");
       }
@@ -141,7 +141,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
     /** Creates a builder for {@code DriveConfiguration} with default values. */
     public static Builder builder() {
-      return new AutoBuilder_Drive_DriveConfiguration_Builder()
+      return new AutoBuilder_Drive_Configuration_Builder()
           .addLimelightMeasurement(true)
           .usePhotonVisionLocation(false)
           .maxRotationsPerSecond(DEFAULT_MAX_ROTATIONS_PER_SECOND)
@@ -151,9 +151,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     /** Creates an instance from preference values stored in the robot's flash memory. */
-    public static DriveConfiguration fromPreferences() {
-      DriveConfiguration defaultConfig = builder().build();
-      return PreferencesInjector.DEFAULT_INSTANCE.injectPreferences(defaultConfig);
+    public static Configuration fromPreferences() {
+      Configuration defaultConfig = builder().build();
+      return PersistedConfiguration.fromPreferences("Drive", defaultConfig);
     }
 
     @AutoBuilder
@@ -178,18 +178,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
       Builder usePnpDistanceTrigSolveStrategy(boolean enabled);
 
-      DriveConfiguration build();
+      Configuration build();
     }
   }
 
   public Drive(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
-    this(networkTableInstance, localization, DriveConfiguration.fromPreferences());
+    this(networkTableInstance, localization, Configuration.fromPreferences());
   }
 
   public Drive(
       NetworkTableInstance networkTableInstance,
       RobotLocalization localization,
-      DriveConfiguration config) {
+      Configuration config) {
     this.localization = localization;
 
     var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
