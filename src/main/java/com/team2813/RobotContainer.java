@@ -347,33 +347,20 @@ public class RobotContainer implements AutoCloseable {
 
     // Every subsystem should be in the set; we don't know what subsystem will be controlled, so
     // assume we control all of them
+    // TODO: Reimplement with photonvision.
     AUTO_ALIGN_LEFT.onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(
-                () ->
-                    Limelight.getDefaultLimelight()
-                        .getLocationalData()
-                        .getBotpose()
-                        .map(Pose3d::toPose2d)
-                        .map(RobotContainer::toBotposeBlue)
-                        .ifPresent(drive::setPose)),
-            new WaitCommand(0.02),
-            new DeferredCommand(
-                () -> localization.getLeftAutoAlignCommand(drive::getPose), Set.of(drive))));
-
+        new InstantCommand(
+            () ->
+                DriverStation.reportWarning(
+                    "Attempted to auto align left, but there is no limelight implementation.",
+                    false)));
+    // TODO: Reimplement with photonvision.
     AUTO_ALIGN_RIGHT.onTrue(
-        new SequentialCommandGroup(
-            new InstantCommand(
-                () ->
-                    Limelight.getDefaultLimelight()
-                        .getLocationalData()
-                        .getBotpose()
-                        .map(Pose3d::toPose2d)
-                        .map(RobotContainer::toBotposeBlue)
-                        .ifPresent(drive::setPose)),
-            new WaitCommand(0.02),
-            new DeferredCommand(
-                () -> localization.getRightAutoAlignCommand(drive::getPose), Set.of(drive))));
+        new InstantCommand(
+            () ->
+                DriverStation.reportWarning(
+                    "Attempted to auto align right, but there is no limelight implementation.",
+                    false)));
 
     SYSID_RUN.whileTrue(
         new DeferredCommand(

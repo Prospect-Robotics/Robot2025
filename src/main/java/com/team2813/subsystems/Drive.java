@@ -47,7 +47,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
@@ -521,15 +520,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   @Override
   public void periodic() {
-    // If the limelight has a position, send it to SwerveDrivetrain.addVisionMeasurement().
-    //
-    // Note: we call limelightLocation() even if config.addLimelightMeasurement is false so
-    // the position is published to network tables, which allows us to view the limelight's
-    // pose estimate in AdvantageScope.
-    Optional<BotPoseEstimate> limelightEstimate = localization.limelightLocation();
-    if (config.addLimelightMeasurement) {
-      limelightEstimate.ifPresent(this::addVisionMeasurement);
-    }
 
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);

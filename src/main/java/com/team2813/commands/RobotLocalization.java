@@ -8,13 +8,8 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
-import com.team2813.RobotContainer;
-import com.team2813.lib2813.limelight.BotPoseEstimate;
-import com.team2813.lib2813.limelight.Limelight;
-import com.team2813.lib2813.limelight.LocationalData;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
 import com.team2813.subsystems.Drive;
-import com.team2813.vision.LimelightPosePublisher;
 import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -28,18 +23,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
+/*
+TODO:
+  8/8/2025:
+  * Make robot localization use photonvision,
+    as now since I deleted the limelight impl. it is useless.
+ */
 public class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
-  private static final Limelight limelight = Limelight.getDefaultLimelight();
   private final Configuration config;
   private final StructPublisher<Pose2d> lastPosePublisher;
-  private final LimelightPosePublisher limelightPosePublisher;
   private final BooleanPublisher hasDataPublisher;
   private final StructArrayPublisher<Pose3d> visibleAprilTagPosesPublisher;
 
@@ -61,7 +58,6 @@ public class RobotLocalization {
 
     lastPosePublisher =
         networkTableInstance.getStructTopic("Auto Align to", Pose2d.struct).publish();
-    limelightPosePublisher = new LimelightPosePublisher(networkTableInstance);
     NetworkTable limelightNetworkTable =
         VisionNetworkTables.getTableForLimelight(networkTableInstance);
     hasDataPublisher = limelightNetworkTable.getBooleanTopic(HAS_DATA_TOPIC).publish();
@@ -71,22 +67,24 @@ public class RobotLocalization {
             .publish();
   }
 
-  /** Gets the position estimate from the Limelight relative to the Blue origin. */
-  public Optional<BotPoseEstimate> limelightLocation() {
-    LocationalData locationalData = limelight.getLocationalData();
-    hasDataPublisher.accept(locationalData.isValid());
-
-    Collection<Pose3d> visibleAprilTagPoses = locationalData.getVisibleAprilTagPoses().values();
-    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
-
-    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
-    limelightPosePublisher.publish(optionalEstimate);
-
-    return optionalEstimate;
+  /** TODO: Dummy method, implement sometime. */
+  public void visionLocation() {
+    //    LocationalData locationalData = limelight.getLocationalData();
+    //    hasDataPublisher.accept(locationalData.isValid());
+    //
+    //    Collection<Pose3d> visibleAprilTagPoses =
+    // locationalData.getVisibleAprilTagPoses().values();
+    //    visibleAprilTagPosesPublisher.accept(visibleAprilTagPoses.toArray(EMPTY_POSE3D_ARRAY));
+    //
+    //    Optional<BotPoseEstimate> optionalEstimate = botPoseEstimateBlue(locationalData);
+    //    limelightPosePublisher.publish(optionalEstimate);
+    //
+    //    return optionalEstimate;
   }
 
-  private static Optional<BotPoseEstimate> botPoseEstimateBlue(LocationalData locationalData) {
-    return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
+  // TODO: Dummy method, implement sometime.
+  private static void botPoseEstimateBlue(/*LocationalData locationalData*/ ) {
+    //    return locationalData.getBotPoseEstimate().map(RobotContainer::toBotposeBlue);
   }
 
   private static List<Pose2d> positions() {
