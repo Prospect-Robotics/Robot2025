@@ -33,5 +33,6 @@ includeBuild('lib2813') {
     dependencySubstitution {
         substitute module('com.team2813:lib2813') using project(':lib')
         substitute module('com.team2813:limelight') using project(':limelight')
+        substitute module('com.team2813:testing') using project(':testing')
     }
 }
