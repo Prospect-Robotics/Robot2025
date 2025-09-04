@@ -16,6 +16,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import java.util.function.Supplier;
 
 /** This is the Elevator. His name is Pablo. Please be kind to him and say hi. Have a nice day! */
@@ -49,6 +50,11 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   @Override
   protected void useOutput(double output, double setpoint) {
     super.useOutput(MathUtil.clamp(output, -6, 6), setpoint);
+  }
+
+  @Override
+  public Current getAppliedCurrent() {
+    return motor.getAppliedCurrent();
   }
 
   public enum Position implements Supplier<Angle> {

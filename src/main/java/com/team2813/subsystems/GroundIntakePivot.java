@@ -17,6 +17,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.DriverStation;
 import java.util.function.Supplier;
 
@@ -52,6 +53,11 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
         new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
 
     return pivotMotor;
+  }
+
+  @Override
+  public Current getAppliedCurrent() {
+    return motor.getAppliedCurrent();
   }
 
   @Override
