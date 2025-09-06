@@ -16,18 +16,23 @@ import java.util.stream.Stream;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 
+/** Published timestamped pose estimates from a camera. */
 public final class PhotonVisionPosePublisher {
   private final TimestampedStructPublisher<Pose3d> publisher;
   private final TimestampedStructPublisher<Pose3d> tagPublisher;
-  private final AprilTagFieldLayout fieldTags;
+  private final AprilTagFieldLayout aprilTagFieldLayout;
 
-  public PhotonVisionPosePublisher(PhotonCamera camera, AprilTagFieldLayout fieldTags) {
-    this(camera, fieldTags, Timer::getFPGATimestamp);
+  /** Creates a publisher for the provided camera and field layout. */
+  public PhotonVisionPosePublisher(PhotonCamera camera, AprilTagFieldLayout aprilTagFieldLayout) {
+    this(camera, aprilTagFieldLayout, Timer::getFPGATimestamp);
   }
 
+  /** Package-scoped constructor (for unit testing). */
   PhotonVisionPosePublisher(
-      PhotonCamera camera, AprilTagFieldLayout fieldTags, Supplier<Double> fpgaTimestampSupplier) {
-    this.fieldTags = fieldTags;
+      PhotonCamera camera,
+      AprilTagFieldLayout aprilTagFieldLayout,
+      Supplier<Double> fpgaTimestampSupplier) {
+    this.aprilTagFieldLayout = aprilTagFieldLayout;
     NetworkTable table = getTableForCamera(camera);
     StructTopic<Pose3d> topic = table.getStructTopic(POSE_ESTIMATE_TOPIC, Pose3d.struct);
     publisher = new TimestampedStructPublisher<>(topic, Pose3d.kZero, fpgaTimestampSupplier);
@@ -58,7 +63,7 @@ public final class PhotonVisionPosePublisher {
     if (pose.targetsUsed.isEmpty()) {
       return Stream.empty();
     }
-    return fieldTags
+    return aprilTagFieldLayout
         .getTagPose(pose.targetsUsed.get(0).fiducialId)
         .map(
             tagPose ->
