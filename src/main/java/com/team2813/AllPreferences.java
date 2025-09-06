@@ -1,6 +1,7 @@
 package com.team2813;
 
 import edu.wpi.first.wpilibj.Preferences;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,22 +25,63 @@ class AllPreferences {
   private static final Set<String> REMOVED_PREFERENCES =
       Set.of("USE_LIMELIGHT_LOCATION", "DRIVE_ADD_LIMELIGHT_MEASUREMENT");
 
+  public static final List<String> DRIVE_BOOLEAN_PREFERENCE_KEYS =
+      List.of(
+          "addLimelightMeasurement", "usePhotonVisionLocation", "usePnpDistanceTrigSolveStrategy");
+  public static final List<String> DRIVE_DOUBLE_PREFERENCE_KEYS =
+      List.of(
+          "maxLimelightDifferenceMeters", "maxRotationsPerSecond", "maxVelocityInMetersPerSecond");
+
+  /** Migrate Preferences stored on the robot from older keys to current keys. */
   static synchronized void migrateLegacyPreferences() {
     for (var entry : LEGACY_BOOLEAN_PREFERENCES.entrySet()) {
       String oldKey = entry.getKey().name();
       String newKey = entry.getValue();
-      if (Preferences.containsKey(oldKey)) {
-        if (!Preferences.containsKey(newKey)) {
-          boolean value = Preferences.getBoolean(oldKey, false);
-          Preferences.initBoolean(newKey, value);
-        }
-        Preferences.remove(oldKey);
-      }
+      migratePreference(oldKey, newKey, AllPreferences::booleanPreferenceMigrator);
     }
+
     for (var key : REMOVED_PREFERENCES) {
       if (Preferences.containsKey(key)) {
         Preferences.remove(key);
       }
+    }
+
+    migrateDrivePreferences(
+        DRIVE_BOOLEAN_PREFERENCE_KEYS, AllPreferences::booleanPreferenceMigrator);
+    migrateDrivePreferences(DRIVE_DOUBLE_PREFERENCE_KEYS, AllPreferences::doublePreferenceMigrator);
+  }
+
+  @FunctionalInterface
+  private interface PreferenceMigrator {
+    void migrate(String oldKey, String newKey);
+  }
+
+  private static void migrateDrivePreferences(List<String> keys, PreferenceMigrator migrator) {
+    for (String key : keys) {
+      String oldKey = "subsystems.Drive.DriveConfiguration." + key;
+      String newKey = "Drive/" + key;
+      migratePreference(oldKey, newKey, migrator);
+    }
+  }
+
+  private static void booleanPreferenceMigrator(String oldKey, String newKey) {
+    boolean value = Preferences.getBoolean(oldKey, false);
+    Preferences.initBoolean(newKey, value);
+  }
+
+  private static void doublePreferenceMigrator(String oldKey, String newKey) {
+    double value = Preferences.getDouble(oldKey, -1);
+    if (value > 0) {
+      Preferences.initDouble(newKey, value);
+    }
+  }
+
+  private static void migratePreference(String oldKey, String newKey, PreferenceMigrator migrator) {
+    if (Preferences.containsKey(oldKey)) {
+      if (!Preferences.containsKey(newKey)) {
+        migrator.migrate(oldKey, newKey);
+      }
+      Preferences.remove(oldKey);
     }
   }
 
