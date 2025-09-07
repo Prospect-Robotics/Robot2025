@@ -5,6 +5,7 @@
 package com.team2813;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.team2813.lib2813.util.BuildConstantsPublisher;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DataLogManager;
@@ -16,8 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-  private static final BuildConstantsPublisher m_buildConstantsPublisher =
-      new BuildConstantsPublisher(NetworkTableInstance.getDefault());
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
@@ -41,8 +40,10 @@ public class Robot extends TimedRobot {
     }
     CameraServer.startAutomaticCapture();
     // Publish build constants to the Metadata table on NetworkTables and print them in system log.
-    m_buildConstantsPublisher.publish();
-    m_buildConstantsPublisher.log();
+    BuildConstantsPublisher buildConstantsPublisher =
+        new BuildConstantsPublisher(BuildConstants.class);
+    buildConstantsPublisher.publish(NetworkTableInstance.getDefault());
+    buildConstantsPublisher.log();
   }
 
   @Override
