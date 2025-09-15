@@ -46,6 +46,17 @@ class AllPreferences {
       }
     }
 
+    // Preferences installs a listener that makes all new topics persistent, so these values can be
+    // written even if we explicitly marked them as not persistent. Delete them to avoid possible
+    // exceptions from PersistedConfiguration.
+    //
+    // For a long-term fix, see https://github.com/Prospect-Robotics/lib2813/pull/58.
+    for (var key : Preferences.getKeys()) {
+      if (key.endsWith(".registeredTo")) {
+        Preferences.remove(key);
+      }
+    }
+
     migrateDrivePreferences(
         DRIVE_BOOLEAN_PREFERENCE_KEYS, AllPreferences::booleanPreferenceMigrator);
     migrateDrivePreferences(DRIVE_DOUBLE_PREFERENCE_KEYS, AllPreferences::doublePreferenceMigrator);
