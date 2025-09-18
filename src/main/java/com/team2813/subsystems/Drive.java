@@ -417,27 +417,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     drivetrain.setControl(fieldCentricFacingAngleApplier.withTargetDirection(rotation));
   }
 
-  /**
-   * Sets the rotation velocity of the robot
-   *
-   * @param rotationRate rotation rate in radians per second
-   * @deprecated Unsafe; use {@link #setRotationVelocity(AngularVelocity)}, and specify the unit you
-   *     are using
-   */
-  @Deprecated
-  public void setRotationVelocityDouble(double rotationRate) { // Radians per second
-    drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
-  }
-
-  /**
-   * Sets the rotation velocity of the robot
-   *
-   * @param rotationRate rotation rate in units as defined by the WPIlib unit library.
-   */
-  public void setRotationVelocity(AngularVelocity rotationRate) {
-    drivetrain.setControl(fieldCentricApplier.withRotationalRate(rotationRate));
-  }
-
   public Pose2d getPose() {
     return drivetrain.getState().Pose;
   }
