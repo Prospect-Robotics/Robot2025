@@ -11,7 +11,8 @@ final class TimestampedStructPublisher<S> {
   private static final long MICROS_PER_SECOND = 1_000_000;
   static final long EXPECTED_UPDATE_FREQUENCY_MICROS =
       (long) (TimedRobot.kDefaultPeriod * MICROS_PER_SECOND);
-  static final long PUBLISHED_VALUE_VALID_MICROS = 2 * EXPECTED_UPDATE_FREQUENCY_MICROS;
+  // PhotonVision appears to produce estimates every 80ms, so treat values older than 0.1s as stale.
+  static final long PUBLISHED_VALUE_VALID_MICROS = MICROS_PER_SECOND / 10;
 
   private final StructPublisher<S> publisher;
   private final Supplier<Double> fpgaTimestampSupplier;
