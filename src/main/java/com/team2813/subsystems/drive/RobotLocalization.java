@@ -1,4 +1,4 @@
-package com.team2813.commands;
+package com.team2813.subsystems.drive;
 
 import static com.team2813.vision.VisionNetworkTables.HAS_DATA_TOPIC;
 import static com.team2813.vision.VisionNetworkTables.VISIBLE_APRIL_TAG_POSES_TOPIC;
@@ -9,7 +9,6 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 import com.team2813.lib2813.preferences.PersistedConfiguration;
-import com.team2813.subsystems.Drive;
 import com.team2813.vision.VisionNetworkTables;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -33,7 +32,7 @@ TODO:
   * Make robot localization use photonvision,
     as now since I deleted the limelight impl. it is useless.
  */
-public class RobotLocalization {
+class RobotLocalization {
   private static final Pose3d[] EMPTY_POSE3D_ARRAY = new Pose3d[0];
   private final Configuration config;
   private final StructPublisher<Pose2d> lastPosePublisher;
