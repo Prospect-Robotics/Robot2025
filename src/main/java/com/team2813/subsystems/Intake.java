@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
+import com.team2813.lib2813.subsystems.ParameterizedIntakeSubsystem;
 import com.team2813.lib2813.util.ConfigUtils;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;

@@ -7,7 +7,7 @@ import com.team2813.lib2813.control.PIDMotor;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 
-abstract class FakePIDMotor implements PIDMotor {
+public abstract class FakePIDMotor implements PIDMotor {
   double demand = 0.0f;
   private ControlMode controlMode;
 
