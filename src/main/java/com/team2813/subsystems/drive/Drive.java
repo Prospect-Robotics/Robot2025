@@ -9,8 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public interface Drive extends AutoCloseable {
 
   static Drive create(NetworkTableInstance networkTableInstance, SubsystemRegistry registry) {
-    RobotLocalization localization = new RobotLocalization(networkTableInstance);
-    DriveSubsystem drive = new DriveSubsystem(networkTableInstance, localization);
+    DriveSubsystem drive = new DriveSubsystem(networkTableInstance);
     registry.addSubsystem(drive);
     return drive;
   }
@@ -31,8 +30,4 @@ public interface Drive extends AutoCloseable {
   Command enableSlowModeCommand(boolean enable);
 
   Command resetPoseCommand();
-
-  Command rightAutoAlignCommand();
-
-  Command leftAutoAlignCommand();
 }

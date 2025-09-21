@@ -64,7 +64,6 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
   private static final double DEFAULT_MAX_ROTATIONS_PER_SECOND = 1.2;
   private static final Matrix<N3, N1> PHOTON_MULTIPLE_TAG_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.1, 0.1, 0.1});
-  private final RobotLocalization localization;
   private final SwerveDrivetrain<TalonFX, TalonFX, CANcoder> drivetrain;
   private final SimulatedSwerveDrivetrain simDrivetrain;
   private final VisionSystemSim simVisionSystem;
@@ -185,16 +184,11 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
     }
   }
 
-  DriveSubsystem(NetworkTableInstance networkTableInstance, RobotLocalization localization) {
-    this(networkTableInstance, localization, Configuration.fromPreferences());
+  DriveSubsystem(NetworkTableInstance networkTableInstance) {
+    this(networkTableInstance, Configuration.fromPreferences());
   }
 
-  DriveSubsystem(
-      NetworkTableInstance networkTableInstance,
-      RobotLocalization localization,
-      Configuration config) {
-    this.localization = localization;
-
+  DriveSubsystem(NetworkTableInstance networkTableInstance, Configuration config) {
     var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
@@ -569,15 +563,5 @@ public class DriveSubsystem extends SubsystemBase implements Drive {
   @Override
   public Command resetPoseCommand() {
     return new InstantCommand(this::resetPose, this);
-  }
-
-  @Override
-  public Command rightAutoAlignCommand() {
-    return localization.getRightAutoAlignCommand(this::getPose);
-  }
-
-  @Override
-  public Command leftAutoAlignCommand() {
-    return localization.getLeftAutoAlignCommand(this::getPose);
   }
 }
