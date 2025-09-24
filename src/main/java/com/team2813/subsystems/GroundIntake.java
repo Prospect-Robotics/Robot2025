@@ -4,6 +4,7 @@ import static com.team2813.Constants.GROUND_INTAKE_WHEEL;
 
 import com.team2813.lib2813.control.InvertType;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
+import com.team2813.lib2813.subsystems.ParameterizedIntakeSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
