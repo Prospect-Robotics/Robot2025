@@ -8,14 +8,17 @@ import edu.wpi.first.wpilibj2.command.*;
 public final class OuttakeCommand {
   public static Command createMedium(
       Intake intake, GroundIntake groundIntake, GroundIntakePivot groundIntakePivot) {
+
     Command command =
-        new ParallelCommandGroup(
-            intake.outtakeItemCommand(),
-            new InstantCommand(
-                () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
-                groundIntakePivot),
-            new SequentialCommandGroup(
-                new WaitCommand(0.13), groundIntake.mediumOuttakeItemCommand()));
+        new SequentialCommandGroup(
+            new ParallelCommandGroup(
+                intake.outtakeItemCommand(),
+                new InstantCommand(
+                    () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
+                    groundIntakePivot),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.13), groundIntake.mediumOuttakeItemCommand())),
+            Commands.idle());
     return command.finallyDo(
         () -> {
           intake.stopMotor();
