@@ -27,6 +27,6 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
   }
 
   public Command mediumOuttakeItemCommand() {
-      return setMotorDemandCommand(10);
+    return setMotorDemandCommand(10);
   }
 }
