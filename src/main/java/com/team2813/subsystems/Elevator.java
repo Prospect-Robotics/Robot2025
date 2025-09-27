@@ -35,6 +35,7 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
             .PID(0.2, 0.001, 0.001)
             .rotationUnit(Units.Radians));
     NetworkTable networkTable = networkTableInstance.getTable("Elevator");
+    encoder.setPosition(Position.BOTTOM.position);
     atPosition = networkTable.getBooleanTopic("at position").publish();
     position = networkTable.getDoubleTopic("position").publish();
   }
@@ -52,9 +53,9 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   public enum Position implements Supplier<Angle> {
-    BOTTOM(-0.212500),
+    BOTTOM(0.51708984375),
     TEST(10),
-    TOP(16.358496);
+    TOP(17.36474609375);
 
     private final Angle position;
 
