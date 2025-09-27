@@ -25,4 +25,8 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
   public Command fastOuttakeItemCommand() {
     return setMotorDemandCommand(FAST_OUTTAKE_VOLTAGE);
   }
+
+  public Command mediumOuttakeItemCommand() {
+      return setMotorDemandCommand(10);
+  }
 }
