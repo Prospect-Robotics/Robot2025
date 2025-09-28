@@ -486,6 +486,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
+  /** Configures the robot's vision system by reading Preference data from NetworkTables. */
   public void configureVisionFromPreferences() {
     updateEstimatedPoseFromPhotonVision = config.usePhotonVisionLocation.getAsBoolean();
     if (updateEstimatedPoseFromPhotonVision) {
