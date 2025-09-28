@@ -47,6 +47,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
@@ -113,8 +114,8 @@ public class Drive extends SubsystemBase implements AutoCloseable {
    */
   public record Configuration(
       boolean addLimelightMeasurement,
-      boolean usePhotonVisionLocation,
-      boolean usePnpDistanceTrigSolveStrategy,
+      BooleanSupplier usePhotonVisionLocation,
+      BooleanSupplier usePnpDistanceTrigSolveStrategy,
       double maxLimelightDifferenceMeters,
       DoubleSupplier maxRotationsPerSecond,
       DoubleSupplier maxVelocityInMetersPerSecond) {
@@ -134,7 +135,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     }
 
     PhotonPoseEstimator.PoseStrategy poseStrategy() {
-      return usePnpDistanceTrigSolveStrategy
+      return usePnpDistanceTrigSolveStrategy.getAsBoolean()
           ? PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
           : PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     }
@@ -160,7 +161,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
 
-      Builder usePhotonVisionLocation(boolean enabled);
+      Builder usePhotonVisionLocation(BooleanSupplier enabledSupplier);
+
+      default Builder usePhotonVisionLocation(boolean enabled) {
+        return usePhotonVisionLocation(() -> enabled);
+      }
 
       Builder maxRotationsPerSecond(DoubleSupplier value);
 
@@ -176,7 +181,11 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
       Builder maxLimelightDifferenceMeters(double value);
 
-      Builder usePnpDistanceTrigSolveStrategy(boolean enabled);
+      Builder usePnpDistanceTrigSolveStrategy(BooleanSupplier enabledSupplier);
+
+      default Builder usePnpDistanceTrigSolveStrategy(boolean enabled) {
+        return usePnpDistanceTrigSolveStrategy(() -> enabled);
+      }
 
       Configuration build();
     }
@@ -458,7 +467,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
-      if (config.usePnpDistanceTrigSolveStrategy) {
+      if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
         photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
       }
       if (simDrivetrain != null) {
@@ -493,10 +502,6 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   private void handlePhotonPose(EstimatedRobotPose estimate) {
-    if (!config.usePhotonVisionLocation) {
-      return;
-    }
-
     Matrix<N3, N1> stdDevs;
     List<PhotonTrackedTarget> targets = estimate.targetsUsed;
     if (targets.isEmpty()) {
@@ -524,10 +529,18 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
-    if (config.usePnpDistanceTrigSolveStrategy) {
-      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
+
+    // Update estimated pose from PhotonVision cameras.
+    if (config.usePhotonVisionLocation.getAsBoolean()) {
+      photonPoseEstimator.setPrimaryStrategy(config.poseStrategy());
+      if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
+        photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
+      }
+      photonPoseEstimator.update(this::handlePhotonPose);
+    } else {
+      photonPoseEstimator.update(pose -> {});
     }
-    photonPoseEstimator.update(this::handlePhotonPose);
+
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);
     // TODO(vdikov): The name/purpose of `setDrivePose` method of MultiPhotonPoseEstimator is not
