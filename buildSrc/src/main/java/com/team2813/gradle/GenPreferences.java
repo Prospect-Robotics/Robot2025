@@ -43,9 +43,10 @@ public abstract class GenPreferences implements Plugin<Project> {
             task.getJsonFile().set(extension.getJsonFile());
             task.onlyIf(t -> extension.getJsonFile().getAsFile().get().exists());
         });
-        // ... and make sure all Java tasks dend on this task.
+        // ... and make sure all Java tasks depend on this task.
         project.getTasks().getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(taskProvider);
 
+        // Add generated sources to the main source set.
         var sourceSets = project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
         var generatedSourcesDir = project.getLayout().getBuildDirectory().dir(GEN_DIR);
         sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).getJava().srcDirs(generatedSourcesDir);
