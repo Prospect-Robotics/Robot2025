@@ -503,6 +503,10 @@ public class RobotContainer implements AutoCloseable {
     return autoChooser.getSelected();
   }
 
+  public void configureVisionFromPreferences() {
+    drive.configureVisionFromPreferences();
+  }
+
   @Override
   public void close() {
     climb.close();

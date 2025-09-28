@@ -75,6 +75,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositionsPublisher;
   private final DoublePublisher ambiguityPublisher =
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+  private boolean updateEstimatedPoseFromPhotonVision;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -201,6 +202,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       Configuration config) {
     this.localization = localization;
 
+    updateEstimatedPoseFromPhotonVision = config.usePhotonVisionLocation.getAsBoolean();
     var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
@@ -484,6 +486,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
   }
 
+  public void configureVisionFromPreferences() {
+    updateEstimatedPoseFromPhotonVision = config.usePhotonVisionLocation.getAsBoolean();
+    if (updateEstimatedPoseFromPhotonVision) {
+      photonPoseEstimator.setPrimaryStrategy(config.poseStrategy());
+    }
+  }
+
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
       new Matrix<>(Nat.N3(), Nat.N1(), new double[] {0.9, 0.9, 0.9});
 
@@ -502,6 +511,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   private void handlePhotonPose(EstimatedRobotPose estimate) {
+    if (!updateEstimatedPoseFromPhotonVision) {
+      return;
+    }
     Matrix<N3, N1> stdDevs;
     List<PhotonTrackedTarget> targets = estimate.targetsUsed;
     if (targets.isEmpty()) {
@@ -531,15 +543,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
 
     // Update estimated pose from PhotonVision cameras.
-    if (config.usePhotonVisionLocation.getAsBoolean()) {
-      photonPoseEstimator.setPrimaryStrategy(config.poseStrategy());
-      if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
-        photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
-      }
-      photonPoseEstimator.update(this::handlePhotonPose);
-    } else {
-      photonPoseEstimator.update(pose -> {});
+    if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
+      photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
     }
+    photonPoseEstimator.update(this::handlePhotonPose);
 
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);
