@@ -47,6 +47,7 @@ import org.photonvision.simulation.VisionSystemSim;
  */
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final List<PhotonCameraWrapper> cameraWrappers;
+  private PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy;
 
   public static class Builder {
     private final Map<String, CameraConfig> cameraConfigs = new HashMap<>();
@@ -225,6 +226,29 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
 
     return new PhotonCameraWrapper(
         camera, estimator, cameraConfig.robotToCamera, estimatedPosePublisher, cameraPosePublisher);
+  }
+
+  public PhotonPoseEstimator.PoseStrategy getPrimaryStrategy() {
+    return poseEstimatorStrategy;
+  }
+
+  public void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
+    if (!poseEstimatorStrategy.equals(poseStrategy)) {
+      cameraWrappers.forEach(wrapper -> wrapper.estimator.setPrimaryStrategy(poseStrategy));
+      poseEstimatorStrategy = poseStrategy;
+    }
+  }
+
+  /**
+   * Determines if the pose strategy requires addHeadingData() to be called with every frame.
+   *
+   * @return {@code true} if the pose strategy is documented to require addHeadingData().
+   */
+  public boolean poseStrategyRequiresHeadingData() {
+    return switch (poseEstimatorStrategy) {
+      case PNP_DISTANCE_TRIG_SOLVE, CONSTRAINED_SOLVEPNP -> true;
+      default -> false;
+    };
   }
 
   /**
