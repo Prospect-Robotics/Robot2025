@@ -128,12 +128,18 @@ public class RobotContainer implements AutoCloseable {
     NamedCommands.registerCommand(
         "ScoreL1",
         new SequentialCommandGroup(
-            new LockFunctionCommand(
-                    groundIntakePivot::atPosition,
-                    () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
-                    groundIntakePivot)
-                .withTimeout(5),
-            groundIntake.outtakeItemCommand()));
+                new LockFunctionCommand(
+                        groundIntakePivot::atPosition,
+                        () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
+                        groundIntakePivot)
+                    .withTimeout(8),
+                groundIntake.outtakeItemCommand(),
+                new WaitCommand(4))
+            .finallyDo(
+                () -> {
+                  groundIntake.stopMotor();
+                  groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
+                }));
 
     NamedCommands.registerCommand(
         "ScoreL3",
