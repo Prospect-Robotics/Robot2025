@@ -233,10 +233,20 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
         camera, estimator, cameraConfig.robotToCamera, estimatedPosePublisher, cameraPosePublisher);
   }
 
+  /**
+   * Gets the Position Estimation Strategy being used by the Position Estimators.
+   *
+   * @return the strategy
+   */
   public PhotonPoseEstimator.PoseStrategy getPrimaryStrategy() {
     return poseEstimatorStrategy;
   }
 
+  /**
+   * Sets the Position Estimation Strategy used by the Position Estimators.
+   *
+   * @param poseStrategy the strategy to set
+   */
   public void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
     Objects.requireNonNull(poseStrategy, "poseStrategy cannot be null");
     if (!poseStrategy.equals(poseEstimatorStrategy)) {

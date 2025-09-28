@@ -503,6 +503,7 @@ public class RobotContainer implements AutoCloseable {
     return autoChooser.getSelected();
   }
 
+  /** Configures the robot's vision system by reading Preference data from NetworkTables. */
   public void configureVisionFromPreferences() {
     drive.configureVisionFromPreferences();
   }
