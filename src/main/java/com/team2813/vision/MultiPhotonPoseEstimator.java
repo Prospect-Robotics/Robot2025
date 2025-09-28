@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -69,9 +70,11 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
         NetworkTableInstance ntInstance,
         AprilTagFieldLayout aprilTagFieldLayout,
         PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy) {
-      this.ntInstance = ntInstance;
-      this.aprilTagFieldLayout = aprilTagFieldLayout;
-      this.poseEstimatorStrategy = poseEstimatorStrategy;
+      this.ntInstance = Objects.requireNonNull(ntInstance, "ntInstance cannot be null");
+      this.aprilTagFieldLayout =
+          Objects.requireNonNull(aprilTagFieldLayout, "aprilTagFieldLayout cannot be null");
+      this.poseEstimatorStrategy =
+          Objects.requireNonNull(poseEstimatorStrategy, "poseEstimatorStrategy cannot be null");
     }
 
     /**
@@ -106,13 +109,15 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
      * @return Builder instance.
      */
     private Builder addCamera(String name, Transform3d transform, Optional<String> description) {
+      Objects.requireNonNull(name, "camera name cannot be null");
+      Objects.requireNonNull(transform, "transform cannot be null");
       if (name.equals(LIMELIGHT_CAMERA_NAME)) {
         throw new IllegalArgumentException(String.format("Invalid camera name: '%s'", name));
       }
+
       if (cameraConfigs.put(name, new CameraConfig(transform, description)) != null) {
         throw new IllegalArgumentException(String.format("Already a camera with name '%s'", name));
       }
-
       return this;
     }
 
@@ -233,7 +238,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   public void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
-    if (!poseEstimatorStrategy.equals(poseStrategy)) {
+    Objects.requireNonNull(poseStrategy, "poseStrategy cannot be null");
+    if (!poseStrategy.equals(poseEstimatorStrategy)) {
       cameraWrappers.forEach(wrapper -> wrapper.estimator.setPrimaryStrategy(poseStrategy));
       poseEstimatorStrategy = poseStrategy;
     }
