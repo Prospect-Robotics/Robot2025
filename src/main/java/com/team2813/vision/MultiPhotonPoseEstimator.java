@@ -346,7 +346,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   /**
-   * Takes a consumer for estimated poses and applies all unread robot-pose estimatations from all
+   * Takes a consumer for estimated poses and applies all unread robot-pose estimations from all
    * cameras against `apply`.
    *
    * <p>This method is supposed to be called from a routine updating drive-train pose with pose
