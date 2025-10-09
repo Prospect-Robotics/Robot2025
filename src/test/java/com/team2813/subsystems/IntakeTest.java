@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.team2813.IsolatedNetworkTablesExtension;
+import com.team2813.lib2813.testing.FakePIDMotor;
 import com.team2813.lib2813.testing.junit.jupiter.CommandTester;
 import com.team2813.lib2813.testing.junit.jupiter.WPILibExtension;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -65,12 +66,18 @@ public final class IntakeTest {
   @Test
   public void outtakeCoral(NetworkTableInstance ntInstance, CommandTester commandTester) {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
-      intake.intakeGamePiece();
-      Command command = intake.outtakeItemCommand();
+      Command command = intake.intakeItemCommand();
+      commandTester.runUntilComplete(command);
+      command = intake.stopMotorCommand();
       assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
 
+      assertMotorIsStopped();
+      command = intake.outtakeItemCommand();
+
+      commandTester.runUntilComplete(command);
+      assertMotorIsRunning();
       assertThat(fakeMotor.getVoltage()).isWithin(0.01).of(Intake.PARAMS.outtakeDemand());
     }
   }
@@ -78,8 +85,15 @@ public final class IntakeTest {
   @Test
   public void stopAfterOutakingCoral(NetworkTableInstance ntInstance, CommandTester commandTester) {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
-      intake.intakeGamePiece();
-      Command command = intake.outtakeItemCommand();
+      Command command = intake.intakeItemCommand();
+      commandTester.runUntilComplete(command);
+      command = intake.stopMotorCommand();
+      assertMotorIsRunning();
+
+      commandTester.runUntilComplete(command);
+
+      assertMotorIsStopped();
+      command = intake.outtakeItemCommand();
       commandTester.runUntilComplete(command);
       command = intake.stopMotorCommand();
       assertMotorIsRunning();
@@ -93,8 +107,9 @@ public final class IntakeTest {
   @Test
   public void bumpAlgae(NetworkTableInstance ntInstance, CommandTester commandTester) {
     try (Intake intake = new Intake(fakeMotor, mockBeamBreak, ntInstance)) {
-      intake.intakeGamePiece();
-      Command command = intake.bumpAlgaeCommand();
+      Command command = intake.intakeItemCommand();
+      commandTester.runUntilComplete(command);
+      command = intake.bumpAlgaeCommand();
       assertMotorIsRunning();
 
       commandTester.runUntilComplete(command);
