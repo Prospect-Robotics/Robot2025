@@ -47,10 +47,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.stream.IntStream;
 import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -74,6 +75,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   private final DoubleArrayPublisher modulePositionsPublisher;
   private final DoublePublisher ambiguityPublisher =
       NetworkTableInstance.getDefault().getDoubleTopic("Ambiguity").publish();
+  private boolean updateEstimatedPoseFromPhotonVision;
 
   /** This measurement is <em>IN INCHES</em> */
   private static final double WHEEL_RADIUS_IN = 1.875;
@@ -108,13 +110,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   /**
    * Configurable values for the {@code Drive} subsystem
    *
-   * <p>Thee values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
-   * starting with {@code "subsystems.Drive.DriveConfiguration."}.
+   * <p>These values here can be updated in the SmartDashboard/Shuffleboard UI, and will have keys
+   * starting with {@code "Drive/"}.
    */
   public record Configuration(
       boolean addLimelightMeasurement,
-      boolean usePhotonVisionLocation,
-      boolean usePnpDistanceTrigSolveStrategy,
+      BooleanSupplier usePhotonVisionLocation,
+      BooleanSupplier usePnpDistanceTrigSolveStrategy,
       double maxLimelightDifferenceMeters,
       DoubleSupplier maxRotationsPerSecond,
       DoubleSupplier maxVelocityInMetersPerSecond) {
@@ -125,18 +127,21 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       }
     }
 
+    /** Gets the maximum rotational speed, in radians per second, supported in teleop mode. */
     double maxRadiansPerSecond() {
       return maxRotationsPerSecond.getAsDouble() * Math.PI * 2;
     }
 
+    /** Gets the maximum velocity (in meters per second) supported in teleop mode. */
     double maxVelocity() {
       return maxVelocityInMetersPerSecond.getAsDouble();
     }
 
-    PhotonPoseEstimator.PoseStrategy poseStrategy() {
-      return usePnpDistanceTrigSolveStrategy
-          ? PhotonPoseEstimator.PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
-          : PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
+    /** Gets the pose strategy to use for PhotonVision. */
+    PoseStrategy poseStrategy() {
+      return usePnpDistanceTrigSolveStrategy.getAsBoolean()
+          ? PoseStrategy.PNP_DISTANCE_TRIG_SOLVE
+          : PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR;
     }
 
     /** Creates a builder for {@code DriveConfiguration} with default values. */
@@ -156,27 +161,62 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       return PersistedConfiguration.fromPreferences("Drive", defaultConfig);
     }
 
+    /** A builder for creating {@link Drive.Configuration} values. */
     @AutoBuilder
     public interface Builder {
       Builder addLimelightMeasurement(boolean enabled);
 
-      Builder usePhotonVisionLocation(boolean enabled);
+      Builder usePhotonVisionLocation(BooleanSupplier enabledSupplier);
+
+      /**
+       * Sets whether PhotonVision should be used for drive pose estimation.
+       *
+       * @param enabled {@code true} to use PhotonVision for drive post estimation.
+       * @return Builder (for method chaining)
+       */
+      default Builder usePhotonVisionLocation(boolean enabled) {
+        return usePhotonVisionLocation(() -> enabled);
+      }
 
       Builder maxRotationsPerSecond(DoubleSupplier value);
 
-      default Builder maxRotationsPerSecond(double value) {
-        return maxRotationsPerSecond(() -> value);
+      /**
+       * Sets the maximum rotations per second supported in teleop mode.
+       *
+       * @param rotationsPerSecond Maximum rotations per second.
+       * @return Builder (for method chaining)
+       */
+      default Builder maxRotationsPerSecond(double rotationsPerSecond) {
+        return maxRotationsPerSecond(() -> rotationsPerSecond);
       }
 
       Builder maxVelocityInMetersPerSecond(DoubleSupplier value);
 
-      default Builder maxVelocityInMetersPerSecond(double value) {
-        return maxVelocityInMetersPerSecond(() -> value);
+      /**
+       * Sets the maximum velocity (in meters per second) supported in teleop mode.
+       *
+       * @param velocity Velocity, in m/s.
+       * @return Builder (for method chaining)
+       */
+      default Builder maxVelocityInMetersPerSecond(double velocity) {
+        return maxVelocityInMetersPerSecond(() -> velocity);
       }
 
       Builder maxLimelightDifferenceMeters(double value);
 
-      Builder usePnpDistanceTrigSolveStrategy(boolean enabled);
+      Builder usePnpDistanceTrigSolveStrategy(BooleanSupplier enabledSupplier);
+
+      /**
+       * Set whether the {@link PoseStrategy#PNP_DISTANCE_TRIG_SOLVE PNP_DISTANCE_TRIG_SOLVE}
+       * strategy should be used.
+       *
+       * @param enabled {@code true} to use {@link PoseStrategy#PNP_DISTANCE_TRIG_SOLVE}; otherwise
+       *     use {@link PoseStrategy#MULTI_TAG_PNP_ON_COPROCESSOR}.
+       * @return Builder (for method chaining)
+       */
+      default Builder usePnpDistanceTrigSolveStrategy(boolean enabled) {
+        return usePnpDistanceTrigSolveStrategy(() -> enabled);
+      }
 
       Configuration build();
     }
@@ -192,6 +232,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
       Configuration config) {
     this.localization = localization;
 
+    updateEstimatedPoseFromPhotonVision = config.usePhotonVisionLocation.getAsBoolean();
     var aprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
     photonPoseEstimator =
         new MultiPhotonPoseEstimator.Builder(
@@ -458,7 +499,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     correctRotation = true;
     if (pose != null) {
       drivetrain.resetPose(pose);
-      if (config.usePnpDistanceTrigSolveStrategy) {
+      if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
         photonPoseEstimator.resetHeadingData(Timer.getTimestamp(), pose.getRotation());
       }
       if (simDrivetrain != null) {
@@ -473,6 +514,14 @@ public class Drive extends SubsystemBase implements AutoCloseable {
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return this.drivetrain.getKinematics().toChassisSpeeds(this.drivetrain.getState().ModuleStates);
+  }
+
+  /** Configures the robot's vision system by reading Preference data from NetworkTables. */
+  public void configureVisionFromPreferences() {
+    updateEstimatedPoseFromPhotonVision = config.usePhotonVisionLocation.getAsBoolean();
+    if (updateEstimatedPoseFromPhotonVision) {
+      photonPoseEstimator.setPrimaryStrategy(config.poseStrategy());
+    }
   }
 
   private static final Matrix<N3, N1> LIMELIGHT_STD_DEVS =
@@ -493,10 +542,9 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   }
 
   private void handlePhotonPose(EstimatedRobotPose estimate) {
-    if (!config.usePhotonVisionLocation) {
+    if (!updateEstimatedPoseFromPhotonVision) {
       return;
     }
-
     Matrix<N3, N1> stdDevs;
     List<PhotonTrackedTarget> targets = estimate.targetsUsed;
     if (targets.isEmpty()) {
@@ -524,10 +572,13 @@ public class Drive extends SubsystemBase implements AutoCloseable {
     // Publish data to NetworkTables
     expectedStatePublisher.set(drivetrain.getState().ModuleTargets);
     actualStatePublisher.set(drivetrain.getState().ModuleStates);
-    if (config.usePnpDistanceTrigSolveStrategy) {
+
+    // Update estimated pose from PhotonVision cameras.
+    if (photonPoseEstimator.poseStrategyRequiresHeadingData()) {
       photonPoseEstimator.addHeadingData(Timer.getTimestamp(), getRotation3d());
     }
     photonPoseEstimator.update(this::handlePhotonPose);
+
     Pose2d drivePose = getPose();
     currentPosePublisher.set(drivePose);
     // TODO(vdikov): The name/purpose of `setDrivePose` method of MultiPhotonPoseEstimator is not

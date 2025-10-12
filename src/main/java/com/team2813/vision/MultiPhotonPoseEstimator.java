@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,6 +48,7 @@ import org.photonvision.simulation.VisionSystemSim;
  */
 public class MultiPhotonPoseEstimator implements AutoCloseable {
   private final List<PhotonCameraWrapper> cameraWrappers;
+  private PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy;
 
   public static class Builder {
     private final Map<String, CameraConfig> cameraConfigs = new HashMap<>();
@@ -68,9 +70,11 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
         NetworkTableInstance ntInstance,
         AprilTagFieldLayout aprilTagFieldLayout,
         PhotonPoseEstimator.PoseStrategy poseEstimatorStrategy) {
-      this.ntInstance = ntInstance;
-      this.aprilTagFieldLayout = aprilTagFieldLayout;
-      this.poseEstimatorStrategy = poseEstimatorStrategy;
+      this.ntInstance = Objects.requireNonNull(ntInstance, "ntInstance cannot be null");
+      this.aprilTagFieldLayout =
+          Objects.requireNonNull(aprilTagFieldLayout, "aprilTagFieldLayout cannot be null");
+      this.poseEstimatorStrategy =
+          Objects.requireNonNull(poseEstimatorStrategy, "poseEstimatorStrategy cannot be null");
     }
 
     /**
@@ -105,13 +109,15 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
      * @return Builder instance.
      */
     private Builder addCamera(String name, Transform3d transform, Optional<String> description) {
+      Objects.requireNonNull(name, "camera name cannot be null");
+      Objects.requireNonNull(transform, "transform cannot be null");
       if (name.equals(LIMELIGHT_CAMERA_NAME)) {
         throw new IllegalArgumentException(String.format("Invalid camera name: '%s'", name));
       }
+
       if (cameraConfigs.put(name, new CameraConfig(transform, description)) != null) {
         throw new IllegalArgumentException(String.format("Already a camera with name '%s'", name));
       }
-
       return this;
     }
 
@@ -228,6 +234,40 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   /**
+   * Gets the Position Estimation Strategy being used by the Position Estimators.
+   *
+   * @return the strategy
+   */
+  public PhotonPoseEstimator.PoseStrategy getPrimaryStrategy() {
+    return poseEstimatorStrategy;
+  }
+
+  /**
+   * Sets the Position Estimation Strategy used by the Position Estimators.
+   *
+   * @param poseStrategy the strategy to set
+   */
+  public void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
+    Objects.requireNonNull(poseStrategy, "poseStrategy cannot be null");
+    if (!poseStrategy.equals(poseEstimatorStrategy)) {
+      cameraWrappers.forEach(wrapper -> wrapper.estimator.setPrimaryStrategy(poseStrategy));
+      poseEstimatorStrategy = poseStrategy;
+    }
+  }
+
+  /**
+   * Determines if the pose strategy requires addHeadingData() to be called with every frame.
+   *
+   * @return {@code true} if the pose strategy is documented to require addHeadingData().
+   */
+  public boolean poseStrategyRequiresHeadingData() {
+    return switch (poseEstimatorStrategy) {
+      case PNP_DISTANCE_TRIG_SOLVE, CONSTRAINED_SOLVEPNP -> true;
+      default -> false;
+    };
+  }
+
+  /**
    * Sets a 2D pose estimate in a field-centric frame (relative to the blue origin).
    *
    * <p>This method takes a field-centric drive train pose (drive train and robot are the same
@@ -306,7 +346,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   }
 
   /**
-   * Takes a consumer for estimated poses and applies all unread robot-pose estimatations from all
+   * Takes a consumer for estimated poses and applies all unread robot-pose estimations from all
    * cameras against `apply`.
    *
    * <p>This method is supposed to be called from a routine updating drive-train pose with pose

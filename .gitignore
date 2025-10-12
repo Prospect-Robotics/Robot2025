@@ -25,6 +25,7 @@ test-reports
 
 # IntelliJ
 # See https://www.toptal.com/developers/gitignore/api/intellij
+.idea/**/AndroidProjectSystem.xml
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
