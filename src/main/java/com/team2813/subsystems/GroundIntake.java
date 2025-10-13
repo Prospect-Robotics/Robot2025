@@ -17,6 +17,7 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
   static final Params PARAMS = Params.builder().setIntakeDemand(8).setOuttakeDemand(-2.75).build();
 
   static final double FAST_OUTTAKE_VOLTAGE = -12;
+  static final double MEDIUM_OUTTAKE_VOLTAGE = -10;
 
   public GroundIntake() {
     super(new TalonFXWrapper(GROUND_INTAKE_WHEEL, InvertType.CLOCKWISE), PARAMS);
@@ -27,6 +28,6 @@ public final class GroundIntake extends ParameterizedIntakeSubsystem {
   }
 
   public Command mediumOuttakeItemCommand() {
-    return setMotorDemandCommand(-10);
+    return setMotorDemandCommand(MEDIUM_OUTTAKE_VOLTAGE);
   }
 }
