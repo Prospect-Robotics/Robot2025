@@ -127,11 +127,19 @@ public class RobotContainer implements AutoCloseable {
 
     NamedCommands.registerCommand(
         "ScoreL1",
-        new ParallelCommandGroup(
-            groundIntake.outtakeItemCommand(),
-            new InstantCommand(
-                () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
-                groundIntakePivot)));
+        new SequentialCommandGroup(
+                new LockFunctionCommand(
+                        groundIntakePivot::atPosition,
+                        () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.TOP),
+                        groundIntakePivot)
+                    .withTimeout(8),
+                groundIntake.outtakeItemCommand(),
+                new WaitCommand(4))
+            .finallyDo(
+                () -> {
+                  groundIntake.stopMotor();
+                  groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP);
+                }));
 
     NamedCommands.registerCommand(
         "ScoreL3",
@@ -395,7 +403,8 @@ public class RobotContainer implements AutoCloseable {
                 () -> groundIntakePivot.setSetpoint(GroundIntakePivot.Positions.HARD_STOP),
                 groundIntakePivot)));
 
-    OUTTAKE_BUTTON.onTrue(OuttakeCommand.create(intake, groundIntake, groundIntakePivot));
+    OUTTAKE_BUTTON.whileTrue(OuttakeCommand.createMedium(intake, groundIntake, groundIntakePivot));
+    PLACE_CORAL.onTrue(OuttakeCommand.create(intake, groundIntake, groundIntakePivot));
     CATCH_CORAL.onTrue(
         new ParallelCommandGroup(
             new InstantCommand(
