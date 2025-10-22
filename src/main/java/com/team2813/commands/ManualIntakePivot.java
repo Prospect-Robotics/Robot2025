@@ -5,12 +5,12 @@ import com.team2813.subsystems.IntakePivot;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.function.DoubleSupplier;
 
-public class ManuelIntakePivot extends Command {
+public class ManualIntakePivot extends Command {
 
   private final IntakePivot intakepivot;
   private final DoubleSupplier rotation;
 
-  public ManuelIntakePivot(IntakePivot intakepivot, DoubleSupplier rotation) {
+  public ManualIntakePivot(IntakePivot intakepivot, DoubleSupplier rotation) {
     this.intakepivot = intakepivot;
     this.rotation = rotation;
     addRequirements(intakepivot);
