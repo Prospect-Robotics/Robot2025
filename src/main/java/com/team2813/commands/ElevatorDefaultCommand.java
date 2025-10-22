@@ -15,6 +15,7 @@ public class ElevatorDefaultCommand extends Command {
     addRequirements(elevator);
   }
 
+  @Override
   public void execute() {
     double val = movement.getAsDouble();
     if (Math.abs(val) > 0.1) {
