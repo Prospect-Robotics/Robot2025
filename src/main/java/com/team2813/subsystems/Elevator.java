@@ -48,8 +48,8 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
   }
 
   @Override
-  protected void useOutput(double output, double setpoint) {
-    super.useOutput(MathUtil.clamp(output, -6, 6), setpoint);
+  protected double clampOutput(double output) {
+    return MathUtil.clamp(output, -6, 6);
   }
 
   public enum Position implements Supplier<Angle> {
