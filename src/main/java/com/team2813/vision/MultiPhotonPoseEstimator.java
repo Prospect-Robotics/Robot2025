@@ -189,6 +189,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
         builder.cameraConfigs.entrySet().stream()
             .map(entry -> createCameraWrapperFromConfig(builder, entry.getKey(), entry.getValue()))
             .collect(Collectors.toCollection(ArrayList::new));
+    poseEstimatorStrategy = builder.poseEstimatorStrategy;
   }
 
   /**
