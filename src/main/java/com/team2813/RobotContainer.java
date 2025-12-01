@@ -336,6 +336,10 @@ public class RobotContainer implements AutoCloseable {
     return routines;
   }
 
+  public void setPose(Pose2d pose) {
+    drive.setPose(pose);
+  }
+
   private void configureBindings(RobotLocalization localization) {
     // Driver
     SLOWMODE_BUTTON.whileTrue(new InstantCommand(() -> drive.enableSlowMode(true), drive));
