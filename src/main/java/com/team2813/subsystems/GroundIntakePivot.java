@@ -62,7 +62,7 @@ public class GroundIntakePivot extends MotorSubsystem<GroundIntakePivot.Position
     if (DriverStation.isEnabled()) {
       enable();
     } else {
-      disable();
+      stopMotor();
     }
   }
 

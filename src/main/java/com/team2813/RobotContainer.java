@@ -121,7 +121,7 @@ public class RobotContainer implements AutoCloseable {
             new WaitCommand(DROP_CORAL),
             new ParallelCommandGroup(
                 intake.stopMotorCommand(),
-                new InstantCommand(elevator::disable, elevator),
+                new InstantCommand(elevator::stopMotor, elevator),
                 new InstantCommand(
                     () -> intakePivot.setSetpoint(IntakePivot.Rotations.INTAKE), intakePivot))));
 
@@ -226,8 +226,8 @@ public class RobotContainer implements AutoCloseable {
             new WaitUntilCommand(intake::hasCoral).withTimeout(INTAKE_TIME),
             new ParallelCommandGroup(
                 intake.intakeItemCommand(),
-                new InstantCommand(elevator::disable, elevator),
-                new InstantCommand(intakePivot::disable, intakePivot))));
+                new InstantCommand(elevator::stopMotor, elevator),
+                new InstantCommand(intakePivot::stopMotor, intakePivot))));
 
     new EventTrigger("PrepareL2")
         .onTrue(
