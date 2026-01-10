@@ -2,7 +2,7 @@
 //file:noinspection DependencyNotationArgument
 plugins {
     id 'java'
-    id 'edu.wpi.first.GradleRIO' version '2026.1.1-beta-1'
+    id 'edu.wpi.first.GradleRIO' version '2026.1.1'
     // Plugin needed for Git Build Info
     // (see https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html)
     id 'com.peterabeles.gversion' version '1.10'

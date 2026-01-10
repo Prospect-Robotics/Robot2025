@@ -3,7 +3,6 @@ package com.team2813.subsystems;
 import static com.google.common.truth.Truth.assertThat;
 import static com.team2813.subsystems.Intake.BUMP_VOLTAGE;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.team2813.IsolatedNetworkTablesExtension;

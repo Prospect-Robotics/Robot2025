@@ -2,7 +2,7 @@
     "fileName": "Phoenix5-5.36.0-beta-1.json",
     "name": "CTRE-Phoenix (v5)",
     "version": "5.36.0-beta-1",
-    "frcYear": "2026beta",
+    "frcYear": "2026",
     "uuid": "ab676553-b602-441f-a38d-f1296eff6537",
     "mavenUrls": [
         "https://maven.ctr-electronics.com/release/"
