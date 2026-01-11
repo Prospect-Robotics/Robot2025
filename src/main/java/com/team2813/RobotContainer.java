@@ -505,7 +505,8 @@ public class RobotContainer implements AutoCloseable {
   }
 
   public static BotPoseEstimate toBotposeBlue(BotPoseEstimate estimate) {
-    return new BotPoseEstimate(toBotposeBlue(estimate.pose()), estimate.timestampSeconds());
+    return new BotPoseEstimate(
+        toBotposeBlue(estimate.pose()), estimate.timestampSeconds(), Set.of());
   }
 
   public Command getAutonomousCommand() {
