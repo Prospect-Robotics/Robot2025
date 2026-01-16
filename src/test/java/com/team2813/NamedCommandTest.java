@@ -3,8 +3,10 @@ package com.team2813;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.util.PPLibTesting;
 import java.util.Arrays;
 import java.util.Collection;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,11 @@ public class NamedCommandTest {
   }
 
   @Parameter public String commandName;
+
+  @Before
+  public void resetPathPlanner() {
+    PPLibTesting.resetForTesting();
+  }
 
   @Test
   public void commandExists() {

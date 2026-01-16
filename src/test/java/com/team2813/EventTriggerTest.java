@@ -3,10 +3,12 @@ package com.team2813;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.pathplanner.lib.events.EventTrigger;
+import com.pathplanner.lib.util.PPLibTesting;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +48,11 @@ public class EventTriggerTest {
   }
 
   @Parameterized.Parameter public String eventName;
+
+  @Before
+  public void resetPathPlanner() {
+    PPLibTesting.resetForTesting();
+  }
 
   @Test
   public void eventExists() {
