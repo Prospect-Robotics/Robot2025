@@ -17,13 +17,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+  private Command autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private final RobotContainer robotContainer;
 
   public Robot() {
     AllPreferences.migrateLegacyPreferences();
-    m_robotContainer =
+    robotContainer =
         new RobotContainer(new RealShuffleboardTabs(), NetworkTableInstance.getDefault());
   }
 
@@ -62,11 +62,11 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.configureVisionFromPreferences();
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    robotContainer.configureVisionFromPreferences();
+    autonomousCommand = robotContainer.getAutonomousCommand();
 
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+    if (autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
 
@@ -78,9 +78,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.configureVisionFromPreferences();
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    robotContainer.configureVisionFromPreferences();
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
     }
   }
 

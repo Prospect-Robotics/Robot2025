@@ -10,10 +10,7 @@ import java.util.Set;
  *
  * <p>The values can be viewed and edited on SmartDashboard or Shuffleboard. If the values are
  * edited, the updated values are persisted across reboots.
- *
- * @deprecated use {@link com.team2813.lib2813.preferences.PreferencesInjector}
  */
-@Deprecated
 class AllPreferences {
   private static final Map<Key, String> LEGACY_BOOLEAN_PREFERENCES =
       Map.of(

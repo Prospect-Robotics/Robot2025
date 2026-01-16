@@ -28,6 +28,7 @@ import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 /**
  * Provides estimated robot positions, in field pose, from multiple PhotonVision cameras.
@@ -176,6 +177,16 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
       cameraPosePublisher.set(pose.plus(robotToCamera));
     }
 
+    @SuppressWarnings("removal")
+    private void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
+      estimator.setPrimaryStrategy(poseStrategy);
+    }
+
+    @SuppressWarnings("removal")
+    private Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult) {
+      return estimator.update(cameraResult);
+    }
+
     @Override
     public void close() {
       // TODO: Close publishers
@@ -201,6 +212,8 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   private static PhotonCameraWrapper createCameraWrapperFromConfig(
       Builder builder, String cameraName, CameraConfig cameraConfig) {
     PhotonCamera camera = new PhotonCamera(builder.ntInstance, cameraName);
+
+    @SuppressWarnings("removal")
     PhotonPoseEstimator estimator =
         new PhotonPoseEstimator(
             builder.aprilTagFieldLayout, builder.poseEstimatorStrategy, cameraConfig.robotToCamera);
@@ -251,7 +264,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
   public void setPrimaryStrategy(PhotonPoseEstimator.PoseStrategy poseStrategy) {
     Objects.requireNonNull(poseStrategy, "poseStrategy cannot be null");
     if (!poseStrategy.equals(poseEstimatorStrategy)) {
-      cameraWrappers.forEach(wrapper -> wrapper.estimator.setPrimaryStrategy(poseStrategy));
+      cameraWrappers.forEach(wrapper -> wrapper.setPrimaryStrategy(poseStrategy));
       poseEstimatorStrategy = poseStrategy;
     }
   }
@@ -362,7 +375,7 @@ public class MultiPhotonPoseEstimator implements AutoCloseable {
     for (PhotonCameraWrapper cameraWrapper : cameraWrappers) {
       List<EstimatedRobotPose> poses =
           cameraWrapper.camera.getAllUnreadResults().stream()
-              .map(cameraWrapper.estimator::update)
+              .map(cameraWrapper::update)
               .flatMap(Optional::stream)
               .toList();
 

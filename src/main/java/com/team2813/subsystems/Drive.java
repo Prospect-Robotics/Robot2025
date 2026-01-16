@@ -2,7 +2,6 @@ package com.team2813.subsystems;
 
 import static com.team2813.Constants.*;
 import static com.team2813.Constants.DriverConstants.DRIVER_CONTROLLER;
-import static com.team2813.lib2813.util.ControlUtils.deadband;
 import static edu.wpi.first.units.Units.Rotations;
 
 import com.ctre.phoenix6.Utils;
@@ -31,6 +30,7 @@ import com.team2813.sysid.SwerveSysidRequest;
 import com.team2813.vision.MultiPhotonPoseEstimator;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.geometry.*;
@@ -613,5 +613,16 @@ public class Drive extends SubsystemBase implements AutoCloseable {
   public void close() {
     drivetrain.close();
     photonPoseEstimator.close();
+  }
+
+  private static double deadband(double value, double deadband) {
+    if (deadband < 0.0 || deadband >= 1.0) {
+      throw new IllegalArgumentException(
+          "Deadband must be in [0.0, 1.0). Instead, it was " + deadband);
+    }
+    if (value < -1.0 || value > 1.0) {
+      throw new IllegalArgumentException("Value must be in [-1.0, 1.0]. Instead, it was " + value);
+    }
+    return MathUtil.applyDeadband(value, deadband);
   }
 }
