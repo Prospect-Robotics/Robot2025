@@ -7,12 +7,11 @@ import com.team2813.lib2813.control.PIDMotor;
 import com.team2813.lib2813.control.encoders.CancoderWrapper;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.MotorSubsystem;
-import edu.wpi.first.networktables.BooleanPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -28,11 +27,12 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
             .startingPosition(Rotations.INTAKE)
             .rotationUnit(Units.Rotations)
             .controlMode(ControlMode.VOLTAGE)
+            .publishTo(networkTableInstance)
             .PID(19.875, 0, 0.4));
-    // Logging
-    NetworkTable networkTable = networkTableInstance.getTable("IntakePivot");
-    intakePivotPosition = networkTable.getDoubleTopic("position").publish();
-    atPosition = networkTable.getBooleanTopic("at position").publish();
+  }
+
+  public void setControl(DoubleSupplier controlPositionSupplier) {
+    setDefaultCommand(new DefaultCommand(controlPositionSupplier));
   }
 
   @Deprecated
@@ -46,16 +46,6 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     pivotMotor.setNeutralMode(NeutralModeValue.Brake);
 
     return pivotMotor;
-  }
-
-  private final DoublePublisher intakePivotPosition;
-  private final BooleanPublisher atPosition;
-
-  @Override
-  public void periodic() {
-    super.periodic();
-    intakePivotPosition.set(getPositionMeasure().in(Units.Rotations));
-    atPosition.set(atPosition());
   }
 
   public enum Rotations implements Supplier<Angle> {
@@ -73,6 +63,26 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     @Override
     public Angle get() {
       return pos;
+    }
+  }
+
+  public class DefaultCommand extends Command {
+    private final DoubleSupplier controlPositionSupplier;
+
+    public DefaultCommand(DoubleSupplier controlPositionSupplier) {
+      this.controlPositionSupplier = controlPositionSupplier;
+      addRequirements(IntakePivot.this);
+    }
+
+    public void execute() {
+      double val = controlPositionSupplier.getAsDouble();
+      if (Math.abs(val) > 0.1) {
+        motor.set(ControlMode.DUTY_CYCLE, val * .1);
+      } else if (!isEnabled()) {
+        // An InstantCommand initiated the motor, and
+        // PID controller is disabled; stop the elevator motors, potentially sliding down.
+        motor.set(ControlMode.DUTY_CYCLE, 0);
+      } // ..else an InstantCommand initiated the motor. Leave it running ast the current speed
     }
   }
 }

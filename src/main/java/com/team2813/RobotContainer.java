@@ -440,10 +440,8 @@ public class RobotContainer implements AutoCloseable {
     R2.whileTrue(
       new InstantCommand()
       );*/
-    elevator.setDefaultCommand(
-        new ElevatorDefaultCommand(elevator, () -> -OPERATOR_CONTROLLER.getRightY()));
-    intakePivot.setDefaultCommand(
-        new ManualIntakePivot(intakePivot, () -> -OPERATOR_CONTROLLER.getLeftY()));
+    elevator.setControl(() -> -OPERATOR_CONTROLLER.getRightY());
+    intakePivot.setControl(() -> -OPERATOR_CONTROLLER.getLeftY());
 
     CLIMB_DOWN.onTrue(
         new SequentialCommandGroup(

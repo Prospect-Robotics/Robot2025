@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj2.command.Command;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /** This is the Elevator. His name is Pablo. Please be kind to him and say hi. Have a nice day! */
@@ -38,6 +40,10 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     encoder.setPosition(Position.BOTTOM.position);
     atPosition = networkTable.getBooleanTopic("at position").publish();
     position = networkTable.getDoubleTopic("position").publish();
+  }
+
+  public void setControl(DoubleSupplier controlPositionSupplier) {
+    setDefaultCommand(new DefaultCommand(controlPositionSupplier));
   }
 
   private static TalonFXWrapper getMotor() {
@@ -77,5 +83,26 @@ public class Elevator extends MotorSubsystem<Elevator.Position> {
     super.periodic();
     atPosition.set(atPosition());
     position.set(getMeasurement());
+  }
+
+  private class DefaultCommand extends Command {
+    private final DoubleSupplier controlPositionSupplier;
+
+    public DefaultCommand(DoubleSupplier controlPositionSupplier) {
+      this.controlPositionSupplier = controlPositionSupplier;
+      addRequirements(Elevator.this);
+    }
+
+    @Override
+    public void execute() {
+      double val = controlPositionSupplier.getAsDouble();
+      if (Math.abs(val) > 0.1) {
+        motor.set(ControlMode.DUTY_CYCLE, val);
+      } else if (!isEnabled()) {
+        // An InstantCommand initiated the motor, and
+        // PID controller is disabled; stop the elevator motors, potentially sliding down.
+        motor.set(ControlMode.DUTY_CYCLE, 0);
+      } // ..else an InstantCommand initiated the motor. Leave it running ast the current speed
+    }
   }
 }
