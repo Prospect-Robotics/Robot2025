@@ -11,6 +11,11 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0'
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 // Download the source code for dependencies and the javadoc (in IntelliJ IDEA).
 // Not required for running the robot, but helps with IntelliJ IDEA development.
 idea {
@@ -141,9 +146,9 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:5.14.2'
     testImplementation 'com.google.truth:truth:1.4.4'
-    testImplementation 'com.team2813:testing'
-    implementation 'com.team2813:lib2813'
-    implementation 'com.team2813:limelight'
+    testImplementation 'com.team2813.lib2813:testing:2.0.0-rc-1'
+    implementation 'com.team2813.lib2813:lib:2.0.0-rc-1'
+    implementation 'com.team2813.lib2813:limelight:2.0.0-rc-1'
 }
 
 test {
@@ -155,9 +160,9 @@ test {
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
-downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
-downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':testing:jar')
-downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':limelight:jar')
+//downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':lib:jar')
+//downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':testing:jar')
+//downloadDepsPreemptively.dependsOn gradle.includedBuild('lib2813').task(':limelight:jar')
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
