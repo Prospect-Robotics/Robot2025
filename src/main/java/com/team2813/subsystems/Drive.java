@@ -336,7 +336,7 @@ public class Drive extends SubsystemBase implements AutoCloseable {
                 BRSteerOffset,
                 -FRONT_DIST,
                 -LEFT_DIST,
-                true, // May need to change later.
+                false, // May need to change later.
                 true, // May need to change later.
                 false); // May need to change later.
     SwerveModuleConstants<?, ?, ?>[] modules = {frontLeft, frontRight, backLeft, backRight};
