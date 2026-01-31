@@ -243,10 +243,10 @@ public class Drive extends SubsystemBase implements AutoCloseable {
             .build();
     this.config = config;
 
-    double FLSteerOffset = 0.22021484375;
-    double FRSteerOffset = 1.917236;
-    double BLSteerOffset = -0.367919921875;
-    double BRSteerOffset = -0.258544921875;
+    double FLSteerOffset = 0.226074;
+    double FRSteerOffset = -0.084961;
+    double BLSteerOffset = -0.360596;
+    double BRSteerOffset = 0.779541;
 
     Slot0Configs steerGains =
         new Slot0Configs()
