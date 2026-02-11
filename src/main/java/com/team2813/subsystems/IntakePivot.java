@@ -40,11 +40,6 @@ public class IntakePivot extends MotorSubsystem<IntakePivot.Rotations> {
     encoder.setPosition(Rotations.HARD_STOP.get());
   }
 
-  @Override
-  protected void useOutput(double output, double setPoint) {
-    super.useOutput(output, setPoint);
-  }
-
   private static PIDMotor pivotMotor() {
     TalonFXWrapper pivotMotor =
         new TalonFXWrapper(com.team2813.Constants.INTAKE_PIVOT, InvertType.COUNTER_CLOCKWISE);

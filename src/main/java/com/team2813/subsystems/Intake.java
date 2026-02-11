@@ -6,7 +6,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.team2813.lib2813.control.InvertType;
-import com.team2813.lib2813.control.PIDMotor;
+import com.team2813.lib2813.control.Motor;
 import com.team2813.lib2813.control.motors.TalonFXWrapper;
 import com.team2813.lib2813.subsystems.ParameterizedIntakeSubsystem;
 import com.team2813.lib2813.util.ConfigUtils;
@@ -31,7 +31,7 @@ public final class Intake extends ParameterizedIntakeSubsystem {
         networkTableInstance);
   }
 
-  Intake(PIDMotor motor, DigitalInput beamBreak, NetworkTableInstance networkTableInstance) {
+  Intake(Motor motor, DigitalInput beamBreak, NetworkTableInstance networkTableInstance) {
     super(motor, PARAMS);
     this.beamBreak = beamBreak;
     if (motor instanceof TalonFXWrapper wrapper) {
