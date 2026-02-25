@@ -256,31 +256,36 @@ public class RobotContainer implements AutoCloseable {
       // Or handle the error more gracefully
       throw new RuntimeException("Could not get config!", e);
     }
-    AutoBuilder.configure(
-        drive::getPose, // Robot pose supplier
-        drive
-            ::setPose, // Method to reset odometry (will be called if your auto has a starting pose)
-        drive::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-        drive::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also
-        // optionally outputs individual module feedforwards
-        new PPHolonomicDriveController( // PPHolonomicController is the built in path following
-            // controller for holonomic drive trains
-            new PIDConstants(15, 0.0, 0), // Translation PID constants
-            new PIDConstants(
-                6.85, 0.0, 1.3) // Rotation PID constants //make lower but 5 doesnt work
-            ),
-        config, // The robot configuration
-        () -> {
-          // Boolean supplier that controls when the path will be mirrored for the red alliance
-          // This will flip the path being followed to the red side of the field.
-          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-          return DriverStation.getAlliance()
-              .map(alliance -> alliance != ALLIANCE_USED_IN_PATHS)
-              .orElse(false);
-        },
-        drive // Reference to this subsystem to set requirements
-        );
-    configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
+    if (!AutoBuilder.isConfigured()) {
+      AutoBuilder.configure(
+          drive::getPose, // Robot pose supplier
+          // Method to reset odometry (will be called if your auto has a starting pose)
+          drive::setPose,
+          // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+          drive::getRobotRelativeSpeeds,
+          // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally
+          // outputs individual module feedforwards
+          drive::drive,
+          // PPHolonomicController is the built-in path following controller for holonomic drive
+          // trains
+          new PPHolonomicDriveController(
+              // Translation PID constants
+              new PIDConstants(15, 0.0, 0),
+              // Rotation PID constants make lower but 5 doesn't work
+              new PIDConstants(6.85, 0.0, 1.3)),
+          config, // The robot configuration
+          () -> {
+            // Boolean supplier that controls when the path will be mirrored for the red alliance
+            // This will flip the path being followed to the red side of the field.
+            // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+            return DriverStation.getAlliance()
+                .map(alliance -> alliance != ALLIANCE_USED_IN_PATHS)
+                .orElse(false);
+          },
+          drive // Reference to this subsystem to set requirements
+          );
+      configureAutoCommands(elevator, intakePivot, intake, groundIntake, groundIntakePivot);
+    }
     return AutoBuilder.buildAutoChooser();
   }
 
